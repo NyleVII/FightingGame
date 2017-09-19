@@ -16,22 +16,59 @@
 	margin: 0px;
 }
 
+#changeAlias{
+	display: inline;
+}
+
 #container{
 	padding: 10px;
-	float: top;
+	white-space: nowrap;
+
 }
 
 .column{
 	display: inline-block;
+	background: white;
 	border: 1px solid black;
+	height: 600px;
+	
 }
 
 #left-column{
-	height: 600px;
-	width: 300px;
+	width: 200px;
+	overflow-y: auto;
+	float: left;
 }
 
+.player{
+	border: 1px solid black;
+}
+
+#right-column{
+	width: 600px;
+	position: relative;
+}
+#chatBox {
+	position: absolute;
+	width: 100%;
+	bottom: 0px;
+}
+#chatBox div {
+	overflow: hidden;
+}
+
+#chatSubmit {
+	width: auto;
+}
+
+#chatInput{
+	width: 100%;
+}
+
+#chatSubmitButton{
+	float: right;
+}
 
 body{
-	
+	margin: 0px;
 }
