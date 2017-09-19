@@ -1,0 +1,39 @@
+{
+	"env":
+	{
+		"node": true
+	},
+	"parserOptions":
+	{
+		"ecmaVersion": 6
+	},
+	"extends": "eslint:recommended",
+	"rules":
+	{
+		"indent": ["error", "tab"],
+		"linebreak-style": ["error", "unix"],
+		"quotes": ["error", "double"],
+		"semi": ["error", "always"],
+		"prefer-const": "error",
+		"block-scoped-var": "error",
+		"consistent-return": "error",
+		"default-case": "error",
+		"no-else-return": "error",
+		"no-multi-spaces": ["error", {"ignoreEOLComments": false}],
+		"no-return-assign": "error",
+		"no-self-assign": "error",
+		"no-self-compare":  "error",
+		"no-unused-expressions": "error",
+		"no-useless-escape": "error",
+		"vars-on-top": "error",
+		"comma-spacing": ["error", {"before": false, "after": true}],
+		"brace-style": ["error", "allman"],
+		"no-var": "error"
+	},
+	"globals":
+	{
+		"WebSocket": false,
+		
+		"server_http": true
+	}
+}
