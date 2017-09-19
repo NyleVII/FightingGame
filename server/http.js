@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const http = require("http");
 
-server_http = http.createServer(function(request, response)
+module.exports = http.createServer(function(request, response)
 {
 	let filename = request.url;
 	if (filename === "/")
@@ -26,4 +26,4 @@ server_http = http.createServer(function(request, response)
 	});
 });
 
-server_http.listen(80);
+module.exports.listen(80);
