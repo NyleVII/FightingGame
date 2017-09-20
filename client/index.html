@@ -3,20 +3,19 @@
 		<title>Lobby</title>
 		<script src="lib/pixi.min.js"></script>
 		<script src="main.js"></script>
+		<link rel="stylesheet" type="text/css" href="styles/chat.css">
 		<link rel="stylesheet" type="text/css" href="styles/main.css">
+		<link rel="stylesheet" type="text/css" href="styles/nav.css">
+		<link rel="stylesheet" type="text/css" href="styles/players.css">
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans">
 	</head>
 	
 	<body>
 		<div id="nav">
-			<ul class="nav">
-				<li>List 1</li>
-				<li>List 2</li>
-				<label>Change player Alias:</label>
-				<form id="changeAlias">
-					<input type="text">
-				</form>
-				<button id="changeAliasButton">Submit</button>
+			<div id="logo">Fight Lobby</div>
+			<ul id="nav_menu">
+				<li>Some Menu Option</li>
+				<li>Logout</li>
 			</ul>
 		</div>
 		<div id="page">
@@ -32,14 +31,20 @@
 				</div>
 			</div>
 			<div id="chat" class="column">
-				<!--
-				<div id="chatBox">
-					<form id="chatSubmit">
-						<input id = "chatSubmitButton" type = "submit" value="Send">
-						<div><input id = "chatInput" type="text" ></div>
+				<div id="chat_container">
+					<div id="chat_inner">
+						<div id="chat_lines">
+							<div class="chat_line"><div class="chat_name">Player 1: </div>Hello, world</div>
+							<div class="chat_line"><div class="chat_name">Player 2: </div>Greetings</div>
+						</div>
+					</div>
+					<form id="chat_form">
+						<input id="chat_send" type="submit" value="Chat">
+						<div id="chat_input">
+							<input type="text">
+						</div>
 					</form>
 				</div>
-				-->
 			</div>
 		</div>
 	</body>

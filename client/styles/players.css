@@ -1,0 +1,41 @@
+#players
+{
+	float: left;
+	width: 20%;
+	min-width: 200px;
+	
+	background-color: #29333d;
+	margin-right: 8px;
+	border-top-right-radius: 4px;
+	color: #c2ccd6;
+}
+
+#players_container
+{
+	height: 100%;
+	padding: 49px 0 0;
+	margin-top: -41px;
+}
+
+#players_inner
+{
+	padding: 4px 4px 0;
+	border-radius: 4px;
+	height: 100%;
+	overflow-y: auto;
+	
+	background-color: #141a1f;
+	
+	box-shadow: inset 2px 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+.player
+{
+	padding: 4px 8px;
+	margin-bottom: 4px;
+	background-color: #1f262e;
+	border-radius: 4px;
+	line-height: 16px;
+	
+	box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
