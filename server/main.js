@@ -26,6 +26,25 @@ function alias_set(id_player, alias)
 	connections[id_player].alias = alias;
 }
 
+function broadcast_players()
+{
+	for (const i in connections)
+		connections[i].send("players " + connections.map(function(connection)
+		{
+			return connection.alias;
+		}).join(","));
+}
+
+
+const processes =
+{
+	chat: function(connection, params)
+	{
+		for (const i in connections)
+			connections[i].send("chat " + connections.indexOf(connection) + " " + params);
+	}
+};
+
 
 server_websocket.on("request", function(request)
 {
@@ -37,12 +56,33 @@ server_websocket.on("request", function(request)
 		
 		alias_set(id_player, "player_" + Math.floor(Math.random()*10000));
 		
-		console.log(connection.alias + " connected.");
+		broadcast_players();
 		
 		connection.on("close", function()
 		{
-			console.log(connection.alias + " disconnected.");
 			connections.splice(connections.indexOf(connection), 1);
+			broadcast_players();
+		});
+		
+		connection.on("message", function(message)
+		{
+			const input = message.utf8Data;
+			const sep = input.indexOf(" ");
+			
+			let type, params;
+			if (sep === -1)
+			{
+				type = input;
+				params = "";
+			}
+			else
+			{
+				type = input.slice(0, sep);
+				params = input.slice(sep + 1);
+			}
+			
+			if (processes[type] !== undefined)
+				processes[type](connection, params);
 		});
 	}
 	else

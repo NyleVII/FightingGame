@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Lobby</title>
+		<title>Fight Lobby</title>
 		<script src="lib/pixi.min.js"></script>
 		<script src="main.js"></script>
 		<link rel="stylesheet" type="text/css" href="styles/chat.css">
@@ -23,25 +23,19 @@
 				<h3 class="title">Connected Players</h3>
 				<div id="players_container">
 					<div id="players_inner">
-						<div id="players_list">
-							<div class="player">Player 1</div>
-							<div class="player">Player 2</div>
-						</div>
+						<div id="players_list"></div>
 					</div>
 				</div>
 			</div>
 			<div id="chat" class="column">
 				<div id="chat_container">
 					<div id="chat_inner">
-						<div id="chat_lines">
-							<div class="chat_line"><div class="chat_name">Player 1: </div>Hello, world</div>
-							<div class="chat_line"><div class="chat_name">Player 2: </div>Greetings</div>
-						</div>
+						<div id="chat_lines"></div>
 					</div>
 					<form id="chat_form">
 						<input id="chat_send" type="submit" value="Chat">
 						<div id="chat_input">
-							<input type="text">
+							<input id="chat_text" type="text" autocomplete="off">
 						</div>
 					</form>
 				</div>
