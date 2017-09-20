@@ -48,3 +48,25 @@ body
 	border-bottom: 1px solid #52667a;
 	text-align: center;
 }
+
+.scroll
+{
+	overflow-y: auto;
+}
+
+.scroll::-webkit-scrollbar
+{
+	width: 10px;
+}
+
+.scroll::-webkit-scrollbar-track
+{
+	background: transparent;
+}
+
+.scroll::-webkit-scrollbar-thumb
+{
+	border-radius: 4px;
+	background: #29333d;
+	border: 1px solid #141a1f;
+}
