@@ -1,3 +1,39 @@
+*
+{
+	box-sizing: inherit;
+	-webkit-box-sizing: inherit;
+}
+
+html
+{
+	height: 100%;
+	font-family: "PT Sans", sans-serif;
+	
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+
+body
+{
+	height: 100%;
+	margin: 0;
+}
+
+#nav
+{
+	position: absolute;
+	width: 100%;
+	height: 64px;
+}
+
+#page
+{
+	font-size: 0;
+	overflow: hidden;
+	padding-top: 64px;
+	height: 100%;
+}
+
 .nav {
 	list-style: none;
 	margin: 0px;
@@ -11,7 +47,7 @@
 	padding: 20px;
 	border: 12px dashed red;
 	border-radius: 10px;
-	width:80px;
+	width:160px;
 	cursor: pointer;
 	margin: 0px;
 }
@@ -20,55 +56,62 @@
 	display: inline;
 }
 
-#container{
-	padding: 10px;
-	white-space: nowrap;
-
+.column
+{
+	height: 100%;
+	padding: 8px;
+	font-size: 16px;
 }
 
-.column{
-	display: inline-block;
-	background: white;
-	border: 1px solid black;
-	height: 600px;
+.title
+{
+	margin: 16px 0 0;
+	padding: 0 8px 8px;
+	border-bottom: 1px solid #52667a;
+	text-align: center;
+}
+
+#players
+{
+	float: left;
+	width: 20%;
+	min-width: 200px;
+	
+	background-color: #29333d;
+	color: #c2ccd6;
+}
+
+#players_container
+{
+	height: 100%;
+	padding: 63px 0 0;
+	margin-top: -55px;
 	
 }
 
-#left-column{
-	width: 200px;
+#players_inner
+{
+	padding: 8px 8px 0;
+	border-radius: 4px;
+	height: 100%;
 	overflow-y: auto;
-	float: left;
+	
+	background-color: #141a1f;
+	
+	box-shadow: inset 2px 2px 2px 0 rgba(0, 0, 0, 0.5);
 }
 
-.player{
-	border: 1px solid black;
+.player
+{
+	padding: 4px 8px;
+	margin-bottom: 8px;
+	background-color: #1f262e;
+	border-radius: 4px;
+	
+	box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.5);
 }
 
-#right-column{
-	width: 600px;
-	position: relative;
-}
-#chatBox {
-	position: absolute;
-	width: 100%;
-	bottom: 0px;
-}
-#chatBox div {
+#chat
+{
 	overflow: hidden;
-}
-
-#chatSubmit {
-	width: auto;
-}
-
-#chatInput{
-	width: 100%;
-}
-
-#chatSubmitButton{
-	float: right;
-}
-
-body{
-	margin: 0px;
 }

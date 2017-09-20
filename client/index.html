@@ -1,66 +1,46 @@
-<!DOCTYPE html>
 <html>
-
-<head>
-	<title>Lobby</title>
-	<script src="lib/pixi.min.js"></script>
-	<script src="main.js"></script>
-	<link rel="stylesheet" type="text/css" href="styles/main.css">
-</head>
-
-<body>
-	<div id="navBar">
-		<ul class="nav">
-			<li>List 1</li>
-			<li>List 2</li>
-			<label>Change player Alias:</label>
-			<form id="changeAlias">
-				<input type="text">
-			</form>
-			<button id="changeAliasButton">Submit</button>
-		</ul>
-	</div>
-
-	<div id="container">
-		<div>Welcome to the fighting game lobby!</div>
-		<div id="left-column" class="column">
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			<div class="player">Player 1</div>
-			
-			
-		</div>
-		<div id="right-column" class="column">
-			Right column
-			<div id="chatBox">
-				<form id="chatSubmit">
-					<input id = "chatSubmitButton" type = "submit" value="Send">
-					<div><input id = "chatInput" type="text" ></div>
+	<head>
+		<title>Lobby</title>
+		<script src="lib/pixi.min.js"></script>
+		<script src="main.js"></script>
+		<link rel="stylesheet" type="text/css" href="styles/main.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans">
+	</head>
+	
+	<body>
+		<div id="nav">
+			<ul class="nav">
+				<li>List 1</li>
+				<li>List 2</li>
+				<label>Change player Alias:</label>
+				<form id="changeAlias">
+					<input type="text">
 				</form>
+				<button id="changeAliasButton">Submit</button>
+			</ul>
+		</div>
+		<div id="page">
+			<div id="players" class="column">
+				<h3 class="title">Connected Players</h3>
+				<div id="players_container">
+					<div id="players_inner">
+						<div id="players_list">
+							<div class="player">Player 1</div>
+							<div class="player">Player 2</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="chat" class="column">
+				<!--
+				<div id="chatBox">
+					<form id="chatSubmit">
+						<input id = "chatSubmitButton" type = "submit" value="Send">
+						<div><input id = "chatInput" type="text" ></div>
+					</form>
+				</div>
+				-->
 			</div>
 		</div>
-	</div>
-
-
-</body>
+	</body>
 </html>
-
-
