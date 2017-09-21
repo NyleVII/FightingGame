@@ -2,7 +2,7 @@
 
 
 // socket connection
-const socket = new WebSocket("ws://" + window.location.hostname);
+const socket = new WebSocket("ws://" + window.location.hostname + ":3000");
 
 // current app state
 let state = "lobby";
