@@ -86,6 +86,33 @@ function addchat(alias, message)
 	document.getElementById("chat_lines").appendChild(line);
 }
 
+let collapsed = false;
+function toggle()
+{
+	const players = document.getElementById("players");
+	const gamescreen = document.getElementById("gamescreen");
+	
+	if (collapsed)
+	{
+		let classes;
+		
+		classes = players.className.split(" ");
+		classes.splice(classes.indexOf("collapsed"), 1);
+		players.className = classes.join(" ");
+		
+		classes = gamescreen.className.split(" ");
+		classes.splice(classes.indexOf("collapsed"), 1);
+		gamescreen.className = classes.join(" ");
+	}
+	else
+	{
+		players.className += " collapsed";
+		gamescreen.className += " collapsed";
+	}
+	
+	collapsed = !collapsed;
+}
+
 document.addEventListener("DOMContentLoaded", function()
 {
 	document.getElementById("chat_form").onsubmit = function(event)
@@ -96,6 +123,12 @@ document.addEventListener("DOMContentLoaded", function()
 		socket.send("chat " + text.value);
 		text.value = "";
 	};
+	
+	const renderer = PIXI.autoDetectRenderer();
+	document.getElementById().appendChild(renderer.view);
+	
+	const stage = new PIXI.Container();
+	renderer.render(stage);
 	
 	renderplayers();
 });

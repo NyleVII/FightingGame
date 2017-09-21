@@ -5,9 +5,15 @@
 	min-width: 200px;
 	
 	background-color: #29333d;
-	margin-right: 8px;
 	border-top-right-radius: 4px;
 	color: #c2ccd6;
+	
+	transition: margin-left 0.5s ease;
+}
+
+#players.collapsed
+{
+	margin-left: -20%;
 }
 
 #players_container
