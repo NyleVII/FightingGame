@@ -7,6 +7,7 @@ const MAX_CONNECTIONS = 50;
 
 // global variables
 const connections = [];
+const games = [];
 const server_websocket = new WebSocket.server({httpServer: server_http});
 
 
@@ -57,6 +58,10 @@ server_websocket.on("request", function(request)
 		alias_set(id_player, "player_" + Math.floor(Math.random()*10000));
 		
 		broadcast_players();
+		
+		// TEMP(shawn): create game when two players connect
+		if (connections.length === 2)
+			games[0] = new Game();
 		
 		connection.on("close", function()
 		{
