@@ -56,20 +56,7 @@ socket.onmessage = function(event)
 		process(params);
 };
 
-function renderplayers()
-{
-	const list = document.getElementById("players_list");
-	list.innerHTML = "";
-	
-	for (const i in players)
-	{
-		const player = document.createElement("div");
-		player.className = "player";
-		player.innerHTML = players[i].alias;
-		
-		list.appendChild(player);
-	}
-}
+
 
 function addchat(alias, message)
 {
