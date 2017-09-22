@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function()
 	};
 	
 	const renderer = PIXI.autoDetectRenderer();
-	document.getElementById().appendChild(renderer.view);
+	document.getElementById("gamescreen_inner").appendChild(renderer.view);
 	
 	const stage = new PIXI.Container();
 	renderer.render(stage);
