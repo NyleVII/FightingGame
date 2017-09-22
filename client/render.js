@@ -1,8 +1,23 @@
-
+//Game sprites
+const playerCreatureSprite = new PIXI.Sprite;
+const opponentCreatureSprite = new PIXI.Sprite;
 
 //PIXI stage and renderer
 let renderer;
 let stage;
+
+let gameState = {
+	me: {
+		creature: {
+			id: "gyarados"
+		}
+	},
+	opponent: {
+		creature: {
+			id: "mewtwo"
+		}
+	}
+}
 
 //Main render of game screen
 document.addEventListener("DOMContentLoaded", function()
@@ -23,17 +38,27 @@ document.addEventListener("DOMContentLoaded", function()
 	
 	renderplayers();
 
-	PIXI.loader.add(["assets/images/mewtwo/m2.png", "assets/images/mewtwo/mew2.png","assets/images/gyarados/gyarados-mega.gif"]).load(function ()
+	PIXI.loader.add([{name: "mewtwo", url:"assets/images/mewtwo/mewtwo.png"}, {name: "gyarados", url:"assets/images/gyarados/gyarados-mega.gif"}]).load(function ()
 	{
-		var sprite = new PIXI.Sprite(PIXI.loader.resources["assets/images/mewtwo/m2.png"].texture);
-		console.log("loaded");
-		stage.addChild(sprite);
-		sprite.anchor.x = 1;
-		sprite.x = renderer.width;
-		console.log(PIXI.utils.TextureCache);
+		playerCreatureSprite.scale.set(3, 3);
+		playerCreatureSprite.anchor.y = 1;
+		playerCreatureSprite.y = renderer.height;
+		stage.addChild(playerCreatureSprite);
+
+		opponentCreatureSprite.scale.set(3, 3);
+		opponentCreatureSprite.anchor.x = 1;
+		opponentCreatureSprite.x = renderer.width;
+		stage.addChild(opponentCreatureSprite);
+		drawGameState(gameState)
+		//var sprite = new PIXI.Sprite(PIXI.loader.resources["mewtwo"].texture);
+		//console.log("loaded");
+		//stage.addChild(sprite);
+		//sprite.anchor.x = 1;
+		//sprite.x = renderer.width;
+		//console.log(PIXI.utils.TextureCache);
 		
-		renderer.backgroundColor = 0xFFFFFF;
-		renderer.render(stage);
+		//renderer.backgroundColor = 0xFFFFFF;
+		//renderer.render(stage);
 		//sprite = new PIXI.Sprite(PIXI.loader.resources["assets/images/mewtwo/mew2.png"].texture);
 		//stage.removeChildren();
 		//stage.addChild(sprite);
@@ -45,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function()
 });
 
 function updatePlayerCreature(){
-	const playerCreatureSprite = new PIXI.Sprite(PIXI.loader.resources["assets/images/gyarados/gyarados-mega.gif"].texture);
+	playerCreatureSprite = new PIXI.Sprite(PIXI.loader.resources["assets/images/gyarados/gyarados-mega.gif"].texture);
 	console.log("updated playerCreatureSprite");
 	playerCreatureSprite.scale.set(3, 3);
 	playerCreatureSprite.anchor.y = 1;
@@ -54,7 +79,7 @@ function updatePlayerCreature(){
 }
 
 function updateOpponentCreature(){
-	const opponentCreatureSprite = new PIXI.Sprite(PIXI.loader.resources["assets/images/mewtwo/mew2.png"].texture);
+	opponentCreatureSprite = new PIXI.Sprite(PIXI.loader.resources["assets/images/mewtwo/mew2.png"].texture);
 	console.log("updated playerCreatureSprite");
 	opponentCreatureSprite.scale.set(3, 3);
 	opponentCreatureSprite.anchor.x = 1;
@@ -78,11 +103,16 @@ function renderplayers()
 }
 
 function renderGame(){
-	stage.removeChildren(); //Clears the screen...by removing the children ( ͡° ͜ʖ ͡°)
+	//stage.removeChildren(); //Clears the screen...by removing the children ( ͡° ͜ʖ ͡°)
 	//add each sprite to be redendered
-	updatePlayerCreature();
-	updateOpponentCreature();
-	
+	//updatePlayerCreature();
+	//updateOpponentCreature();
+
 	renderer.render(stage);
+}
+
+function drawGameState(gameState){
+	playerCreatureSprite.texture = PIXI.loader.resources[gameState.me.creature.id].texture;
+	opponentCreatureSprite.texture = PIXI.loader.resources[gameState.opponent.creature.id].texture;
 }
 
