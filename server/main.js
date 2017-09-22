@@ -61,7 +61,10 @@ server_websocket.on("request", function(request)
 		
 		// TEMP(shawn): create game when two players connect
 		if (connections.length === 2)
+		{
 			games[0] = new Game();
+			
+		}
 		
 		connection.on("close", function()
 		{

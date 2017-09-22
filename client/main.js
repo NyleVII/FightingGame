@@ -10,6 +10,7 @@ let state = "lobby";
 // player list
 let players = [];
 
+
 // network/state message handler
 const processes =
 {
@@ -112,4 +113,3 @@ function toggle()
 	
 	collapsed = !collapsed;
 }
-
