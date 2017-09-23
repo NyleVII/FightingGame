@@ -1,6 +1,13 @@
 //Game sprites
 const playerCreatureSprite = new PIXI.Sprite;
 const opponentCreatureSprite = new PIXI.Sprite;
+const energySprite = new PIXI.Sprite;
+const cardBackSprite = new PIXI.Sprite;
+const cardOneSprite = new PIXI.Sprite;
+const cardTwoSprite = new PIXI.Sprite;
+const cardThreeSprite = new PIXI.Sprite;
+const cardFourSprite = new PIXI.Sprite;
+const cardFiveSprite = new PIXI.Sprite;
 
 //PIXI stage and renderer
 let renderer;
@@ -11,6 +18,7 @@ let gameState = {
 		creature: {
 			id: "gyarados"
 		}
+
 	},
 	opponent: {
 		creature: {
@@ -38,7 +46,9 @@ document.addEventListener("DOMContentLoaded", function()
 	
 	renderplayers();
 
-	PIXI.loader.add([{name: "mewtwo", url:"assets/images/mewtwo/mewtwo.png"}, {name: "gyarados", url:"assets/images/gyarados/gyarados-mega.gif"}]).load(function ()
+	PIXI.loader.add([{name: "mewtwo", url:"assets/images/mewtwo/mewtwo.png"}, 
+					{name: "gyarados", url:"assets/images/gyarados/gyarados-mega.gif"}, 
+					{name: "cardBack", url:"assets/images/cards/cardBack.png"}]).load(function ()
 	{
 		playerCreatureSprite.scale.set(3, 3);
 		playerCreatureSprite.anchor.y = 1;
@@ -49,6 +59,7 @@ document.addEventListener("DOMContentLoaded", function()
 		opponentCreatureSprite.anchor.x = 1;
 		opponentCreatureSprite.x = renderer.width;
 		stage.addChild(opponentCreatureSprite);
+		stage.addChild(cardBackSprite);
 		drawGameState(gameState)
 		//var sprite = new PIXI.Sprite(PIXI.loader.resources["mewtwo"].texture);
 		//console.log("loaded");
@@ -87,6 +98,11 @@ function updateOpponentCreature(){
 	stage.addChild(opponentCreatureSprite);
 }
 
+function updateOpponentCards(numCards){
+	//cardBackSprite = new PIXI.Sprite(PIXI.loader.resources["assets/images/cards/cardBack.png"].texture);
+	stage.addChild(cardBackSprite);
+}
+
 function renderplayers()
 {
 	const list = document.getElementById("players_list");
@@ -114,5 +130,6 @@ function renderGame(){
 function drawGameState(gameState){
 	playerCreatureSprite.texture = PIXI.loader.resources[gameState.me.creature.id].texture;
 	opponentCreatureSprite.texture = PIXI.loader.resources[gameState.opponent.creature.id].texture;
+	//cardBackSprite.texture = PIXI.loader.resources[cardBack].texture;
 }
 
