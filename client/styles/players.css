@@ -18,9 +18,9 @@
 
 #players_container
 {
-	height: 75%;
-	padding: 49px 0 0;
-	margin-top: -41px;
+	height: 60%;
+	padding: 44px 0 0;
+	margin-top: -36px;
 }
 
 #players_inner
@@ -34,22 +34,17 @@
 	box-shadow: inset 2px 2px 2px 0 rgba(0, 0, 0, 0.5);
 }
 
-#playerInfo_container
+#players_info
 {
-	height: 100%;
-	padding: 59px 0 0;
-	margin-top: -49px;
+	height: 40%;
+	padding: 44px 0 0;
+	margin-top: -36px;
 }
 
-#playerInfo_inner
+#players_infocontent
 {
-	padding: 4px 4px 0;
-	border-radius: 4px;
-	height: 20%;
-	
-	background-color: #141a1f;
-	
-	box-shadow: inset 2px 2px 2px 0 rgba(0, 0, 0, 0.5);
+	height: 100%;
+	padding: 4px;
 }
 
 

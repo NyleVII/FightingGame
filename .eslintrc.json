@@ -33,7 +33,7 @@
 	"globals":
 	{
 		"WebSocket": false,
-		
+		"PIXI": false,
 		"server_http": true
 	}
 }
