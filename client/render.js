@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", function()
 					{name: "gyarados_player", url:"assets/images/gyarados/gyarados_player.gif"},
 					{name: "gyarados_opponent", url:"assets/images/gyarados/gyarados_opponent.gif"},
 					{name: "gyarados_card", url:"assets/images/cards/creatures/gyarados_card.png"},
+					{name: "energy", url:"assets/images/energy.jpg"},
 					{name: "cardBack", url:"assets/images/cards/cardBack.png"},
 					{name: "effect1_card", url:"assets/images/cards/effects/17.png"},
 					{name: "effect2_card", url:"assets/images/cards/effects/24.png"},
