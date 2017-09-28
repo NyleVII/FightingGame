@@ -4,7 +4,23 @@ Project by:
 Stephen Antymis
 Shawn Sutherland
 
-1. Create a lobby system for use in a fighting game
+TO DO:
+- Flesh out game state structure <---------- DO THIS FIRST
+- Create database of cards (creatures have hp, moveset, energy cost, etc.)
+- Deck database to load in for players
+- Consider a move database
+- Render current energy values (and totals) on screen
+- Network protocol (valid move, invalid move, client actions, win condition, whose turn)
+- Game logic
+- HP numbers on active creatures
+- HP numbers on cards in hand
+- Create and design effect cards (3-5)
+- How are we using screen real estate (bottom and sides)
+- Implement creature attack
+- Play test! (nerf Sitting Dude)
+
+LATER:
+- Card hover image
 
 
 
