@@ -39,6 +39,11 @@ renderHand()
 
 
 
+<id>_player
+<id>_opponent
+<id>_card
+
+
 
 state.me.creature.id
 
