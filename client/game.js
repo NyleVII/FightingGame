@@ -18,6 +18,7 @@ function Game(renderer)
 	this.renderer = renderer;
 	this.stage = new PIXI.Container();
 	
+	//Add player creature sprite to game screen
 	this.sprite_player_creature = new PIXI.Sprite();
 	this.sprite_player_creature.anchor.set(0, 1);
 	this.sprite_player_creature.width = 300;
@@ -25,12 +26,32 @@ function Game(renderer)
 	this.sprite_player_creature.y = renderer.height;
 	this.stage.addChild(this.sprite_player_creature);
 	
+	//Add opponent creature sprite to game screen
 	this.sprite_opponent_creature = new PIXI.Sprite();
 	this.sprite_opponent_creature.anchor.set(1, 0);
 	this.sprite_opponent_creature.width = 300;
 	this.sprite_opponent_creature.height = 300;
 	this.sprite_opponent_creature.x = renderer.width;
 	this.stage.addChild(this.sprite_opponent_creature);
+
+	//Add player energy sprite to game screen
+	this.sprite_player_energy = new PIXI.Sprite();
+	this.sprite_player_energy.anchor.set(0,1);
+	this.sprite_player_energy.width = 100;
+	this.sprite_player_energy.height = 100;
+	this.sprite_player_energy.x = this.sprite_player_creature.x + this.sprite_player_creature.width;
+	this.sprite_player_energy.y = renderer.height;
+	this.sprite_player_energy.texture = PIXI.loader.resources["energy"].texture;
+	this.stage.addChild(this.sprite_player_energy);
+
+	//Add opponent energy sprite to game screen
+	this.sprite_opponent_energy = new PIXI.Sprite();
+	this.sprite_opponent_energy.anchor.set(1,0);
+	this.sprite_opponent_energy.width = 100;
+	this.sprite_opponent_energy.height = 100;
+	this.sprite_opponent_energy.x = renderer.width - this.sprite_opponent_creature.width;
+	this.sprite_opponent_energy.texture = PIXI.loader.resources["energy"].texture;
+	this.stage.addChild(this.sprite_opponent_energy);
 	
 	this.sprite_player_effecthand = [];
 	this.sprite_opponent_effecthand = [];
@@ -89,6 +110,12 @@ Game.prototype.state_set = function(state)
 	
 	for (let i = 0; i < state.player.effecthand.length; ++i)
 		this.sprite_player_effecthand[i].texture = PIXI.loader.resources[state.player.effecthand[i].id + "_card"].texture;
+	
+	for (let i = 0; i < state.player.creaturehand.length; ++i)
+	{
+		// console.log(state.player.creaturehand[i] + "_card");
+		this.sprite_creaturehand[i].texture = PIXI.loader.resources[state.player.creaturehand[i] + "_card"].texture;
+	}
 	
 	const texture_cardback = PIXI.loader.resources.cardBack.texture;
 	for (let i = 0; i < MAX_EFFECTHANDSIZE; ++i)
