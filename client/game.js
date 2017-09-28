@@ -63,8 +63,15 @@ Game.prototype.state_set = function(state)
 	this.sprite_player_creature.texture = PIXI.loader.resources[state.player.creature.id + "_player"].texture;
 	this.sprite_opponent_creature.texture = PIXI.loader.resources[state.opponent.creature.id + "_opponent"].texture;
 	
-	for (let i = 0; i < state.player.effecthand.length; ++i)
-		this.sprite_effecthand[i].texture = PIXI.loader.resources[state.player.effecthand[i].id + "_card"].texture;
+	for (let i = 0; i < state.player.effecthand.length; ++i){
+		console.log(state.player.effecthand[i] + "_card");
+		this.sprite_effecthand[i].texture = PIXI.loader.resources[state.player.effecthand[i] + "_card"].texture;
+	}
+
+	for (let i = 0; i < state.player.creaturehand.length; ++i){
+		console.log(state.player.creaturehand[i] + "_card");
+		this.sprite_creaturehand[i].texture = PIXI.loader.resources[state.player.creaturehand[i] + "_card"].texture;
+	}
 };
 
 Game.prototype.render = function()
