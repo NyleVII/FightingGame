@@ -2,8 +2,8 @@ const MAX_EFFECTHANDSIZE = 5;
 const MAX_CREATUREHANDSIZE = 5;
 const OFFSET_EFFECTHAND_PLAYER = {x: 400, y: 200};
 const OFFSET_CREATUREHAND_PLAYER = {x: 100, y: 100};
-const OFFSET_EFFECTHAND_OPPONENT = {x: 400, y: 100};
-const OFFSET_CREATUREHAND_OPPONENT = {x: 100, y: 0};
+const OFFSET_EFFECTHAND_OPPONENT = {x: 325, y: 100};
+const OFFSET_CREATUREHAND_OPPONENT = {x: 25, y: 0};
 const INCREMENT_EFFECTHAND_PLAYER = {x: 50, y: 0};
 const INCREMENT_CREATUREHAND_PLAYER = {x: -50, y: 0};
 const INCREMENT_EFFECTHAND_OPPONENT = {x: -50, y: 0};
@@ -86,7 +86,7 @@ function Game(renderer)
 		sprite.width = SIZE_CARD.x;
 		sprite.height = SIZE_CARD.y;
 		
-		this.sprite_creaturehand.push(sprite);
+		this.sprite_player_creaturehand.push(sprite);
 		this.stage.addChild(sprite);
 		
 		sprite = new PIXI.Sprite();
@@ -109,12 +109,12 @@ Game.prototype.state_set = function(state)
 	this.sprite_opponent_creature.texture = PIXI.loader.resources[state.opponent.creature.id + "_opponent"].texture;
 	
 	for (let i = 0; i < state.player.effecthand.length; ++i)
-		this.sprite_player_effecthand[i].texture = PIXI.loader.resources[state.player.effecthand[i].id + "_card"].texture;
+		this.sprite_player_effecthand[i].texture = PIXI.loader.resources[state.player.effecthand[i] + "_card"].texture;
 	
 	for (let i = 0; i < state.player.creaturehand.length; ++i)
 	{
 		// console.log(state.player.creaturehand[i] + "_card");
-		this.sprite_creaturehand[i].texture = PIXI.loader.resources[state.player.creaturehand[i] + "_card"].texture;
+		this.sprite_player_creaturehand[i].texture = PIXI.loader.resources[state.player.creaturehand[i] + "_card"].texture;
 	}
 	
 	const texture_cardback = PIXI.loader.resources.cardBack.texture;
