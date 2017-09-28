@@ -41,7 +41,9 @@ document.addEventListener("DOMContentLoaded", function()
 			player:
 			{
 				creature: {id: "gyarados"},
-				effecthand: ["mewtwo", "gyarados","mewtwo","gyarados","mewtwo"]
+				effecthand: ["mewtwo", "gyarados","mewtwo","gyarados","mewtwo"],
+				creaturehand: []
+
 			},
 			opponent:
 			{
