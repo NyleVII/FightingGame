@@ -32,3 +32,34 @@ Combat
 - energy is replenished back up to the player's max energy at the beginning of each turn
 - any card or ability can be used in any order during the turn, provided the player has enough energy to do so
 - creatures occupy a space from 1-3 on the field (this impacts whether or not they can be hit by or use certain abilities - see darkest dungeon)
+
+
+Game State
+----------
+
+{
+	player1:
+	{
+		energy_max: <INT>,
+		energy_current: <INT>
+		creatures:
+		[
+			{
+				id: <ID_CREATURE>,
+				hp: <INT>,
+				effects: [{id: <ID_EFFECT_CREATURE>}, ...]
+			},
+			...
+		],
+		hand: [<ID_CARD>, ...],
+		deck: [<ID_CARD>, ...],
+		effects: [<ID_EFFECT_PLAYER>, ...]
+	},
+	player2:
+	{
+		...
+	},
+	player_current: <PLAYER1 OR PLAYER2>,
+	turn: <INT>,
+	effects: [<ID_EFFECT_GAME>]
+}
