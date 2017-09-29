@@ -112,10 +112,7 @@ Game.prototype.state_set = function(state)
 		this.sprite_player_effecthand[i].texture = PIXI.loader.resources[state.player.effecthand[i] + "_card"].texture;
 	
 	for (let i = 0; i < state.player.creaturehand.length; ++i)
-	{
-		// console.log(state.player.creaturehand[i] + "_card");
 		this.sprite_player_creaturehand[i].texture = PIXI.loader.resources[state.player.creaturehand[i] + "_card"].texture;
-	}
 	
 	const texture_cardback = PIXI.loader.resources.cardBack.texture;
 	for (let i = 0; i < MAX_EFFECTHANDSIZE; ++i)

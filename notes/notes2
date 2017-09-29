@@ -1,0 +1,34 @@
+Turn-based Team Battle System with Cards
+========================================
+
+
+Summary
+-------
+
+- turn-based combat with teams of three creatures
+- creatures have individual health points and abilities
+- players take turns, expending energy to play cards and use creature abilities
+- the first player to defeat all three of their opponent's creatures wins
+
+
+Setup
+-----
+
+- players queue up to a game with a deck of N cards, used to affect the battlefield and interact with the creatures in various ways
+- creature teams could be initialized in a few ways:
+	- preselect a team of three along with the effect deck before queuing
+	- players queue with a "creature deck" from which their team is randomly selected/mulliganed
+	- purely random from all possible creatures
+		- mulligan phase?
+	- creatures could be drafted somehow (perhaps the game randomly selects 6 creatures and players take turns drafting a team)
+
+
+Combat
+------
+
+- the main game loop is comprised of turn-based combat
+- each player starts at N max energy
+- effect cards and creature abilities have an associated energy cost, which is expended from their energy total for that turn
+- energy is replenished back up to the player's max energy at the beginning of each turn
+- any card or ability can be used in any order during the turn, provided the player has enough energy to do so
+- creatures occupy a space from 1-3 on the field (this impacts whether or not they can be hit by or use certain abilities - see darkest dungeon)
