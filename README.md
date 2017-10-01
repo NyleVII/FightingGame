@@ -6,6 +6,7 @@ Shawn Sutherland
 
 TO DO:
 - Flesh out game state structure <---------- DO THIS FIRST
+- Decide on initial UI game board layout
 - Create database of cards (creatures have hp, moveset, energy cost, etc.)
 - Deck database to load in for players
 - Consider a move database
