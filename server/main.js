@@ -1,5 +1,9 @@
-const WebSocket = require("websocket");
+const websocket = require("websocket");
+const mongo = require("mongodb");
+
 const server_http = require("./http.js");
+const config = require("./config.json");
+const Game = require("./game/game.js");
 
 
 // server constants
@@ -8,7 +12,41 @@ const MAX_CONNECTIONS = 50;
 // global variables
 const connections = [];
 const games = [];
-const server_websocket = new WebSocket.server({httpServer: server_http});
+
+
+// initialize web server
+server_http.listen(config.app_port);
+const server_websocket = new websocket.server({httpServer: server_http});
+
+// intialize mongo database connection
+mongo.MongoClient.connect("mongodb://" + config.mongo_host + ":" + config.mongo_port + "/" + config.mongo_db, function(error, db)
+{
+	if (error !== null)
+		console.error(error);
+	else
+	{
+		global.data = {};
+		global.collections = {};
+		
+		db.collection("abilities").find().toArray(function(error, result)
+		{
+			global.data.abilities = result;
+		});
+		
+		db.collection("cards").find().toArray(function(error, result)
+		{
+			global.data.cards = result;
+		});
+		
+		db.collection("creatures").find().toArray(function(error, result)
+		{
+			global.data.creatures = result;
+		});
+		
+		global.collections.decks = db.collection("decks");
+		global.collections.players = db.collection("players");
+	}
+});
 
 
 function alias_set(id_player, alias)
@@ -60,10 +98,9 @@ server_websocket.on("request", function(request)
 		broadcast_players();
 		
 		// TEMP(shawn): create game when two players connect
-		if (connections.length === 2)
+		if (connections.length === 1)
 		{
-			// games[0] = new Game();
-			
+			games.push(new Game(0, 1));
 		}
 		
 		connection.on("close", function()

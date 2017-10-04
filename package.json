@@ -2,11 +2,12 @@
 	"name": "fighting-game",
 	"version": "0.0.1",
 	"scripts": {
-		"start": "node server/main.js",
+		"start": "mongod --config db/config | node server/main.js",
 		"install:dev": "npm install",
 		"install:prod": "npm install --production"
 	},
 	"dependencies": {
+		"mongodb": "^2.2.31",
 		"websocket": "^1.0.24"
 	},
 	"devDependencies": {

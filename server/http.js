@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const http = require("http");
-const PORT = 3000;
+
 
 module.exports = http.createServer(function(request, response)
 {
@@ -26,5 +26,3 @@ module.exports = http.createServer(function(request, response)
 		}
 	});
 });
-
-module.exports.listen(PORT);
