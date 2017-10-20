@@ -16,6 +16,13 @@
 	font-size: 24px;
 }
 
+#nav_ticker
+{
+	display: inline-block;
+	text-align: center;
+	font-size: 16px;
+}
+
 #nav_menu
 {
 	float: right;
