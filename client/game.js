@@ -29,6 +29,8 @@ function Game(renderer)
 	this.graphics.lineTo(400,600);
 	this.stage.addChild(this.graphics);
 
+	//Draws command card rectangle
+	//Used for creature ability selection
 	this.graphics.drawRect(50, 380, 300, 200);
 	this.stage.addChild(this.graphics);
 	
