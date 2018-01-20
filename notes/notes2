@@ -38,28 +38,32 @@ Game State
 ----------
 
 {
-	player1:
-	{
-		energy_max: <INT>,
-		energy_current: <INT>
-		creatures:
-		[
-			{
-				id: <ID_CREATURE>,
-				hp: <INT>,
-				effects: [{id: <ID_EFFECT_CREATURE>}, ...]
-			},
+	players:
+	[
+		{
+			name: <STRING>,
+			energy_max: <INT>,
+			energy_current: <INT>
+			creatures:
+			[
+				{
+					id: <ID_CREATURE>,
+					hp: <INT>,
+					effects: [{id: <ID_EFFECT_CREATURE>}, ...]
+				},
+				...
+			],
+			hand: [<ID_CARD>, ...],
+			deck: [<ID_CARD>, ...],
+			effects: [<ID_EFFECT_PLAYER>, ...],
+			mulligan: <BOOL>
+		},
+		{
 			...
-		],
-		hand: [<ID_CARD>, ...],
-		deck: [<ID_CARD>, ...],
-		effects: [<ID_EFFECT_PLAYER>, ...]
-	},
-	player2:
-	{
-		...
-	},
+		}
+	],
 	player_current: <PLAYER1 OR PLAYER2>,
+	phase: <PHASE>,
 	turn: <INT>,
 	effects: [<ID_EFFECT_GAME>]
 }

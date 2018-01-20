@@ -1,0 +1,25 @@
+Combat mechanic possibilities
+1. creatures have attack that is added to ability damage
+	PRO: relatively simple, allows for some synergy
+	CON: not very deep, less flexible
+
+2. ability damage multiplies with creature attack
+	- flat ability multiplied by creature attack
+	- flat creature attack multiplied by ability
+	
+3. just abilities with no creature attack
+	PRO: simple, consistent
+
+4. creatures just have attack, there is no interaction with ability damage
+5. position affects abilities, attack, health
+6. creatures have role archetypes that affect ability damage, healing capability, etc
+7. creatures have elemental affinity
+
+
+
+
+Ideas
+- ranged and melee
+	- melee is generally stronger but has positional considerations
+		- take damage from creatures when attacking past the first position
+		- costs more energy to attack back/middle row
