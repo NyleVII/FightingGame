@@ -1,6 +1,6 @@
 function shuffle(list)
 {
-	for (let i = list.length; i; --i)
+	for(let i = list.length; i; --i)
 	{
 		const j = Math.floor(Math.random()*i);
 		const temp = list[i - 1];
@@ -48,7 +48,7 @@ function Game(id_deck1, id_deck2)
 					init_player(players[0].name, decks[0]),
 					init_player(players[1].name, decks[1])
 				],
-				phase: "mulligan",
+				phase: "game",
 				player_current: 0,
 				turn: 0,
 				effects: []
@@ -64,17 +64,17 @@ Game.prototype.processes =
 	{
 		mulligan: function(player, action)
 		{
-			if (!player.mulligan)
+			if(!player.mulligan)
 			{
 				const hand = [];
-				for (let i = 0; i < action.cards.length; ++i)
+				for(let i = 0; i < action.cards.length; ++i)
 					hand.push(player.hand[action.cards[i]]);
 				player.hand = hand;
 				player.mulligan = true;
 			}
 			
 			// start game
-			if (this.players[0].mulligan && this.players[1].mulligan)
+			if(this.players[0].mulligan && this.players[1].mulligan)
 				this.phase = "main";
 		}
 	},
@@ -88,7 +88,7 @@ Game.prototype.processes =
 			// TODO(shawn): get card data from data store
 			
 			// TODO(shawn): send "invalid" message to client
-			if (card.cost > player.energy_current)
+			if(card.cost > player.energy_current)
 				return;
 			
 			// deduct card cost from player energy
@@ -105,7 +105,7 @@ Game.prototype.processes =
 Game.prototype.process = function(index_player, action)
 {
 	const process = this.processes[this.phase][action.type];
-	if (process !== undefined)
+	if(process !== undefined)
 		process.call(this, this.players[index_player], action);
 };
 

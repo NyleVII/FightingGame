@@ -6,20 +6,20 @@ const http = require("http");
 module.exports = http.createServer(function(request, response)
 {
 	let filename = request.url;
-	if (filename === "/")
+	if(filename === "/")
 		filename = "/index.html";
 	
 	const ext = path.extname(filename);
 	let type = "text/html";
 	
-	if (ext === ".js")
+	if(ext === ".js")
 		type = "text/javascript";
-	else if (ext === ".css")
+	else if(ext === ".css")
 		type = "text/css";
 	
 	fs.readFile("client" + filename, function(error, content)
 	{
-		if (!error)
+		if(!error)
 		{
 			response.writeHead(200, {"Content-Type": type});
 			response.end(content, "utf-8");

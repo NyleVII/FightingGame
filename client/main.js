@@ -3,6 +3,7 @@
 
 // socket connection
 const socket = new WebSocket("ws://" + window.location.hostname + ":3000");
+socket.binaryType = "arraybuffer";
 
 // current app state
 let state = "lobby";
@@ -16,45 +17,37 @@ const processes =
 {
 	lobby:
 	{
-		players: function(params)
+		"0": function(dataview)
 		{
+			const id_player = "";
+			
+			let index, char = dataview.getInt8(index = 1);
+			console.log(char);
+			// addchat(players[params.slice(0, sep)].alias, params.slice(sep + 1));
+		},
+		"4": function(dataview)
+		{
+			/*
 			players = params.split(",").map(function(alias)
 			{
 				return {alias: alias};
 			});
 			
 			renderplayers();
+			*/
 		},
-		chat: function(params)
-		{
-			const sep = params.indexOf(" ");
-			
-			addchat(players[params.slice(0, sep)].alias, params.slice(sep + 1));
-		}
 	}
 };
 
 // socket message handler
 socket.onmessage = function(event)
 {
-	const sep = event.data.indexOf(" ");
+	const dataview = new DataView(event.data);
+	const code = dataview.getInt8(0);
 	
-	let type, params;
-	if (sep === -1)
-	{
-		type = event.data;
-		params = "";
-	}
-	else
-	{
-		type = event.data.slice(0, sep);
-		params = event.data.slice(sep + 1);
-	}
-	
-	const process = processes[state][type];
-	
-	if (process !== undefined)
-		process(params);
+	const process = processes[state][code];
+	if(process !== undefined)
+		process(dataview);
 };
 
 

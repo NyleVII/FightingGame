@@ -1,0 +1,17 @@
+CLIENT -> SERVER
+
+BYTE CODE	| MEANING		| PROTOCOL
+--------------------------------------
+0x00		| Chat message	| <chat text>
+
+
+
+SERVER -> CLIENT
+
+BYTE CODE	| MEANING				| PROTOCOL
+-------------------------------------------------------------
+0x00		| Chat message			| <id_player> <chat text>
+0x01		| Ability data dump		| <ability data>
+0x02		| Card data dump		| <card data>
+0x03		| Creature data dump	| <creature data>
+0x04		| Player list			| <player list>
