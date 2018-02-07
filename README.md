@@ -4,6 +4,9 @@ Project by:
 Stephen Antymis
 Shawn Sutherland
 
+RUN:
+
+
 TO DO:
 - Flesh out game state structure <---------- DO THIS FIRST
 - Decide on initial UI game board layout

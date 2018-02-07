@@ -22,32 +22,38 @@ document.addEventListener("DOMContentLoaded", function()
 	document.getElementById("gamescreen_inner").appendChild(renderer.view);
 
 	PIXI.loader.add([{name: "mewtwo_player", url:"assets/images/mewtwo/mewtwo_player.gif"},
-					{name: "mewtwo_opponent", url:"assets/images/mewtwo/mewtwo_opponent.gif"},
-					{name: "mewtwo_card", url:"assets/images/cards/creatures/mewtwo_card.png"},
-					{name: "gyarados_player", url:"assets/images/gyarados/gyarados_player.gif"},
-					{name: "gyarados_opponent", url:"assets/images/gyarados/gyarados_opponent.gif"},
-					{name: "gyarados_card", url:"assets/images/cards/creatures/gyarados_card.png"},
-					{name: "energy", url:"assets/images/energy.jpg"},
-					{name: "cardBack", url:"assets/images/cards/cardBack.png"},
-					{name: "effect1_card", url:"assets/images/cards/effects/17.png"},
-					{name: "effect2_card", url:"assets/images/cards/effects/24.png"},
-					{name: "effect3_card", url:"assets/images/cards/effects/26.png"},
-					{name: "effect4_card", url:"assets/images/cards/effects/27.png"},
-					{name: "effect5_card", url:"assets/images/cards/effects/36.png"},
-					{name: "effect6_card", url:"assets/images/cards/effects/63.png"},
-					{name: "effect7_card", url:"assets/images/cards/effects/74.png"},
-					{name: "effect8_card", url:"assets/images/cards/effects/91.png"},
-					{name: "effect9_card", url:"assets/images/cards/effects/99.png"},
-					{name: "effect10_card", url:"assets/images/cards/effects/109.png"}
-				]).load(function()
+		{name: "mewtwo_opponent", url:"assets/images/mewtwo/mewtwo_opponent.gif"},
+		{name: "mewtwo_card", url:"assets/images/cards/creatures/mewtwo_card.png"},
+		{name: "gyarados_player", url:"assets/images/gyarados/gyarados_player.gif"},
+		{name: "gyarados_opponent", url:"assets/images/gyarados/gyarados_opponent.gif"},
+		{name: "gyarados_card", url:"assets/images/cards/creatures/gyarados_card.png"},
+		{name: "energy", url:"assets/images/energy.jpg"},
+		{name: "deck", url:"assets/images/cards/deck.png"},
+		{name: "cardBack", url:"assets/images/cards/cardBack.png"},
+		{name: "effect1_card", url:"assets/images/cards/effects/17.png"},
+		{name: "effect2_card", url:"assets/images/cards/effects/24.png"},
+		{name: "effect3_card", url:"assets/images/cards/effects/26.png"},
+		{name: "effect4_card", url:"assets/images/cards/effects/27.png"},
+		{name: "effect5_card", url:"assets/images/cards/effects/36.png"},
+		{name: "effect6_card", url:"assets/images/cards/effects/63.png"},
+		{name: "effect7_card", url:"assets/images/cards/effects/74.png"},
+		{name: "effect8_card", url:"assets/images/cards/effects/91.png"},
+		{name: "effect9_card", url:"assets/images/cards/effects/99.png"},
+		{name: "effect10_card", url:"assets/images/cards/effects/109.png"},
+		{name: "fireball_card", url:"assets/images/cards/fireball.png"},
+		{name: "1_card", url:"assets/images/cards/1.png"},
+		{name: "2_card", url:"assets/images/cards/2.png"},
+		{name: "3_card", url:"assets/images/cards/3.png"},
+		{name: "4_card", url:"assets/images/cards/4.png"},
+	]).load(function()
 	{
 		game = new Game(renderer);
 		game.state_set({
 			player:
 			{
 				creature: {id: "gyarados"},
-				effecthand: ["effect1","effect2","effect3","effect4","effect5"],
-				creaturehand: ["gyarados", "gyarados","gyarados","gyarados","mewtwo"]
+				effecthand: ["1", "2", "3", "4", "fireball"],
+				creaturehand: ["gyarados", "gyarados", "gyarados", "gyarados", "mewtwo"]
 
 			},
 			opponent:
