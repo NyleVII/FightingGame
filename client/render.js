@@ -8,7 +8,11 @@ document.addEventListener("DOMContentLoaded", function()
 		event.preventDefault();
 		
 		const text = document.getElementById("chat_text");
-		socket.send("chat " + text.value);
+		
+		const buffer_text = [0x00];
+		for(let i = 0; i < text.value.length; ++i)
+			buffer_text.push(text.value.charCodeAt(i) & 0xff);
+		socket.send(new Uint8Array(buffer_text));
 		text.value = "";
 	};
 	
