@@ -9,34 +9,89 @@ socket.binaryType = "arraybuffer";
 let state = "lobby";
 
 // player list
-let players = [];
+let players = {};
+
+
+function read_string(dataview, index)
+{
+	let char, string = "";
+	
+	while(index < dataview.byteLength && (char = dataview.getInt8(index++)))
+		string += String.fromCharCode(char);
+	
+	return string;
+}
 
 
 // network/state message handler
 const processes =
 {
 	lobby:
-	{
-		"0": function(dataview)
+	[
+		// Chat message
+		function(dataview)
 		{
-			const id_player = "";
+			const id_player = read_string(dataview, 1);
+			const text = read_string(dataview, id_player.length + 2);
 			
-			let index, char = dataview.getInt8(index = 1);
-			console.log(char);
-			// addchat(players[params.slice(0, sep)].alias, params.slice(sep + 1));
+			addchat(players[id_player].name, text);
 		},
-		"4": function(dataview)
+		
+		// ability data dump
+		function()
 		{
-			/*
-			players = params.split(",").map(function(alias)
+			
+		},
+		
+		// card data dump
+		function()
+		{
+			
+		},
+		
+		// creature data dump
+		function()
+		{
+			
+		},
+		
+		// full player list
+		function(dataview)
+		{
+			let index = 1;
+			
+			players = {};
+			while(index < dataview.byteLength)
 			{
-				return {alias: alias};
-			});
+				const id_player = read_string(dataview, index);
+				index += id_player.length + 1;
+				
+				const name = read_string(dataview, index);
+				index += name.length + 1;
+				
+				players[id_player] = {name: name};
+			}
 			
 			renderplayers();
-			*/
 		},
-	}
+		
+		// player joined
+		function(dataview)
+		{
+			const id_player = read_string(dataview, 1);
+			players[id_player] = {name: read_string(dataview, id_player.length + 2)};
+			
+			renderplayers();
+		},
+		
+		// player left
+		function(dataview)
+		{
+			delete players[read_string(dataview, 1)];
+			
+			renderplayers();
+		}
+	]
 };
 
 // socket message handler

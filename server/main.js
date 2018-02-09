@@ -6,12 +6,8 @@ const config = require("./config.json");
 const Game = require("./game/game.js");
 
 
-// server constants
-const MAX_CONNECTIONS = 50;
-
 // global variables
-const connections = [];
-const games = [];
+const connections = {};
 
 
 // initialize web server
@@ -49,161 +45,126 @@ mongo.MongoClient.connect("mongodb://" + config.mongo_host + ":" + config.mongo_
 });
 
 
-function alias_set(id_player, alias)
+function broadcast(buffer)
 {
-	let inuse = false;
-	for (let i = 0; i < connections.length; ++i)
-		if (i !== id_player && connections[i].alias === alias)
-		{
-			inuse = true;
-			break;
-		}
-	
-	if (inuse)
-		throw new Error("Name in use");
-	
-	connections[id_player].alias = alias;
+	for(const id_player in connections)
+		connections[id_player].sendBytes(buffer);
 }
 
-function broadcast_players()
+function buffer_string(buffer, string)
 {
-	const buffer_players = [0x04];
-	for(let i = 0; i < connections.length; ++i)
-	{
-		const alias = connections[i].alias;
-		
-		for(let j = 0; j < alias.length; ++j)
-			buffer_players.push(alias.charCodeAt(j) & 0xff);
-		buffer_players.push(0x00);
-	}
-	
-	for(let i = 0; i < connections.length; ++i)
-		connections[i].send(Buffer.from(buffer_players));
+	for(let i = 0; i < string.length; ++i)
+		buffer.push(string.charCodeAt(i) & 0xff);
+	buffer.push(0x00);
 }
 
 
 const processes =
-{
-	chat: function(connection, params)
+[
+	// chat message
+	function(connection, buffer_process)
 	{
-		for(const i in connections)
-			connections[i].send("chat " + connections.indexOf(connection) + " " + params);
+		const buffer = [0x00];
+		
+		buffer_string(buffer, connection.player._id);
+		for(let i = 1; i < buffer_process.length; ++i)
+			buffer.push(buffer_process.readUInt8(i));
+		broadcast(Buffer.from(buffer));
 	}
-};
+];
 
 
 server_websocket.on("request", function(request)
 {
-	if(connections.length < MAX_CONNECTIONS)
+	console.log("websocket request");
+	
+	global.collections.players.find().toArray().then(function(players)
 	{
-		const connection = request.accept(null, request.origin);
-		const id_player = connections.length;
-		connections.push(connection);
-		
-		// send ability data dump
-		const buffer_abilities = [0x01];
-		for(let i = 0; i < global.data.abilities.length; ++i)
+		for(let i = 0; i < players.length; ++i)
 		{
-			const ability = global.data.abilities[i];
+			const player = players[i];
 			
-			// ability id
-			for(let j = 0; j < ability._id.length; ++j)
-				buffer_abilities.push(ability._id.charCodeAt(j) & 0xff);
-			buffer_abilities.push(0x00);
-			
-			// ability name
-			for(let j = 0; j < ability.name.length; ++j)
-				buffer_abilities.push(ability.name.charCodeAt(j) & 0xff);
-			buffer_abilities.push(0x00);
-		}
-		connection.sendBytes(Buffer.from(buffer_abilities));
-		
-		// send card data dump
-		const buffer_cards = [0x02];
-		for(let i = 0; i < global.data.cards.length; ++i)
-		{
-			const card = global.data.cards[i];
-			
-			// card id
-			for(let j = 0; j < card._id.length; ++j)
-				buffer_cards.push(card._id.charCodeAt(j) & 0xff);
-			buffer_cards.push(0x00);
-			
-			// card name
-			for(let j = 0; j < card.name.length; ++j)
-				buffer_cards.push(card.name.charCodeAt(j) & 0xff);
-			buffer_cards.push(0x00);
-			
-			// card cost
-			buffer_cards.push(card.cost);
-		}
-		connection.sendBytes(Buffer.from(buffer_cards));
-		
-		// send creature data dump
-		const buffer_creatures = [0x03];
-		for(let i = 0; i < global.data.creatures.length; ++i)
-		{
-			const creature = global.data.creatures[i];
-			
-			// creature id
-			for(let j = 0; j < creature._id.length; ++j)
-				buffer_creatures.push(creature._id.charCodeAt(j) & 0xff);
-			buffer_creatures.push(0x00);
-			
-			// creature name
-			for(let j = 0; j < creature.name.length; ++j)
-				buffer_creatures.push(creature.name.charCodeAt(j) & 0xff);
-			buffer_creatures.push(0x00);
-		}
-		connection.sendBytes(Buffer.from(buffer_creatures));
-		
-		
-		alias_set(id_player, "player_" + Math.floor(Math.random()*10000));
-		
-		broadcast_players();
-		
-		// TEMP(shawn): create game when one player connects
-		if(connections.length === 1)
-		{
-			games.push(new Game(0, 1));
-		}
-		
-		
-		connection.on("close", function()
-		{
-			connections.splice(connections.indexOf(connection), 1);
-			broadcast_players();
-		});
-		
-		connection.on("message", function(message)
-		{
-			const buffer = message.binaryData;
-			
-			const process = processes[buffer.readUInt8(0)]
-			if(process !== undefined)
-				process(buffer);
-			
-			/*
-			const input = message.utf8Data;
-			const sep = input.indexOf(" ");
-			
-			let type, params;
-			if(sep === -1)
+			if(connections[player._id] === undefined)
 			{
-				type = input;
-				params = "";
+				let buffer;
+				
+				const connection = connections[player._id] = request.accept(null, request.origin);
+				connection.player = player;
+				
+				connection.on("close", function()
+				{
+					delete connections[player._id];
+					
+					// broadcast player left message
+					buffer = [0x06];
+					buffer_string(buffer, player._id);
+					broadcast(Buffer.from(buffer));
+					console.log(player.name + " disconnected.");
+				});
+				
+				connection.on("message", function(message)
+				{
+					const buffer = message.binaryData;
+					
+					const process = processes[buffer.readUInt8(0)];
+					if(process !== undefined)
+						process(connection, buffer);
+				});
+				
+				// send full player list
+				buffer = [0x04];
+				for(const id_player in connections)
+				{
+					buffer_string(buffer, id_player);
+					buffer_string(buffer, connections[id_player].player.name);
+				}
+				connection.sendBytes(Buffer.from(buffer));
+				
+				// broadcast player join message
+				buffer = [0x05];
+				buffer_string(buffer, player._id);
+				buffer_string(buffer, player.name);
+				broadcast(Buffer.from(buffer));
+				console.log(player.name + " connected.");
+				
+				// send ability data dump
+				buffer = [0x01];
+				for(let i = 0; i < global.data.abilities.length; ++i)
+				{
+					const ability = global.data.abilities[i];
+					
+					buffer_string(buffer, ability._id);
+					buffer_string(buffer, ability.name);
+				}
+				connection.sendBytes(Buffer.from(buffer));
+				
+				// send card data dump
+				buffer = [0x02];
+				for(let i = 0; i < global.data.cards.length; ++i)
+				{
+					const card = global.data.cards[i];
+					
+					buffer_string(buffer, card._id);
+					buffer_string(buffer, card.name);
+					buffer.push(card.cost);
+				}
+				connection.sendBytes(Buffer.from(buffer));
+				
+				// send creature data dump
+				buffer = [0x03];
+				for(let i = 0; i < global.data.creatures.length; ++i)
+				{
+					const creature = global.data.creatures[i];
+					
+					buffer_string(buffer, creature._id);
+					buffer_string(buffer, creature.name);
+				}
+				connection.sendBytes(Buffer.from(buffer));
+				
+				return;
 			}
-			else
-			{
-				type = input.slice(0, sep);
-				params = input.slice(sep + 1);
-			}
-			
-			if(processes[type] !== undefined)
-				processes[type](connection, params);
-			*/
-		});
-	}
-	else
+		}
+		
 		request.reject();
+	});
 });

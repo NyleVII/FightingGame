@@ -78,7 +78,7 @@ function renderplayers()
 	{
 		const player = document.createElement("div");
 		player.className = "player";
-		player.innerHTML = players[i].alias;
+		player.innerHTML = players[i].name;
 		
 		list.appendChild(player);
 	}
