@@ -9,10 +9,10 @@
 		"build": "tar -zcvf builds/$(date \"+%Y-%m-%d-%H%M%S\").tar.gz server client db/config package.json"
 	},
 	"dependencies": {
-		"mongodb": "^2.2.31",
-		"websocket": "^1.0.24"
+		"mongodb": "latest",
+		"websocket": "latest"
 	},
 	"devDependencies": {
-		"eslint": "^4.6.1"
+		"eslint": "latest"
 	}
 }

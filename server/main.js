@@ -15,12 +15,14 @@ server_http.listen(config.app_port);
 const server_websocket = new websocket.server({httpServer: server_http});
 
 // intialize mongo database connection
-mongo.MongoClient.connect("mongodb://" + config.mongo_host + ":" + config.mongo_port + "/" + config.mongo_db, function(error, db)
+mongo.MongoClient.connect("mongodb://" + config.mongo_host + ":" + config.mongo_port + "/" + config.mongo_db, function(error, client)
 {
 	if (error !== null)
 		console.error(error);
 	else
 	{
+		const db = client.db("game");
+		
 		global.data = {};
 		global.collections = {};
 		
