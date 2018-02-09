@@ -76,8 +76,6 @@ const processes =
 
 server_websocket.on("request", function(request)
 {
-	console.log("websocket request");
-	
 	global.collections.players.find().toArray().then(function(players)
 	{
 		for(let i = 0; i < players.length; ++i)
@@ -118,6 +116,11 @@ server_websocket.on("request", function(request)
 					buffer_string(buffer, id_player);
 					buffer_string(buffer, connections[id_player].player.name);
 				}
+				connection.sendBytes(Buffer.from(buffer));
+				
+				// send login success message
+				buffer = [0x07];
+				buffer_string(buffer, player._id);
 				connection.sendBytes(Buffer.from(buffer));
 				
 				// broadcast player join message

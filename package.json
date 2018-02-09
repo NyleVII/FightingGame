@@ -2,9 +2,11 @@
 	"name": "fighting-game",
 	"version": "0.0.1",
 	"scripts": {
-		"start": "mongod --config db/config | node server/main.js",
+		"start": "node server/main.js",
+		"start:db": "mongod --config db/config",
 		"install:dev": "npm install",
-		"install:prod": "npm install --production"
+		"install:prod": "npm install --production",
+		"build": "tar -zcvf builds/$(date \"+%Y-%m-%d-%H%M%S\").tar.gz server client db/config package.json"
 	},
 	"dependencies": {
 		"mongodb": "^2.2.31",

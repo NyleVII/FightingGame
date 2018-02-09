@@ -9,7 +9,7 @@ socket.binaryType = "arraybuffer";
 let state = "lobby";
 
 // player list
-let players = {};
+let players = {}, id_player_self;
 
 
 function read_string(dataview, index)
@@ -90,6 +90,12 @@ const processes =
 			delete players[read_string(dataview, 1)];
 			
 			renderplayers();
+		},
+		
+		// successful login
+		function(dataview)
+		{
+			id_player_self = read_string(dataview, 1);
 		}
 	]
 };

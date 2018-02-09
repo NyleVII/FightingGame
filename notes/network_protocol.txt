@@ -1,18 +1,19 @@
 CLIENT -> SERVER
 
-BYTE CODE	| MEANING		| PROTOCOL
---------------------------------------
-0x00		| Chat message	| <chat text>
+BYTE CODE	| MEANING				| PROTOCOL
+----------------------------------------------
+0x00		| Chat message			| <text>
 
 
 SERVER -> CLIENT
 
 BYTE CODE	| MEANING				| PROTOCOL
--------------------------------------------------------------
+----------------------------------------------
 0x00		| Chat message			| <player.id>0<text>
 0x01		| Ability data dump		| [<ability.id>0<ability.name>0]
-0x02		| Card data dump		| [<card.id>0<card.name>0<card.cost>0]
+0x02		| Card data dump		| [<card.id>0<card.name>0<card.cost>]
 0x03		| Creature data dump	| [<creature.id>0<creature.name>0]
 0x04		| Player list			| [<player.id>0<player.name>0]
 0x05		| Player joined			| <player.id>0<player.name>
 0x06		| Player left			| <player.id>
+0x07		| Login successful		| <player.id>

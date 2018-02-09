@@ -20,7 +20,8 @@ document.addEventListener("DOMContentLoaded", function()
 	
 	const renderer = PIXI.autoDetectRenderer();
 	document.getElementById("gamescreen_inner").appendChild(renderer.view);
-
+	
+	/*
 	PIXI.loader.add([{name: "mewtwo_player", url:"assets/images/mewtwo/mewtwo_player.gif"},
 		{name: "mewtwo_opponent", url:"assets/images/mewtwo/mewtwo_opponent.gif"},
 		{name: "mewtwo_card", url:"assets/images/cards/creatures/mewtwo_card.png"},
@@ -65,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function()
 		});
 		game.render();
 	});
-
+	*/
 
 });
 
