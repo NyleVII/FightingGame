@@ -1,0 +1,23 @@
+#tooltip
+{
+	background-color: #1f262e;
+	border-radius: 4px;
+	box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.5);
+	display: none;
+	font-size: 12px;
+	padding: 8px;
+	position: fixed;
+	min-width: 128px;
+}
+
+#tooltip.visible
+{
+	display: block;
+}
+
+#tooltip-title
+{
+	margin-bottom: 8px;
+	padding: 8px 0;
+	text-align: left;
+}

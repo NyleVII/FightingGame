@@ -21,10 +21,10 @@ function Game(renderer)
 	//Graphics to draw grid lines to double check spacing
 	this.graphics = new PIXI.Graphics();
 	this.graphics.lineStyle(1, 0xffffff, 1);
-	this.graphics.moveTo(0,300);
-	this.graphics.lineTo(800,300);
-	this.graphics.moveTo(400,0);
-	this.graphics.lineTo(400,600);
+	this.graphics.moveTo(0, 300);
+	this.graphics.lineTo(800, 300);
+	this.graphics.moveTo(400, 0);
+	this.graphics.lineTo(400, 600);
 	this.stage.addChild(this.graphics);
 
 	//Draws command card rectangle
@@ -93,7 +93,7 @@ function Game(renderer)
 	//PLAYER INFO
 	//Add player deck sprite to game screen
 	this.sprite_player_deck = new PIXI.Sprite();
-	this.sprite_player_deck.anchor.set(0,1);
+	this.sprite_player_deck.anchor.set(0, 1);
 	this.sprite_player_deck.width = 50;
 	this.sprite_player_deck.height = 50;
 	this.sprite_player_deck.x = 200;
@@ -102,8 +102,8 @@ function Game(renderer)
 	this.stage.addChild(this.sprite_player_deck);
 
 	//Add player deck text to game screen
-	let playerDeck = new PIXI.Text("55", textStyle);
-	playerDeck.anchor.set(0,0.5);
+	const playerDeck = new PIXI.Text("55", textStyle);
+	playerDeck.anchor.set(0, 0.5);
 	playerDeck.x = this.sprite_player_deck.x + this.sprite_player_deck.width;
 	playerDeck.y = this.sprite_player_deck.y - this.sprite_player_deck.height/2;
 	this.stage.addChild(playerDeck);
@@ -111,7 +111,7 @@ function Game(renderer)
 
 	//Add player energy sprite to game screen
 	this.sprite_player_energy = new PIXI.Sprite();
-	this.sprite_player_energy.anchor.set(0,1);
+	this.sprite_player_energy.anchor.set(0, 1);
 	this.sprite_player_energy.width = 50;
 	this.sprite_player_energy.height = 50;
 	this.sprite_player_energy.x = 280;
@@ -120,15 +120,15 @@ function Game(renderer)
 	this.stage.addChild(this.sprite_player_energy);
 
 	//Add player energy text to game screen
-	let playerEnergy = new PIXI.Text("10/10", textStyle);
-	playerEnergy.anchor.set(0,0.5);
+	const playerEnergy = new PIXI.Text("10/10", textStyle);
+	playerEnergy.anchor.set(0, 0.5);
 	playerEnergy.x = this.sprite_player_energy.x + this.sprite_player_energy.width;
 	playerEnergy.y = this.sprite_player_energy.y - this.sprite_player_energy.height/2;
 	this.stage.addChild(playerEnergy);
 
 	//Add player name to game screen
-	let playerName = new PIXI.Text("Player", textStyle);
-	playerName.anchor.set(0,0.5);
+	const playerName = new PIXI.Text("Player", textStyle);
+	playerName.anchor.set(0, 0.5);
 	playerName.x = 20;
 	playerName.y = renderer.height - this.sprite_player_energy.height/2;
 	this.stage.addChild(playerName);
@@ -136,7 +136,7 @@ function Game(renderer)
 	//OPPONENT INFO
 	//Add opponent energy sprite to game screen
 	this.sprite_opponent_energy = new PIXI.Sprite();
-	this.sprite_opponent_energy.anchor.set(0,0);
+	this.sprite_opponent_energy.anchor.set(0, 0);
 	this.sprite_opponent_energy.width = 50;
 	this.sprite_opponent_energy.height = 50;
 	this.sprite_opponent_energy.x = renderer.width/2;
@@ -144,15 +144,15 @@ function Game(renderer)
 	this.stage.addChild(this.sprite_opponent_energy);
 
 	//Add opponent energy text to game screen
-	let opponentEnergy = new PIXI.Text("20/20", textStyle);
-	opponentEnergy.anchor.set(0,0.5);
+	const opponentEnergy = new PIXI.Text("20/20", textStyle);
+	opponentEnergy.anchor.set(0, 0.5);
 	opponentEnergy.x = this.sprite_opponent_energy.x + this.sprite_opponent_energy.width;
 	opponentEnergy.y = this.sprite_opponent_energy.y + this.sprite_opponent_energy.height/2;
 	this.stage.addChild(opponentEnergy);
 
 	//Add opponent deck sprite to game screen
 	this.sprite_opponent_deck = new PIXI.Sprite();
-	this.sprite_opponent_deck.anchor.set(0,0);
+	this.sprite_opponent_deck.anchor.set(0, 0);
 	this.sprite_opponent_deck.width = 50;
 	this.sprite_opponent_deck.height = 50;
 	this.sprite_opponent_deck.x = 520;
@@ -161,15 +161,15 @@ function Game(renderer)
 	this.stage.addChild(this.sprite_opponent_deck);
 
 	//Add opponent deck text to game screen
-	let opponentDeck = new PIXI.Text("99", textStyle);
-	opponentDeck.anchor.set(0,0.5);
+	const opponentDeck = new PIXI.Text("99", textStyle);
+	opponentDeck.anchor.set(0, 0.5);
 	opponentDeck.x = this.sprite_opponent_deck.x + this.sprite_opponent_deck.width;
 	opponentDeck.y = this.sprite_opponent_deck.y + this.sprite_opponent_deck.height/2;
 	this.stage.addChild(opponentDeck);
 
 	//Add opponent name to game screen
-	let opponentName = new PIXI.Text("Opponent", textStyle);
-	opponentName.anchor.set(1,0.5);
+	const opponentName = new PIXI.Text("Opponent", textStyle);
+	opponentName.anchor.set(1, 0.5);
 	opponentName.x = renderer.width - 20;
 	opponentName.y = 25;
 	this.stage.addChild(opponentName);

@@ -16,12 +16,12 @@
 
 #chat_inner
 {
-	height: 100%;
 	background-color: #141a1f;
 	border-radius: 4px;
-	padding: 8px;
-	
 	box-shadow: inset 2px 2px 2px 0 rgba(0, 0, 0, 0.5);
+	cursor: default;
+	height: 100%;
+	padding: 8px;
 }
 
 .chat_line
@@ -30,6 +30,20 @@
 	color: #8f99a3;
 	padding-bottom: 4px;
 	overflow-wrap: break-word;
+}
+
+.chat_message
+{
+	font-size: 12px;
+	font-style: italic;
+	color: #52667a;
+	padding-bottom: 4px;
+	overflow-wrap: break-word;
+}
+
+.chat_link
+{
+	color: #c08040;
 }
 
 .chat_name

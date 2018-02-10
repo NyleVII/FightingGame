@@ -6,19 +6,18 @@
 
 html
 {
-	height: 100%;
-	font-family: "PT Sans", sans-serif;
-	
 	box-sizing: border-box;
 	-webkit-box-sizing: border-box;
+	height: 100%;
+	font-family: "PT Sans", sans-serif;
 }
 
 body
 {
+	background-color: #0a0d0f;
+	color: #c2ccd6;
 	height: 100%;
 	margin: 0;
-	
-	background-color: #0a0d0f;
 }
 
 a
@@ -53,6 +52,13 @@ a
 	padding: 8px;
 	border-bottom: 1px solid #52667a;
 	text-align: center;
+}
+
+.label
+{
+	display: inline;
+	font-weight: bold;
+	padding: 0 4px 4px 0;
 }
 
 .scroll

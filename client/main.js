@@ -10,6 +10,8 @@ let state = "lobby";
 
 // player list
 let players = {}, id_player_self;
+const Cards = {};
+const Creatures = {};
 
 
 function read_string(dataview, index)
@@ -44,15 +46,55 @@ const processes =
 		},
 		
 		// card data dump
-		function()
+		function(dataview)
 		{
+			let index = 1;
 			
+			Cards.by_id = {};
+			Cards.by_name = {};
+			while(index < dataview.byteLength)
+			{
+				const id_card = read_string(dataview, index);
+				index += id_card.length + 1;
+				
+				const name = read_string(dataview, index);
+				index += name.length + 1;
+				
+				const cost = dataview.getInt8(index++);
+				
+				Cards.by_id[id_card] = Cards.by_name[name] = {
+					id: id_card,
+					name: name,
+					cost: cost
+				};
+			}
 		},
 		
 		// creature data dump
-		function()
+		function(dataview)
 		{
+			let index = 1;
 			
+			Creatures.by_id = {};
+			Creatures.by_name = {};
+			while(index < dataview.byteLength)
+			{
+				const id_creature = read_string(dataview, index);
+				index += id_creature.length + 1;
+				
+				const name = read_string(dataview, index);
+				index += name.length + 1;
+				
+				const attack = dataview.getInt8(index++);
+				const health = dataview.getInt8(index++);
+				
+				Creatures.by_id[id_creature] = Creatures.by_name[name] = {
+					id: id_creature,
+					name: name,
+					attack: attack,
+					health: health
+				};
+			}
 		},
 		
 		// full player list
@@ -81,13 +123,18 @@ const processes =
 			const id_player = read_string(dataview, 1);
 			players[id_player] = {name: read_string(dataview, id_player.length + 2)};
 			
+			addmessage(players[id_player].name + " joined the server.");
+			
 			renderplayers();
 		},
 		
 		// player left
 		function(dataview)
 		{
-			delete players[read_string(dataview, 1)];
+			const id_player = read_string(dataview, 1);
+			
+			addmessage(players[id_player].name + " left the server.");
+			delete players[id_player];
 			
 			renderplayers();
 		},
@@ -123,7 +170,65 @@ function addchat(alias, message)
 	name.innerHTML = alias + ":";
 	
 	line.appendChild(name);
-	line.innerHTML += message;
+	
+	// message bracket processing
+	let index = 0;
+	while(index < message.length)
+	{
+		const start = message.indexOf("[", index);
+		if(start === -1)
+			break;
+		
+		const end = message.indexOf("]", start);
+		if(end === -1)
+			break;
+		
+		const name_card = message.substring(start + 1, end);
+		if(Cards.by_name[name_card] !== undefined)
+		{
+			const link = document.createElement("span");
+			link.className = "chat_link";
+			link.appendChild(document.createTextNode(name_card));
+			
+			line.appendChild(link);
+		}
+		else
+			line.appendChild(document.createTextNode(message.substring(index, end + 1)));
+		
+		index = end + 1;
+	}
+	line.appendChild(document.createTextNode(message.substring(index)));
+	
+	document.getElementById("chat_lines").appendChild(line);
+	
+	const links = document.getElementsByClassName("chat_link");
+	for(let i = 0; i < links.length; ++i)
+	{
+		links[i].onmouseover = function(event)
+		{
+			const name = event.target.innerHTML;
+			
+			if(Cards.by_name[name] !== undefined)
+			{
+				document.getElementById("tooltip").classList.add("visible");
+				document.getElementById("tooltip-title").innerHTML = name;
+				document.getElementById("tooltip-content").innerHTML = "<div class=\"tooltip-property\"><div class=\"label\">Cost:</div>" + Cards.by_name[name].cost + "</div>";
+			}
+		};
+		
+		links[i].onmouseout = function()
+		{
+			document.getElementById("tooltip").classList.remove("visible");
+		};
+	}
+}
+
+function addmessage(message)
+{
+	const line = document.createElement("div");
+	line.className = "chat_message";
+	
+	line.appendChild(document.createTextNode(message));
 	
 	document.getElementById("chat_lines").appendChild(line);
 }

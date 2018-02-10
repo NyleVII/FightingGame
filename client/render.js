@@ -1,5 +1,3 @@
-let game;
-
 //Main render of game screen
 document.addEventListener("DOMContentLoaded", function()
 {
@@ -14,6 +12,13 @@ document.addEventListener("DOMContentLoaded", function()
 			buffer_text.push(text.value.charCodeAt(i) & 0xff);
 		socket.send(new Uint8Array(buffer_text));
 		text.value = "";
+	};
+	
+	const dom_tooltip = document.getElementById("tooltip");
+	document.onmousemove = function(event)
+	{
+		dom_tooltip.style.left = event.clientX + 16 + "px";
+		dom_tooltip.style.top = event.clientY + 16 + "px";
 	};
 	
 	renderplayers();

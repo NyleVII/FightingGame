@@ -78,7 +78,7 @@ const processes =
 
 server_websocket.on("request", function(request)
 {
-	global.collections.players.find().toArray().then(function(players)
+	global.collections.players.find().toArray(function(error, players)
 	{
 		for(let i = 0; i < players.length; ++i)
 		{
@@ -163,6 +163,8 @@ server_websocket.on("request", function(request)
 					
 					buffer_string(buffer, creature._id);
 					buffer_string(buffer, creature.name);
+					buffer.push(creature.attack);
+					buffer.push(creature.health);
 				}
 				connection.sendBytes(Buffer.from(buffer));
 				
