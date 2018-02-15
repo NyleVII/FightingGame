@@ -1,14 +1,12 @@
 #gamescreen
 {
-	padding: 0;
-	margin-right: 8px;
-	width: 0;
-	float: left;
-	
 	background-color: #29333d;
 	border-top-right-radius: 4px;
-	
+	float: left;
+	margin-right: 8px;
+	padding: 0;
 	transition: width 0.5s ease;
+	width: 0;
 }
 
 #gamescreen.collapsed
@@ -18,11 +16,10 @@
 
 #gamescreen_inner
 {
-	height: 600px;
-	border-radius: 4px;
 	background-color: #000000;
+	border-radius: 4px;
+	box-shadow: inset 2px 2px 2px 0 rgba(0, 0, 0, 0.5);
+	height: 600px;
 	margin: 8px;
 	overflow: hidden;
-	
-	box-shadow: inset 2px 2px 2px 0 rgba(0, 0, 0, 0.5);
 }

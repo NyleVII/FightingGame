@@ -7,6 +7,7 @@
 		<script src="render.js"></script>
 		<link rel="stylesheet" type="text/css" href="styles/chat.css">
 		<link rel="stylesheet" type="text/css" href="styles/gamescreen.css">
+		<link rel="stylesheet" type="text/css" href="styles/layout.css">
 		<link rel="stylesheet" type="text/css" href="styles/main.css">
 		<link rel="stylesheet" type="text/css" href="styles/nav.css">
 		<link rel="stylesheet" type="text/css" href="styles/players.css">
@@ -25,13 +26,13 @@
 		</div>
 		<div id="page">
 			<div id="players" class="column">
-				<h3 class="title">Connected Players</h3>
+				<span class="title">Connected Players</span>
 				<div id="players_container">
 					<div id="players_inner" class="scroll">
 						<div id="players_list"></div>
 					</div>
 				</div>
-				<h3 class="title">Player Info</h3>
+				<span class="title">Player Info</span>
 				<div id="players_info">
 					<div id="players_infocontent"></div>
 				</div>
@@ -53,7 +54,7 @@
 				</div>
 			</div>
 			<div id="tooltip">
-				<h3 id="tooltip-title" class="title"></h3>
+				<span id="tooltip-title" class="title"></span>
 				<div id="tooltip-content"></div>
 			</div>
 		</div>

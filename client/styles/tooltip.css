@@ -4,10 +4,10 @@
 	border-radius: 4px;
 	box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.5);
 	display: none;
-	font-size: 12px;
+	font-size: 0.75rem;
 	padding: 8px;
 	position: fixed;
-	min-width: 128px;
+	min-width: 8rem;
 }
 
 #tooltip.visible

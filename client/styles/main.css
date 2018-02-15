@@ -8,8 +8,8 @@ html
 {
 	box-sizing: border-box;
 	-webkit-box-sizing: border-box;
-	height: 100%;
 	font-family: "PT Sans", sans-serif;
+	height: 100%;
 }
 
 body
@@ -22,8 +22,8 @@ body
 
 a
 {
-	text-decoration: none;
 	color: inherit;
+	text-decoration: none;
 }
 
 :focus
@@ -31,27 +31,15 @@ a
 	outline: none;
 }
 
-#page
-{
-	font-size: 0;
-	overflow: hidden;
-	padding-top: 72px;
-	height: 100%;
-}
-
-.column
-{
-	height: 100%;
-	padding: 8px;
-	font-size: 12px;
-}
-
 .title
 {
-	margin: 0;
-	padding: 8px;
 	border-bottom: 1px solid #52667a;
+	display: block;
+	font-size: 1rem;
+	line-height: 1rem;
+	padding: 0.5rem 0 calc(0.5rem - 1px);
 	text-align: center;
+	width: 100%;
 }
 
 .label
@@ -78,7 +66,7 @@ a
 
 .scroll::-webkit-scrollbar-thumb
 {
-	border-radius: 4px;
 	background: #29333d;
 	border: 1px solid #141a1f;
+	border-radius: 4px;
 }
