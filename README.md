@@ -4,8 +4,9 @@ Project by:
 Stephen Antymis
 Shawn Sutherland
 
-RUN:
-
+RUN LOCALLY:
+npm run start:db
+npm start
 
 TO DO:
 - Flesh out game state structure <---------- DO THIS FIRST

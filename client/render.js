@@ -26,8 +26,9 @@ document.addEventListener("DOMContentLoaded", function()
 	const renderer = PIXI.autoDetectRenderer();
 	document.getElementById("gamescreen_inner").appendChild(renderer.view);
 	
-	/*
-	PIXI.loader.add([{name: "mewtwo_player", url:"assets/images/mewtwo/mewtwo_player.gif"},
+	
+	PIXI.loader.add([
+		{name: "mewtwo_player", url:"assets/images/mewtwo/mewtwo_player.gif"},
 		{name: "mewtwo_opponent", url:"assets/images/mewtwo/mewtwo_opponent.gif"},
 		{name: "mewtwo_card", url:"assets/images/cards/creatures/mewtwo_card.png"},
 		{name: "gyarados_player", url:"assets/images/gyarados/gyarados_player.gif"},
@@ -46,11 +47,6 @@ document.addEventListener("DOMContentLoaded", function()
 		{name: "effect8_card", url:"assets/images/cards/effects/91.png"},
 		{name: "effect9_card", url:"assets/images/cards/effects/99.png"},
 		{name: "effect10_card", url:"assets/images/cards/effects/109.png"},
-		{name: "fireball_card", url:"assets/images/cards/fireball.png"},
-		{name: "1_card", url:"assets/images/cards/1.png"},
-		{name: "2_card", url:"assets/images/cards/2.png"},
-		{name: "3_card", url:"assets/images/cards/3.png"},
-		{name: "4_card", url:"assets/images/cards/4.png"},
 	]).load(function()
 	{
 		game = new Game(renderer);
@@ -58,20 +54,18 @@ document.addEventListener("DOMContentLoaded", function()
 			player:
 			{
 				creature: {id: "gyarados"},
-				effecthand: ["1", "2", "3", "4", "fireball"],
-				creaturehand: ["gyarados", "gyarados", "gyarados", "gyarados", "mewtwo"]
+				effecthand: ["rampage", "frostbolt", "sogg_yaron", "stonetusk_boar", "fireball"],
 
 			},
 			opponent:
 			{
 				creature: {id: "mewtwo"},
 				effecthandsize: 5,
-				creaturehandsize: 5
 			}
 		});
 		game.render();
 	});
-	*/
+	
 
 });
 
@@ -85,6 +79,13 @@ function renderplayers()
 		const player = document.createElement("div");
 		player.className = "player";
 		player.innerHTML = players[i].name;
+		if(i != id_player_self)
+		{
+			const challengePlayer = document.createElement("div");
+			challengePlayer.className = "challengePlayer";
+			challengePlayer.innerHTML = "Fight!";
+			player.appendChild(challengePlayer);
+		}
 		
 		list.appendChild(player);
 	}
