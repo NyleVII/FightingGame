@@ -68,6 +68,12 @@ const processes =
 					cost: cost
 				};
 			}
+			let cardImageArray = [];
+			for(const i in Cards.by_id)
+			{
+				cardImageArray.push({name: i + "_card", url: "assets/images/cards/" + i + ".png"});
+			}
+			PIXI.loader.add(cardImageArray).load();
 		},
 		
 		// creature data dump
