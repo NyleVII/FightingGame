@@ -79,14 +79,6 @@ function renderplayers()
 		const player = document.createElement("div");
 		player.className = "player";
 		player.innerHTML = players[i].name;
-		if(i != id_player_self)
-		{
-			const challengePlayer = document.createElement("div");
-			challengePlayer.className = "challengePlayer";
-			challengePlayer.innerHTML = "Fight!";
-			player.appendChild(challengePlayer);
-		}
-		
 		list.appendChild(player);
 	}
 }
