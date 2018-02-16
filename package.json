@@ -6,7 +6,7 @@
 		"start:db": "mongod --config db/config",
 		"install:dev": "npm install",
 		"install:prod": "npm install --production",
-		"build": "tar -zcvf builds/$(date \"+%Y-%m-%d-%H%M%S\").tar.gz server client db/config package.json"
+		"build-deploy": "build=builds/$(date \"+%Y-%m-%d-%H%M%S\").tar.gz; tar -zcvf $build server client db/config package.json; scp -i ~/.ssh/appserver.pem $build ec2-user@34.217.232.210:app.tar.gz"
 	},
 	"dependencies": {
 		"mongodb": "latest",

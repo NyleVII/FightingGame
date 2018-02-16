@@ -3,6 +3,7 @@ CLIENT -> SERVER
 BYTE CODE	| MEANING				| PROTOCOL
 ----------------------------------------------
 0x00		| Chat message			| <text>
+0x01		| Challenge				| <player.id>
 
 
 SERVER -> CLIENT

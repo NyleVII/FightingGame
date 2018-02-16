@@ -199,6 +199,7 @@ function addchat(alias, message)
 	}
 	line.appendChild(document.createTextNode(message.substring(index)));
 	
+	// TODO(shawn): scroll to bottom automatically
 	document.getElementById("chat_lines").appendChild(line);
 	
 	const links = document.getElementsByClassName("chat_link");
