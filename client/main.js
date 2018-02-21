@@ -28,9 +28,9 @@ function read_string(dataview, index)
 // network/state message handler
 const processes =
 {
-	lobby:
+	lobby: //lobby state needs to be looked at later since game states probably won't happen in the lobby
 	[
-		// Chat message
+		//0x00 Chat message
 		function(dataview)
 		{
 			const id_player = read_string(dataview, 1);
@@ -39,13 +39,13 @@ const processes =
 			addchat(players[id_player].name, text);
 		},
 		
-		// ability data dump
+		//0x01 ability data dump
 		function()
 		{
 			
 		},
 		
-		// card data dump
+		//0x02 card data dump
 		function(dataview)
 		{
 			let index = 1;
@@ -76,7 +76,7 @@ const processes =
 			PIXI.loader.add(cardImageArray).load();
 		},
 		
-		// creature data dump
+		//0x03 creature data dump
 		function(dataview)
 		{
 			let index = 1;
@@ -103,7 +103,7 @@ const processes =
 			}
 		},
 		
-		// full player list
+		//0x04 full player list
 		function(dataview)
 		{
 			let index = 1;
@@ -123,7 +123,7 @@ const processes =
 			renderplayers();
 		},
 		
-		// player joined
+		//0x05 player joined
 		function(dataview)
 		{
 			const id_player = read_string(dataview, 1);
@@ -134,7 +134,7 @@ const processes =
 			renderplayers();
 		},
 		
-		// player left
+		//0x06 player left
 		function(dataview)
 		{
 			const id_player = read_string(dataview, 1);
@@ -145,11 +145,103 @@ const processes =
 			renderplayers();
 		},
 		
-		// successful login
+		//0x07 successful login
 		function(dataview)
 		{
 			id_player_self = read_string(dataview, 1);
+		},
+
+		//0x08 invalid deck
+		function(dataview)
+		{
+			console.log("Invalid deck");
+		},
+
+		//0x09 game started
+		function(dataview)
+		{
+			console.log("Starting game...");
+			toggle(); // Toggles game screen
+			const id_player = read_string(dataview, 1);
+			game = new Game(renderer, players[id_player]);
+		},
+
+		//0x0A game state
+		function(dataview)
+		{
+			console.log("Updating game state");
+			//TO DO AFTER GAME STATE IS FINALIZED
+		},
+
+		//0x0B your turn
+		function(dataview)
+		{
+			console.log("Your turn");
+		},
+
+		//0x0C not in a game
+		function(dataview)
+		{
+			console.log("Not in a game");
+		},
+
+		//0x0D successfully queued
+		function(dataview)
+		{
+			console.log("Successfully queued");
+		},
+
+		//0x0E already in queue
+		function(dataview)
+		{
+			console.log("Already in queue");
+		},
+
+		//0x0F not in queue
+		function(dataview)
+		{
+			console.log("Not in queue");
+		},
+
+		//0x10 Left queue
+		function(dataview)
+		{
+			console.log("Left queue");
+			queued = false;
+		},
+
+		//0x11 game over
+		function(dataview)
+		{
+			console.log("game over");
+			toggle(); //toggle game screen (ideally back to lobby)
+			const gameWinner = dataview.getInt8(1); //0 you won, 1 for they won
+			if(gameWinner)
+			{
+				console.log("A loser is you!");
+			}
+			else
+			{
+				console.log("Winner winner chicken dinner");
+			}
+		},
+
+		//0x12 play card
+		function(dataview)
+		{
+			const playedCardID = read_string(dataview, 1);
+			console.log(Cards.by_id[playedCardID].name); //Prints name of played card
+		},
+
+		//0x13 use ability
+		function(dataview)
+		{
+			const creaturePosition = dataview.getInt8(1);
+			const abilityIndex = dataview.getInt8(2);
+			const creatureID = game.state.opponent.creatures[creaturePosition].id;
+			console.log("Your opponents " + Creatures.by_id[creatureID].name + " used...an ability with some kind of ID");
 		}
+
 	]
 };
 
