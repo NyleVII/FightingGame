@@ -10,6 +10,21 @@ const textStyle = new PIXI.TextStyle({
 	fill: "white"
 });
 
+function init_sprite(stage, x, y, x_anchor, y_anchor, width, height, scale_x)
+{
+	const sprite = new PIXI.Sprite();
+	
+	sprite.anchor.set(x_anchor, y_anchor);
+	sprite.width = width;
+	sprite.height = height;
+	sprite.x = x;
+	sprite.y = y;
+	sprite.scale.x = scale_x;
+	stage.addChild(sprite);
+	
+	return sprite;
+}
+
 function Game(renderer)
 {
 	this.state = {};
@@ -32,74 +47,20 @@ function Game(renderer)
 	this.graphics.drawRect(20, 380, 310, 150);
 	this.stage.addChild(this.graphics);
 	
-	
+	// add player creature sprites to game screen
+	this.sprite_player_creature_pos1 = init_sprite(this.stage, CREATURE_SPACING*2, renderer.height/2, 0, 1, 100, 100, 1);
+	this.sprite_player_creature_pos2 = init_sprite(this.stage, CREATURE_SPACING, renderer.height/2, 0, 1, 100, 100, 1);
+	this.sprite_player_creature_pos3 = init_sprite(this.stage, 0, renderer.height/2, 0, 1, 100, 100, 1);
 
-	//Add player pos 3 creature sprite to game screen
-	this.sprite_player_creature_pos3 = new PIXI.Sprite();
-	this.sprite_player_creature_pos3.anchor.set(0, 1);
-	this.sprite_player_creature_pos3.width = 100;
-	this.sprite_player_creature_pos3.height = 100;
-	this.sprite_player_creature_pos3.y = renderer.height/2;
-	this.stage.addChild(this.sprite_player_creature_pos3);
-
-	//Add player pos 2 creature sprite to game screen
-	this.sprite_player_creature_pos2 = new PIXI.Sprite();
-	this.sprite_player_creature_pos2.anchor.set(0, 1);
-	this.sprite_player_creature_pos2.width = 100;
-	this.sprite_player_creature_pos2.height = 100;
-	this.sprite_player_creature_pos2.x = CREATURE_SPACING;
-	this.sprite_player_creature_pos2.y = renderer.height/2;
-	this.stage.addChild(this.sprite_player_creature_pos2);
-
-	//Add player pos 1 creature sprite to game screen
-	this.sprite_player_creature_pos1 = new PIXI.Sprite();
-	this.sprite_player_creature_pos1.anchor.set(0, 1);
-	this.sprite_player_creature_pos1.width = 100;
-	this.sprite_player_creature_pos1.height = 100;
-	this.sprite_player_creature_pos1.x = CREATURE_SPACING *2;
-	this.sprite_player_creature_pos1.y = renderer.height/2;
-	this.stage.addChild(this.sprite_player_creature_pos1);
-
-	//Add opponent pos 1 creature sprite to game screen
-	this.sprite_opponent_creature_pos1 = new PIXI.Sprite();
-	this.sprite_opponent_creature_pos1.anchor.set(0, 1);
-	this.sprite_opponent_creature_pos1.width = 100;
-	this.sprite_opponent_creature_pos1.height = 100;
-	this.sprite_opponent_creature_pos1.x = renderer.width - CREATURE_SPACING*2;
-	this.sprite_opponent_creature_pos1.y = renderer.height/2;
-	this.sprite_opponent_creature_pos1.scale.x = -1; //This flips the sprite on the vertical axis
-	this.stage.addChild(this.sprite_opponent_creature_pos1);
-
-	//Add opponent pos 2 creature sprite to game screen
-	this.sprite_opponent_creature_pos2 = new PIXI.Sprite();
-	this.sprite_opponent_creature_pos2.anchor.set(0, 1);
-	this.sprite_opponent_creature_pos2.width = 100;
-	this.sprite_opponent_creature_pos2.height = 100;
-	this.sprite_opponent_creature_pos2.x = renderer.width - CREATURE_SPACING;
-	this.sprite_opponent_creature_pos2.y = renderer.height/2;
-	this.sprite_opponent_creature_pos2.scale.x = -1; //This flips the sprite on the vertical axis
-	this.stage.addChild(this.sprite_opponent_creature_pos2);
-
-	//Add opponent pos 3 creature sprite to game screen
-	this.sprite_opponent_creature_pos3 = new PIXI.Sprite();
-	this.sprite_opponent_creature_pos3.anchor.set(0, 1);
-	this.sprite_opponent_creature_pos3.width = 100;
-	this.sprite_opponent_creature_pos3.height = 100;
-	this.sprite_opponent_creature_pos3.x = renderer.width;
-	this.sprite_opponent_creature_pos3.y = renderer.height/2;
-	this.sprite_opponent_creature_pos3.scale.x = -1; //This flips the sprite on the vertical axis
-	this.stage.addChild(this.sprite_opponent_creature_pos3);
+	// add opponent creature sprites to game screen
+	this.sprite_opponent_creature_pos1 = init_sprite(this.stage, renderer.width - CREATURE_SPACING*2, renderer.height/2, 0, 1, 100, 100, -1);
+	this.sprite_opponent_creature_pos2 = init_sprite(this.stage, renderer.width - CREATURE_SPACING, renderer.height/2, 0, 1, 100, 100, -1);
+	this.sprite_opponent_creature_pos3 = init_sprite(this.stage, renderer.width, renderer.height/2, 0, 1, 100, 100, -1);
 	
 	//PLAYER INFO
-	//Add player deck sprite to game screen
-	this.sprite_player_deck = new PIXI.Sprite();
-	this.sprite_player_deck.anchor.set(0, 1);
-	this.sprite_player_deck.width = 50;
-	this.sprite_player_deck.height = 50;
-	this.sprite_player_deck.x = 200;
-	this.sprite_player_deck.y = renderer.height;
+	// add player deck sprite to game screen
+	this.sprite_player_deck = init_sprite(this.stage, 200, renderer.height, 0, 1, 50, 50, 1);
 	this.sprite_player_deck.texture = PIXI.loader.resources["deck"].texture;
-	this.stage.addChild(this.sprite_player_deck);
 
 	//Add player deck text to game screen
 	const playerDeck = new PIXI.Text("55", textStyle);
@@ -107,7 +68,6 @@ function Game(renderer)
 	playerDeck.x = this.sprite_player_deck.x + this.sprite_player_deck.width;
 	playerDeck.y = this.sprite_player_deck.y - this.sprite_player_deck.height/2;
 	this.stage.addChild(playerDeck);
-
 
 	//Add player energy sprite to game screen
 	this.sprite_player_energy = new PIXI.Sprite();
@@ -173,9 +133,6 @@ function Game(renderer)
 	opponentName.x = renderer.width - 20;
 	opponentName.y = 25;
 	this.stage.addChild(opponentName);
-
-
-	
 
 	//Add effect hands to screen
 	this.sprite_player_effecthand = [];

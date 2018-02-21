@@ -72,7 +72,9 @@ const processes =
 		for(let i = 1; i < buffer_process.length; ++i)
 			buffer.push(buffer_process.readUInt8(i));
 		broadcast(Buffer.from(buffer));
-	}
+	},
+	
+	// player challenges another player
 ];
 
 
