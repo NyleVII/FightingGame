@@ -150,6 +150,7 @@ const processes =
 		function(dataview)
 		{
 			id_player_self = read_string(dataview, 1);
+			document.getElementById("nav_ticker").innerText = "Welcome " + players[id_player_self].name;
 		},
 
 		//0x08 invalid deck

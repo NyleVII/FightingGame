@@ -1,6 +1,8 @@
 //Main render of game screen
 document.addEventListener("DOMContentLoaded", function()
 {
+	
+
 	document.getElementById("chat_form").onsubmit = function(event)
 	{
 		event.preventDefault();
