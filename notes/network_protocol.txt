@@ -32,6 +32,6 @@ BYTE CODE	| MEANING				| PROTOCOL
 0x0D		| Successfully queued	|
 0x0E		| Already in queue		|
 0x0F		| Not in queue			|
-0x10		| Game over				| <who won>
+0x10		| Game over				| <who won 0-you won, 1-they won>
 0x11		| Play card				| <card.id><?>
 0x12		| Use ability			| <index_creature><index_ability><?>

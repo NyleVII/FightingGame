@@ -1,0 +1,3 @@
+Run MongoDB on server:
+	cd app
+	sudo nohup mongod --config db/config &

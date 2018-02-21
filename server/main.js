@@ -8,6 +8,7 @@ const Game = require("./game/game.js");
 
 // global variables
 const connections = {};
+const queue = {};
 
 
 // initialize web server
@@ -74,7 +75,11 @@ const processes =
 		broadcast(Buffer.from(buffer));
 	},
 	
-	// player challenges another player
+	// player joins queue
+	function(connection, buffer_process)
+	{
+		
+	}
 ];
 
 
