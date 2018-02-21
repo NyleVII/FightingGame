@@ -3,7 +3,13 @@ CLIENT -> SERVER
 BYTE CODE	| MEANING				| PROTOCOL
 ----------------------------------------------
 0x00		| Chat message			| <text>
-0x01		| Challenge				| <player.id>
+0x01		| Join queue			|
+0x02		| Leave queue			|
+0x03		| Change active loadout	| <loadout.id>
+0x04		| Concede				|
+0x05		| Play card				| <index_card><?>
+0x06		| End turn				| 
+0x07		| Use ability			| <index_creature><index_ability><?>
 
 
 SERVER -> CLIENT
@@ -18,3 +24,14 @@ BYTE CODE	| MEANING				| PROTOCOL
 0x05		| Player joined			| <player.id>0<player.name>
 0x06		| Player left			| <player.id>
 0x07		| Login successful		| <player.id>
+0x08		| Invalid deck			|
+0x09		| Game started			| <player.id>
+0x0A		| Game state			| ...
+0x0B		| Your turn				|
+0x0C		| Not in a game			|
+0x0D		| Successfully queued	|
+0x0E		| Already in queue		|
+0x0F		| Not in queue			|
+0x10		| Game over				| <who won>
+0x11		| Play card				| <card.id><?>
+0x12		| Use ability			| <index_creature><index_ability><?>
