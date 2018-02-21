@@ -52,10 +52,3 @@
 	margin-bottom: 0.25rem;
 	padding: 0.25rem 0.5rem;
 }
-
-.challengePlayer
-{
-	float: right;
-	cursor: pointer;
-	border: #c2ccd6 2px solid;
-}

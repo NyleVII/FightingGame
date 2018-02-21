@@ -176,7 +176,10 @@ Game.prototype.state_set = function(state)
 	//this.sprite_opponent_creature.texture = PIXI.loader.resources[state.opponent.creature.id + "_opponent"].texture;
 	
 	for (let i = 0; i < state.player.effecthand.length; ++i)
+	{
+		console.log(state.player.effecthand[i]);
 		this.sprite_player_effecthand[i].texture = PIXI.loader.resources[state.player.effecthand[i] + "_card"].texture;
+	}
 	
 	/*
 	for (let i = 0; i < state.player.creaturehand.length; ++i)
