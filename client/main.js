@@ -7,6 +7,7 @@ socket.binaryType = "arraybuffer";
 
 // current app state
 let state = "lobby";
+let queued = false;
 
 // player list
 let players = {}, id_player_self;
@@ -189,6 +190,8 @@ const processes =
 		function(dataview)
 		{
 			console.log("Successfully queued");
+			queued = true;
+			document.getElementById("queuedButton").innerText = "In Queue";
 		},
 
 		//0x0E already in queue
@@ -208,6 +211,7 @@ const processes =
 		{
 			console.log("Left queue");
 			queued = false;
+			document.getElementById("queueButton").innerText = "Queue";
 		},
 
 		//0x11 game over

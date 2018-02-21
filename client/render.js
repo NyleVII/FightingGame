@@ -19,12 +19,12 @@ document.addEventListener("DOMContentLoaded", function()
 		
 		if(queued === true)
 		{
-			console.log(In queue, will cancel queue);
+			console.log("In queue, will cancel queue");
 			socket.send(new Uint8Array([0x02])); //leave queue
 		}
 		else 
 		{
-			console.log(Attempting to join queue);
+			console.log("Attempting to join queue");
 			socket.send(new Uint8Array([0x01])); //join queue
 		}
 	};
