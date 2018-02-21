@@ -65,8 +65,6 @@ document.addEventListener("DOMContentLoaded", function()
 		});
 		game.render();
 	});
-	
-
 });
 
 function renderplayers()
