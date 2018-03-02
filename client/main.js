@@ -102,6 +102,12 @@ const processes =
 					health: health
 				};
 			}
+			let creaturesImageArray = [];
+			for(const i in Creatures.by_id)
+			{
+				creaturesImageArray.push({name: i + "_creature", url: "assets/images/creatures/" + i + ".png"});
+			}
+			PIXI.loader.add(creaturesImageArray).load();
 		},
 		
 		//0x04 full player list
