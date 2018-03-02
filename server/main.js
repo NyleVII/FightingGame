@@ -9,6 +9,7 @@ const Game = require("./game/game.js");
 // global variables
 const connections = {};
 const queue = {};
+const games = {};
 
 
 // initialize web server
@@ -42,7 +43,7 @@ mongo.MongoClient.connect("mongodb://" + config.mongo_host + ":" + config.mongo_
 			global.data.creatures = result;
 		});
 		
-		global.collections.decks = db.collection("decks");
+		global.collections.loadouts = db.collection("loadouts");
 		global.collections.players = db.collection("players");
 	}
 });
@@ -76,9 +77,19 @@ const processes =
 	},
 	
 	// player joins queue
-	function(connection, buffer_process)
+	function(connection)
 	{
-		
+		// NOTE(shawn): temp queue code; implement matchmaking
+		if(queue.length)
+		{
+			const id_game = 0;
+			
+			games[id_game] = new Game(connection.player, queue[0].player);
+		}
+		else
+		{
+			queue.push(connection);
+		}
 	}
 ];
 

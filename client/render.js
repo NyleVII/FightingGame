@@ -1,6 +1,8 @@
 //Main render of game screen
 document.addEventListener("DOMContentLoaded", function()
 {
+	
+
 	document.getElementById("chat_form").onsubmit = function(event)
 	{
 		event.preventDefault();
@@ -12,6 +14,21 @@ document.addEventListener("DOMContentLoaded", function()
 			buffer_text.push(text.value.charCodeAt(i) & 0xff);
 		socket.send(new Uint8Array(buffer_text));
 		text.value = "";
+	};
+
+	document.getElementById("queueButton").onclick = function(event)
+	{
+		
+		if(queued === true)
+		{
+			console.log("In queue, will cancel queue");
+			socket.send(new Uint8Array([0x02])); //leave queue
+		}
+		else 
+		{
+			console.log("Attempting to join queue");
+			socket.send(new Uint8Array([0x01])); //join queue
+		}
 	};
 	
 	const dom_tooltip = document.getElementById("tooltip");
@@ -53,13 +70,13 @@ document.addEventListener("DOMContentLoaded", function()
 		game.state_set({
 			player:
 			{
-				creature: {id: "gyarados"},
-				effecthand: ["rampage", "frostbolt", "sogg_yaron", "stonetusk_boar", "fireball"],
+				creatures: [{id: "mewtwo"}, {id: "gyarados"}, {id: "gyarados"}],
+				effecthand: ["fireball", "fireball", "fireball", "fireball", "fireball"],
 
 			},
 			opponent:
 			{
-				creature: {id: "mewtwo"},
+				creatures: [{id: "mewtwo"}, {id: "mewtwo"}, {id: "mewtwo"}],
 				effecthandsize: 5,
 			}
 		});

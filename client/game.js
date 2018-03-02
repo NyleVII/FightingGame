@@ -167,12 +167,12 @@ Game.prototype.state_set = function(state)
 	this.state = state;
 	
 	//this.sprite_player_creature.texture = PIXI.loader.resources[state.player.creature.id + "_player"].texture;
-	this.sprite_player_creature_pos3.texture = PIXI.loader.resources[state.player.creature.id + "_player"].texture;
-	this.sprite_player_creature_pos2.texture = PIXI.loader.resources[state.player.creature.id + "_player"].texture;
-	this.sprite_player_creature_pos1.texture = PIXI.loader.resources[state.player.creature.id + "_player"].texture;
-	this.sprite_opponent_creature_pos1.texture = PIXI.loader.resources[state.opponent.creature.id + "_player"].texture;
-	this.sprite_opponent_creature_pos2.texture = PIXI.loader.resources[state.opponent.creature.id + "_player"].texture;
-	this.sprite_opponent_creature_pos3.texture = PIXI.loader.resources[state.opponent.creature.id + "_player"].texture;
+	this.sprite_player_creature_pos3.texture = PIXI.loader.resources[state.player.creatures[2].id + "_player"].texture;
+	this.sprite_player_creature_pos2.texture = PIXI.loader.resources[state.player.creatures[1].id + "_player"].texture;
+	this.sprite_player_creature_pos1.texture = PIXI.loader.resources[state.player.creatures[0].id + "_player"].texture;
+	this.sprite_opponent_creature_pos1.texture = PIXI.loader.resources[state.opponent.creatures[0].id + "_player"].texture;
+	this.sprite_opponent_creature_pos2.texture = PIXI.loader.resources[state.opponent.creatures[1].id + "_player"].texture;
+	this.sprite_opponent_creature_pos3.texture = PIXI.loader.resources[state.opponent.creatures[2].id + "_player"].texture;
 	//this.sprite_opponent_creature.texture = PIXI.loader.resources[state.opponent.creature.id + "_opponent"].texture;
 	
 	for (let i = 0; i < state.player.effecthand.length; ++i)

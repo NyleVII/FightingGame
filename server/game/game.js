@@ -9,76 +9,55 @@ function shuffle(list)
 	}
 }
 
-function init_player(name, deck)
+function drawcard(deck)
 {
-	shuffle(deck);
+	return deck.splice(0, 1)[0];
+}
+
+function init_player(name, loadout)
+{
+	const cards = loadout.cards.slice();
+	shuffle(cards);
 	
 	return {
 		name: name,
-		mulligan: false,
 		energy_max: 2,
 		energy_current: 0,
-		creatures: [],
-		hand: [],
-		deck: deck.cards,
-		effects: []
+		creatures: loadout.creatures,
+		hand: [drawcard(cards), drawcard(cards), drawcard(cards), drawcard(cards), drawcard(cards)],
+		deck: cards
 	};
 }
 
-function Game(id_deck1, id_deck2)
+function Game(player1, player2)
 {
 	const game = this;
 	
+	const players = [player1, player2];
+	shuffle(players);
+	
 	Promise.all([
-		global.collections.decks.findOne({_id: id_deck1}),
-		global.collections.decks.findOne({_id: id_deck2})
-	]).then(function(decks)
+		global.collections.loadouts.findOne({_id: players[0].id_activeloadout}),
+		global.collections.loadouts.findOne({_id: players[1].id_activeloadout})
+	]).then(function(loadouts)
 	{
-		shuffle(decks);
-		
-		return Promise.all([
-			global.collections.players.findOne({_id: decks[0].id_player}),
-			global.collections.players.findOne({_id: decks[1].id_player})
-		]).then(function(players)
+		game.state =
 		{
-			game.state =
-			{
-				players:
-				[
-					init_player(players[0].name, decks[0]),
-					init_player(players[1].name, decks[1])
-				],
-				phase: "game",
-				player_current: 0,
-				turn: 0,
-				effects: []
-			};
-		});
+			players:
+			[
+				init_player(players[0].name, loadouts[0]),
+				init_player(players[1].name, loadouts[1])
+			],
+			phase: "game",
+			player_current: 0,
+			turn: 0
+		};
 	});
 }
 
 
 Game.prototype.processes =
 {
-	mulligan:
-	{
-		mulligan: function(player, action)
-		{
-			if(!player.mulligan)
-			{
-				const hand = [];
-				for(let i = 0; i < action.cards.length; ++i)
-					hand.push(player.hand[action.cards[i]]);
-				player.hand = hand;
-				player.mulligan = true;
-			}
-			
-			// start game
-			if(this.players[0].mulligan && this.players[1].mulligan)
-				this.phase = "main";
-		}
-	},
-	
 	main:
 	{
 		card: function(player, action)
