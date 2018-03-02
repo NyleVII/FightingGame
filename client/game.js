@@ -25,7 +25,7 @@ function init_sprite(stage, x, y, x_anchor, y_anchor, width, height, scale_x)
 	return sprite;
 }
 
-function Game(renderer)
+function Game(renderer, opponent)
 {
 	this.state = {};
 	
@@ -87,7 +87,7 @@ function Game(renderer)
 	this.stage.addChild(playerEnergy);
 
 	//Add player name to game screen
-	const playerName = new PIXI.Text("Player", textStyle);
+	const playerName = new PIXI.Text(players[id_player_self].name, textStyle);
 	playerName.anchor.set(0, 0.5);
 	playerName.x = 20;
 	playerName.y = renderer.height - this.sprite_player_energy.height/2;
@@ -128,7 +128,7 @@ function Game(renderer)
 	this.stage.addChild(opponentDeck);
 
 	//Add opponent name to game screen
-	const opponentName = new PIXI.Text("Opponent", textStyle);
+	const opponentName = new PIXI.Text(opponent.name, textStyle);
 	opponentName.anchor.set(1, 0.5);
 	opponentName.x = renderer.width - 20;
 	opponentName.y = 25;
