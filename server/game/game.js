@@ -32,7 +32,7 @@ function init_player(loadout)
 			
 			return {
 				id: creature._id,
-				hp: creature.health,
+				health: creature.health,
 				abilities: [],
 				effects: []
 			};
@@ -89,7 +89,7 @@ Game.prototype.encodestate = function(index_player)
 	{
 		const creature = player.creatures[i];
 		
-		BufferWriter.string(creature.id);
+		BufferWriter.string(buffer, creature.id);
 		buffer.push(creature.health);
 		
 		buffer.push(creature.abilities.length);
@@ -113,7 +113,7 @@ Game.prototype.encodestate = function(index_player)
 	{
 		const creature = opponent.creatures[i];
 		
-		BufferWriter.string(creature.id);
+		BufferWriter.string(buffer, creature.id);
 		buffer.push(creature.health);
 		
 		buffer.push(creature.abilities.length);
