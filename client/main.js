@@ -59,7 +59,7 @@ const processes =
 				url: "assets/images/cards/" + id_card + ".png"
 			});
 		
-		PIXI.loader.add(assets);
+		PIXI.loader.add(assets).load();
 	},
 	
 	// 0x03 creature data dump
@@ -89,7 +89,7 @@ const processes =
 				url: "assets/images/creatures/" + id_creature + ".png"
 			});
 		
-		PIXI.loader.add(assets);
+		PIXI.loader.add(assets).load();
 	},
 	
 	// 0x04 full player list

@@ -59,7 +59,7 @@ function Game(renderer, opponent)
 	this.sprite_player_creature_pos1 = init_sprite(this.stage, CREATURE_SPACING*2, renderer.height/2, 0, 1, 100, 100, 1);
 	this.sprite_player_creature_pos2 = init_sprite(this.stage, CREATURE_SPACING, renderer.height/2, 0, 1, 100, 100, 1);
 	this.sprite_player_creature_pos3 = init_sprite(this.stage, 0, renderer.height/2, 0, 1, 100, 100, 1);
-
+	
 	// add opponent creature sprites to game screen
 	this.sprite_opponent_creature_pos1 = init_sprite(this.stage, renderer.width - CREATURE_SPACING*2, renderer.height/2, 0, 1, 100, 100, -1);
 	this.sprite_opponent_creature_pos2 = init_sprite(this.stage, renderer.width - CREATURE_SPACING, renderer.height/2, 0, 1, 100, 100, -1);
@@ -67,10 +67,10 @@ function Game(renderer, opponent)
 	
 	// player info sprites
 	this.sprite_player_deck = init_sprite(this.stage, 200, renderer.height, 0, 1, 50, 50, 1);
-	//this.sprite_player_deck.texture = PIXI.loader.resources["deck"].texture;
+	this.sprite_player_deck.texture = PIXI.loader.resources.deck.texture;
 	this.sprite_player_energy = init_sprite(this.stage, 280, renderer.height, 0, 1, 50, 50, 1);
-	//this.sprite_player_energy.texture = PIXI.loader.resources["energy"].texture;
-
+	this.sprite_player_energy.texture = PIXI.loader.resources.energy.texture;
+	
 	// player info text
 	this.text_player_deck = init_text(this.stage, this.sprite_player_deck.x + this.sprite_player_deck.width, this.sprite_player_deck.y - this.sprite_player_deck.height/2, 0, 0.5);
 	this.text_player_energy = init_text(this.stage, this.sprite_player_energy.x + this.sprite_player_energy.width, this.sprite_player_energy.y - this.sprite_player_energy.height/2, 0, 0.5)
@@ -79,15 +79,15 @@ function Game(renderer, opponent)
 	
 	// opponent info sprites
 	this.sprite_opponent_deck = init_sprite(this.stage, 520, 0, 0, 0, 50, 50, 1);
-	//this.sprite_opponent_deck.texture = PIXI.loader.resources["deck"].texture;
+	this.sprite_opponent_deck.texture = PIXI.loader.resources["deck"].texture;
 	this.sprite_opponent_energy = init_sprite(this.stage, renderer.width/2, 0, 0, 0, 50, 50, 1);
-	//this.sprite_opponent_energy.texture = PIXI.loader.resources["energy"].texture;
+	this.sprite_opponent_energy.texture = PIXI.loader.resources["energy"].texture;
 	
 	// opponent info text
 	this.text_opponent_deck = init_text(this.stage, this.sprite_opponent_deck.x + this.sprite_opponent_deck.width, this.sprite_opponent_deck.y + this.sprite_opponent_deck.height/2, 0, 0.5);
 	this.text_opponent_energy = init_text(this.stage, this.sprite_opponent_energy.x + this.sprite_opponent_energy.width, this.sprite_opponent_energy.y + this.sprite_opponent_energy.height/2, 0, 0.5);
 	this.text_opponent_name = init_text(this.stage, renderer.width - 20, 25, 1, 0.5);
-	this.text_opponent_name = opponent.name;
+	this.text_opponent_name.text = opponent.name;
 
 	// hand card sprites
 	this.sprite_player_hand = [];
