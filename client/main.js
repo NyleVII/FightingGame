@@ -306,6 +306,9 @@ const processes =
 
 		//current turn
 		gameState.turn = read_int(dataview, currentDataviewIndex++);
+
+		//Set the state game state to...the uhh...game state >_>
+		State.game.state_get(gameState);
 	},
 
 	// 0x0B your turn
