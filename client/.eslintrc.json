@@ -6,8 +6,10 @@
 	"globals":
 	{
 		"Data": false,
+		"DataReader": false,
 		"DataView": false,
 		"DOMRenderer": false,
+		"Game": false,
 		"State": false
 	}
 }

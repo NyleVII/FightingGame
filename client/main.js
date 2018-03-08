@@ -3,63 +3,47 @@ const socket = new WebSocket("ws://" + window.location.hostname + ":3000");
 socket.binaryType = "arraybuffer";
 
 
-function read_string(dataview, index)
-{
-	let char, string = "";
-	
-	while(index < dataview.byteLength && (char = dataview.getInt8(index++)))
-		string += String.fromCharCode(char);
-	
-	return string;
-}
-
-function read_int(dataview, index)
-{
-	if(index < dataview.byteLength)
-	{
-		return dataview.getInt8(index);
-	}
-	console.error("index out of dataview bounds at index " + index);
-}
-
-
 // network/state message handler
 const processes =
 [
 	// 0x00 Chat message
-	function(dataview)
+	function(reader)
 	{
-		console.log("Chat message");
-		const id_player = read_string(dataview, 1);
-		const text = read_string(dataview, id_player.length + 2);
+		const id_player = reader.read_string();
+		const text = reader.read_string();
 		
 		DOMRenderer.addchat(Data.players[id_player].name, text);
 	},
 	
 	// 0x01 ability data dump
-	function()
+	function(reader)
 	{
-		console.log("Ability data dump");
-		// TODO(shawn): load ability data
+		Data.abilities.by_id = {};
+		Data.abilities.by_name = {};
+		while(reader.index < reader.dataview.byteLength)
+		{
+			const id_ability = reader.read_string();
+			const name = reader.read_string();
+			const cost = reader.read_int8();
+			
+			Data.abilities.by_id[id_ability] = Data.abilities.by_name[name] = {
+				id: id_ability,
+				name: name,
+				cost: cost
+			};
+		}
 	},
 	
 	// 0x02 card data dump
-	function(dataview)
+	function(reader)
 	{
-		console.log("Card data dump");
-		let index = 1;
-		
 		Data.cards.by_id = {};
 		Data.cards.by_name = {};
-		while(index < dataview.byteLength)
+		while(reader.index < reader.dataview.byteLength)
 		{
-			const id_card = read_string(dataview, index);
-			index += id_card.length + 1;
-			
-			const name = read_string(dataview, index);
-			index += name.length + 1;
-			
-			const cost = dataview.getInt8(index++);
+			const id_card = reader.read_string();
+			const name = reader.read_string();
+			const cost = reader.read_int8();
 			
 			Data.cards.by_id[id_card] = Data.cards.by_name[name] = {
 				id: id_card,
@@ -75,32 +59,20 @@ const processes =
 				url: "assets/images/cards/" + id_card + ".png"
 			});
 		
-		PIXI.loader.add(assets).load(function()
-		{
-			// TODO(shawn): do something once card assets are loaded
-		});
+		PIXI.loader.add(assets);
 	},
 	
 	// 0x03 creature data dump
-	function(dataview)
+	function(reader)
 	{
-		console.log("Creature data dump");
-		let index = 1;
-		
 		Data.creatures.by_id = {};
 		Data.creatures.by_name = {};
-		console.log("Before while loop" + dataview.byteLength);
-		while(index < dataview.byteLength)
+		while(reader.index < reader.dataview.byteLength)
 		{
-			const id_creature = read_string(dataview, index);
-			console.log(id_creature);
-			index += id_creature.length + 1;
-			
-			const name = read_string(dataview, index);
-			index += name.length + 1;
-			
-			const attack = dataview.getInt8(index++);
-			const health = dataview.getInt8(index++);
+			const id_creature = reader.read_string();
+			const name = reader.read_string();
+			const attack = reader.read_int8();
+			const health = reader.read_int8();
 			
 			Data.creatures.by_id[id_creature] = Data.creatures.by_name[name] = {
 				id: id_creature,
@@ -117,26 +89,17 @@ const processes =
 				url: "assets/images/creatures/" + id_creature + ".png"
 			});
 		
-		PIXI.loader.add(assets).load(function()
-		{
-			// TODO(shawn): do something once creature assets are loaded
-		});
+		PIXI.loader.add(assets);
 	},
 	
 	// 0x04 full player list
-	function(dataview)
+	function(reader)
 	{
-		console.log("Full player list");
-		let index = 1;
-		
 		Data.players = {};
-		while(index < dataview.byteLength)
+		while(reader.index < reader.dataview.byteLength)
 		{
-			const id_player = read_string(dataview, index);
-			index += id_player.length + 1;
-			
-			const name = read_string(dataview, index);
-			index += name.length + 1;
+			const id_player = reader.read_string();
+			const name = reader.read_string();
 			
 			Data.players[id_player] = {name: name};
 		}
@@ -145,11 +108,10 @@ const processes =
 	},
 	
 	// 0x05 player joined
-	function(dataview)
+	function(reader)
 	{
-		console.log("Player joined");
-		const id_player = read_string(dataview, 1);
-		Data.players[id_player] = {name: read_string(dataview, id_player.length + 2)};
+		const id_player = reader.read_string();
+		Data.players[id_player] = {name: reader.read_string()};
 		
 		DOMRenderer.addmessage(Data.players[id_player].name + " joined the server.");
 		
@@ -157,10 +119,9 @@ const processes =
 	},
 	
 	// 0x06 player left
-	function(dataview)
+	function(reader)
 	{
-		console.log("Player left");
-		const id_player = read_string(dataview, 1);
+		const id_player = reader.read_string();
 		
 		DOMRenderer.addmessage(Data.players[id_player].name + " left the server.");
 		delete Data.players[id_player];
@@ -169,10 +130,9 @@ const processes =
 	},
 	
 	// 0x07 successful login
-	function(dataview)
+	function(reader)
 	{
-		console.log("Successful login");
-		State.id_player_self = read_string(dataview, 1);
+		State.id_player_self = reader.read_string();
 		DOMRenderer.usertext("Welcome " + Data.players[State.id_player_self].name);
 	},
 
@@ -184,12 +144,9 @@ const processes =
 	},
 
 	// 0x09 game started
-	function(dataview)
+	function(reader)
 	{
-		console.log("Game started");
-		const id_opponent = read_string(dataview, 1);
-		
-		console.log(id_opponent);
+		const id_opponent = reader.read_string();
 		
 		DOMRenderer.gamescreen_show();
 		State.game = new Game(DOMRenderer.gamerenderer, Data.players[id_opponent]);
@@ -197,132 +154,86 @@ const processes =
 	},
 
 	// 0x0A game state
-	function(dataview)
+	function(reader)
 	{
-		console.log("Updating game state...");
-		// TODO(shawn): update game state
-		const gameState =
-		{
-			player: 
-			{
+		const state = {
+			player: {
 				creatures: [],
 				hand: [],
 			},
-			opponent:
-			{
+			opponent: {
 				creatures: [],
-			},
+			}
 		};
-		let currentDataviewIndex = 1;
 		
-		//player energy max
-		gameState.player.energy_max = read_int(dataview, currentDataviewIndex++);
-		
-		//player energy current
-		gameState.player.energy_current = read_int(dataview, currentDataviewIndex++);
+		// player state
+		state.player.energy_max = reader.read_int8();
+		state.player.energy_current = reader.read_int8();
+		state.player.deckSize = reader.read_int8();
 
-		//player deck size
-		gameState.player.deckSize = read_int(dataview, currentDataviewIndex++);
-
-		//player creatures
-		for(let i = 0; i< 3; i++) //Loop through the three creatures
+		// player creatures
+		for(let i = 0; i < 3; ++i)
 		{
-			//initalize creature to avoid null errors
 			const creature = {
 				abilities: [],
 				effects: [],
 			};
+			
+			creature.id = reader.read_string();
+			creature.health = reader.read_int8();
+			
+			const len_abilities = reader.read_int8();
+			for(let j = 0; j < len_abilities; ++j)
+				creature.abilities.push(reader.read_string());
+			
+			const len_effects = reader.read_int8();
+			for(let j = 0; j < len_effects; ++j)
+				creature.effects.push(reader.read_string());
 
-			//creature id
-			creature.id = read_string(dataview, currentDataviewIndex);
-			currentDataviewIndex += creature.id.length + 1; //Increment index by length of string + 1 because of null termination of strings
-
-			//creature hp
-			creature.health = read_int(dataview, currentDataviewIndex++);
-
-			//creature abilities
-			abilityArrayLength = read_int(dataview, currentDataviewIndex++);
-			for(let j = 0; j < abilityArrayLength; j++)
-			{
-				creature.abilities.push(read_string(dataview, currentDataviewIndex));
-				currentDataviewIndex += creature.abilities[j].length + 1; //Increment index by length of string + 1 because of null termination of strings
-			}
-
-			//creature effects
-			effectArrayLength = read_int(dataview, currentDataviewIndex++);
-			for(let k = 0; k < effectArrayLength; k++)
-			{
-				creature.effects.push(read_string(dataview, currentDataviewIndex));
-				currentDataviewIndex += creature.effects[k].length + 1; //Increment index by length of string + 1 because of null termination of strings
-			}
-
-			gameState.player.creatures.push(creature);
+			state.player.creatures.push(creature);
 		}
 
-		//player hand
-		handSizeArrayLength = read_int(dataview, currentDataviewIndex++);
-		for(let i = 0; i < handSizeArrayLength; i++)
-		{
-			gameState.player.hand.push(read_string(dataview, currentDataviewIndex));
-			currentDataviewIndex += gameState.player.hand[i].length + 1; //Increment index by length of string + 1 because of null termination of strings
-		}
-
-		//opponent energy max
-		gameState.opponent.energy_max = read_int(dataview, currentDataviewIndex++);
+		// player hand
+		const len_hand = reader.read_int8();
+		for(let i = 0; i < len_hand; ++i)
+			state.player.hand.push(reader.read_string());
 		
-		//opponent energy current
-		gameState.opponent.energy_current = read_int(dataview, currentDataviewIndex++);
+		// opponent state
+		state.opponent.energy_max = reader.read_int8();
+		state.opponent.energy_current = reader.read_int8();
+		state.opponent.deckSize = reader.read_int8();
 
-		//opponent deck size
-		gameState.opponent.deckSize = read_int(dataview, currentDataviewIndex++);
-
-		//opponent creatures
-		for(let i = 0; i< 3; i++) //Loop through the three creatures
+		// opponent creatures
+		for(let i = 0; i < 3; ++i)
 		{
-			//initalize creature to avoid null errors
 			const creature = {
 				abilities: [],
 				effects: [],
 			};
+			
+			creature.id = reader.read_string();
+			creature.health = reader.read_int8();
+			
+			const len_abilities = reader.read_int8();
+			for(let j = 0; j < len_abilities; ++j)
+				creature.abilities.push(reader.read_string());
+			
+			const len_effects = reader.read_int8();
+			for(let j = 0; j < len_effects; ++j)
+				creature.effects.push(reader.read_string());
 
-			//creature id
-			creature.id = read_string(dataview, currentDataviewIndex);
-			currentDataviewIndex += creature.id.length + 1; //Increment index by length of string + 1 because of null termination of strings
-
-			//creature hp
-			creature.health = read_int(dataview, currentDataviewIndex++);
-
-			//creature abilities
-			abilityArrayLength = read_int(dataview, currentDataviewIndex++);
-			for(let j = 0; j < abilityArrayLength; j++)
-			{
-				creature.abilities.push(read_string(dataview, currentDataviewIndex));
-				currentDataviewIndex += creature.abilities[j].length + 1; //Increment index by length of string + 1 because of null termination of strings
-			}
-
-			//creature effects
-			effectArrayLength = read_int(dataview, currentDataviewIndex++);
-			for(let k = 0; k < effectArrayLength; k++)
-			{
-				creature.effects.push(read_string(dataview, currentDataviewIndex));
-				currentDataviewIndex += creature.effects[k].length + 1; //Increment index by length of string + 1 because of null termination of strings
-			}
-
-			gameState.opponent.creatures.push(creature);
+			state.opponent.creatures.push(creature);
 		}
 
-		//opponent hand
-		gameState.opponent.handSize = read_int(dataview, currentDataviewIndex++);
+		// opponent hand
+		state.opponent.handSize = reader.read_int8();
 
-		//current player
-		gameState.is_opponents_turn = read_int(dataview, currentDataviewIndex++); //0 (false) means it's my turn, 1 opponents
-
-		//current turn
-		gameState.turn = read_int(dataview, currentDataviewIndex++);
+		// game state
+		state.is_opponents_turn = reader.read_int8(); //0 (false) means it's my turn, 1 opponents
+		state.turn = reader.read_int8();
 
 		//Set the state game state to...the uhh...game state >_>
-		State.game.state_set(gameState);
-		console.log(gameState);
+		State.game.state_set(state);
 	},
 
 	// 0x0B your turn
@@ -342,7 +253,6 @@ const processes =
 	// 0x0D successfully queued
 	function()
 	{
-		console.log("Successfully queued");
 		State.queued = true;
 		document.getElementById("queueButton").innerText = "In Queue";
 	},
@@ -364,44 +274,41 @@ const processes =
 	// 0x10 left queue
 	function()
 	{
-		console.log("Left the queue");
 		State.queued = false;
 		document.getElementById("queueButton").innerText = "Queue";
 	},
 
 	// 0x11 game over
-	function(dataview)
+	function(reader)
 	{
-		console.log("Game over");
 		// TODO(shawn): better game over handling
 		DOMRenderer.gamescreen_hide();
 		
-		if(dataview.getInt8(1))
+		if(reader.read_int8())
 			console.log("A loser is you!");
 		else
 			console.log("Winner winner chicken dinner");
 	},
 
 	// 0x12 play card
-	function(dataview)
+	function(reader)
 	{
-		console.log("Play card");
 		// TODO(shawn): animations, sound effects, update game state
-		const playedCardID = read_string(dataview, 1);
-		console.log(Data.cards.by_id[playedCardID].name); //Prints name of played card
+		const id_card = reader.read_string();
+		console.log(Data.cards.by_id[id_card].name);
 	},
 
 	// 0x13 use ability
-	function(dataview)
+	function(reader)
 	{
-		console.log("Use ability");
 		// TODO(shawn): animations, sound effects, update game state
-		const index_creature = dataview.getInt8(1);
-		const index_ability = dataview.getInt8(2);
+		const index_creature = reader.read_int8();
+		const index_ability = reader.read_int8();
 		
-		const id_creature = game.state.opponent.creatures[index_creature].id;
+		const creature = State.game.state.creatures[index_creature];
+		const id_ability = creature.abilities[index_ability];
 		
-		console.log("Your opponents " + Data.creatures.by_id[id_creature].name + " used...an ability with some kind of ID");
+		console.log("Your opponent's " + Data.creatures.by_id[creature.id].name + " used " + Data.abilities.by_id[id_ability].name + ".");
 	},
 
 	// 0x14 not your turn
@@ -414,12 +321,10 @@ const processes =
 // socket message handler
 socket.onmessage = function(event)
 {
-	const dataview = new DataView(event.data);
-	const code = dataview.getInt8(0);
+	const reader = new DataReader(new DataView(event.data));
+	const code = reader.read_int8();
 	
 	const process = processes[code];
-	console.log("Sending Protocol Code: " + code);
 	if(process !== undefined)
-		process(dataview);
-
+		process(reader);
 };

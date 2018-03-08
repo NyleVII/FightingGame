@@ -6,10 +6,6 @@ const INCREMENT_EFFECTHAND_OPPONENT = {x: 50, y: 0}; //OPPONENT HAND GROWS TO TH
 const CREATURE_SPACING = 110;
 const SIZE_CARD = {x: 75, y: 100};
 
-const textStyle = new PIXI.TextStyle({
-	fill: "white"
-});
-
 function init_sprite(stage, x, y, x_anchor, y_anchor, width, height, scale_x)
 {
 	const sprite = new PIXI.Sprite();
@@ -23,6 +19,18 @@ function init_sprite(stage, x, y, x_anchor, y_anchor, width, height, scale_x)
 	stage.addChild(sprite);
 	
 	return sprite;
+}
+
+function init_text(stage, x, y, x_anchor, y_anchor)
+{
+	const text = new PIXI.Text("", new PIXI.TextStyle({fill: "white"}));
+	
+	text.x = x;
+	text.y = y;
+	text.anchor.set(x_anchor, y_anchor);
+	stage.addChild(text);
+	
+	return text;
 }
 
 function Game(renderer, opponent)
@@ -57,107 +65,37 @@ function Game(renderer, opponent)
 	this.sprite_opponent_creature_pos2 = init_sprite(this.stage, renderer.width - CREATURE_SPACING, renderer.height/2, 0, 1, 100, 100, -1);
 	this.sprite_opponent_creature_pos3 = init_sprite(this.stage, renderer.width, renderer.height/2, 0, 1, 100, 100, -1);
 	
-	//PLAYER INFO
-	// add player deck sprite to game screen
+	// player info sprites
 	this.sprite_player_deck = init_sprite(this.stage, 200, renderer.height, 0, 1, 50, 50, 1);
-	this.sprite_player_deck.texture = PIXI.loader.resources["deck"].texture;
+	//this.sprite_player_deck.texture = PIXI.loader.resources["deck"].texture;
+	this.sprite_player_energy = init_sprite(this.stage, 280, renderer.height, 0, 1, 50, 50, 1);
+	//this.sprite_player_energy.texture = PIXI.loader.resources["energy"].texture;
 
-	//Add player deck text to game screen
-	this.playerDeck = new PIXI.Text("55", textStyle);
-	this.playerDeck.anchor.set(0, 0.5);
-	this.playerDeck.x = this.sprite_player_deck.x + this.sprite_player_deck.width;
-	this.playerDeck.y = this.sprite_player_deck.y - this.sprite_player_deck.height/2;
-	this.stage.addChild(this.playerDeck);
+	// player info text
+	this.text_player_deck = init_text(this.stage, this.sprite_player_deck.x + this.sprite_player_deck.width, this.sprite_player_deck.y - this.sprite_player_deck.height/2, 0, 0.5);
+	this.text_player_energy = init_text(this.stage, this.sprite_player_energy.x + this.sprite_player_energy.width, this.sprite_player_energy.y - this.sprite_player_energy.height/2, 0, 0.5)
+	this.text_player_name = init_text(this.stage, 20, renderer.height - this.sprite_player_energy.height/2, 0, 0.5);
+	this.text_player_name.text = Data.players[State.id_player_self].name;
+	
+	// opponent info sprites
+	this.sprite_opponent_deck = init_sprite(this.stage, 520, 0, 0, 0, 50, 50, 1);
+	//this.sprite_opponent_deck.texture = PIXI.loader.resources["deck"].texture;
+	this.sprite_opponent_energy = init_sprite(this.stage, renderer.width/2, 0, 0, 0, 50, 50, 1);
+	//this.sprite_opponent_energy.texture = PIXI.loader.resources["energy"].texture;
+	
+	// opponent info text
+	this.text_opponent_deck = init_text(this.stage, this.sprite_opponent_deck.x + this.sprite_opponent_deck.width, this.sprite_opponent_deck.y + this.sprite_opponent_deck.height/2, 0, 0.5);
+	this.text_opponent_energy = init_text(this.stage, this.sprite_opponent_energy.x + this.sprite_opponent_energy.width, this.sprite_opponent_energy.y + this.sprite_opponent_energy.height/2, 0, 0.5);
+	this.text_opponent_name = init_text(this.stage, renderer.width - 20, 25, 1, 0.5);
+	this.text_opponent_name = opponent.name;
 
-	//Add player energy sprite to game screen
-	this.sprite_player_energy = new PIXI.Sprite();
-	this.sprite_player_energy.anchor.set(0, 1);
-	this.sprite_player_energy.width = 50;
-	this.sprite_player_energy.height = 50;
-	this.sprite_player_energy.x = 280;
-	this.sprite_player_energy.y = renderer.height;
-	this.sprite_player_energy.texture = PIXI.loader.resources["energy"].texture;
-	this.stage.addChild(this.sprite_player_energy);
-
-	//Add player energy text to game screen
-	this.playerEnergy = new PIXI.Text("10/10", textStyle);
-	this.playerEnergy.anchor.set(0, 0.5);
-	this.playerEnergy.x = this.sprite_player_energy.x + this.sprite_player_energy.width;
-	this.playerEnergy.y = this.sprite_player_energy.y - this.sprite_player_energy.height/2;
-	this.stage.addChild(this.playerEnergy);
-
-	//Add player name to game screen
-	this.playerName = new PIXI.Text(Data.players[State.id_player_self].name, textStyle);
-	this.playerName.anchor.set(0, 0.5);
-	this.playerName.x = 20;
-	this.playerName.y = renderer.height - this.sprite_player_energy.height/2;
-	this.stage.addChild(this.playerName);
-
-	//OPPONENT INFO
-	//Add opponent energy sprite to game screen
-	this.sprite_opponent_energy = new PIXI.Sprite();
-	this.sprite_opponent_energy.anchor.set(0, 0);
-	this.sprite_opponent_energy.width = 50;
-	this.sprite_opponent_energy.height = 50;
-	this.sprite_opponent_energy.x = renderer.width/2;
-	this.sprite_opponent_energy.texture = PIXI.loader.resources["energy"].texture;
-	this.stage.addChild(this.sprite_opponent_energy);
-
-	//Add opponent energy text to game screen
-	this.opponentEnergy = new PIXI.Text("20/20", textStyle);
-	this.opponentEnergy.anchor.set(0, 0.5);
-	this.opponentEnergy.x = this.sprite_opponent_energy.x + this.sprite_opponent_energy.width;
-	this.opponentEnergy.y = this.sprite_opponent_energy.y + this.sprite_opponent_energy.height/2;
-	this.stage.addChild(this.opponentEnergy);
-
-	//Add opponent deck sprite to game screen
-	this.sprite_opponent_deck = new PIXI.Sprite();
-	this.sprite_opponent_deck.anchor.set(0, 0);
-	this.sprite_opponent_deck.width = 50;
-	this.sprite_opponent_deck.height = 50;
-	this.sprite_opponent_deck.x = 520;
-	this.sprite_opponent_deck.y = 0;
-	this.sprite_opponent_deck.texture = PIXI.loader.resources["deck"].texture;
-	this.stage.addChild(this.sprite_opponent_deck);
-
-	//Add opponent deck text to game screen
-	this.opponentDeck = new PIXI.Text("99", textStyle);
-	this.opponentDeck.anchor.set(0, 0.5);
-	this.opponentDeck.x = this.sprite_opponent_deck.x + this.sprite_opponent_deck.width;
-	this.opponentDeck.y = this.sprite_opponent_deck.y + this.sprite_opponent_deck.height/2;
-	this.stage.addChild(this.opponentDeck);
-
-	//Add opponent name to game screen
-	this.opponentName = new PIXI.Text(opponent.name, textStyle);
-	this.opponentName.anchor.set(1, 0.5);
-	this.opponentName.x = renderer.width - 20;
-	this.opponentName.y = 25;
-	this.stage.addChild(this.opponentName);
-
-	//Add effect hands to screen
-	this.sprite_player_effecthand = [];
-	this.sprite_opponent_effecthand = [];
+	// hand card sprites
+	this.sprite_player_hand = [];
+	this.sprite_opponent_hand = [];
 	for (let i = 0; i < MAX_EFFECTHANDSIZE; ++i)
 	{
-		let sprite = new PIXI.Sprite();
-		sprite.width = SIZE_CARD.x;
-		sprite.height = SIZE_CARD.y;
-		sprite.x = ANCHOR_EFFECTHAND_PLAYER.x + i*INCREMENT_EFFECTHAND_PLAYER.x;
-		sprite.y = ANCHOR_EFFECTHAND_PLAYER.y - sprite.height + i*INCREMENT_EFFECTHAND_PLAYER.y;
-		
-		
-		this.sprite_player_effecthand.push(sprite);
-		this.stage.addChild(sprite);
-		
-		sprite = new PIXI.Sprite();
-		sprite.width = SIZE_CARD.x;
-		sprite.height = SIZE_CARD.y;
-		sprite.x = ANCHOR_EFFECTHAND_OPPONENT.x + i*INCREMENT_EFFECTHAND_OPPONENT.x;
-		sprite.y = ANCHOR_EFFECTHAND_OPPONENT.y + i*INCREMENT_EFFECTHAND_OPPONENT.y;
-		
-		
-		this.sprite_opponent_effecthand.push(sprite);
-		this.stage.addChild(sprite);
+		this.sprite_player_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_PLAYER.x + i*INCREMENT_EFFECTHAND_PLAYER.x, ANCHOR_EFFECTHAND_PLAYER.y - SIZE_CARD.y + i*INCREMENT_EFFECTHAND_PLAYER.y, 0, 0, SIZE_CARD.x, SIZE_CARD.y, 1));
+		this.sprite_opponent_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_OPPONENT.x + i*INCREMENT_EFFECTHAND_OPPONENT.x, ANCHOR_EFFECTHAND_OPPONENT.y + i*INCREMENT_EFFECTHAND_OPPONENT.y, 0, 0, SIZE_CARD.x, SIZE_CARD.y, 1));
 	}
 }
 
@@ -166,38 +104,32 @@ Game.prototype.state_set = function(state)
 {
 	this.state = state;
 	
-	//this.sprite_player_creature.texture = PIXI.loader.resources[state.player.creature.id + "_player"].texture;
+	// player creatures
 	this.sprite_player_creature_pos3.texture = PIXI.loader.resources[state.player.creatures[2].id + "_creature"].texture;
 	this.sprite_player_creature_pos2.texture = PIXI.loader.resources[state.player.creatures[1].id + "_creature"].texture;
 	this.sprite_player_creature_pos1.texture = PIXI.loader.resources[state.player.creatures[0].id + "_creature"].texture;
+	
+	// opponent creatures
 	this.sprite_opponent_creature_pos1.texture = PIXI.loader.resources[state.opponent.creatures[0].id + "_creature"].texture;
 	this.sprite_opponent_creature_pos2.texture = PIXI.loader.resources[state.opponent.creatures[1].id + "_creature"].texture;
 	this.sprite_opponent_creature_pos3.texture = PIXI.loader.resources[state.opponent.creatures[2].id + "_creature"].texture;
-	//this.sprite_opponent_creature.texture = PIXI.loader.resources[state.opponent.creature.id + "_opponent"].texture;
 	
+	// player hand
 	for (let i = 0; i < state.player.hand.length; ++i)
-	{
-		console.log(state.player.hand[i]);
-		this.sprite_player_effecthand[i].texture = PIXI.loader.resources[state.player.hand[i] + "_card"].texture;
-	}
+		this.sprite_player_hand[i].texture = PIXI.loader.resources[state.player.hand[i] + "_card"].texture;
 	
-
-	
+	// opponent hand
 	const texture_cardback = PIXI.loader.resources.cardBack.texture;
 	for (let i = 0; i < MAX_EFFECTHANDSIZE; ++i)
-		this.sprite_opponent_effecthand[i].texture = (i < state.opponent.handSize) ? texture_cardback : undefined;
+		this.sprite_opponent_hand[i].texture = (i < state.opponent.handSize) ? texture_cardback : undefined;
+	
+	// player info
+	this.text_player_energy.text = State.game.state.player.energy_current + "/" + State.game.state.player.energy_max;
+	this.text_player_deck.text = State.game.state.player.deckSize.toString();
 
-	//Set player energy text
-	this.playerEnergy.text = State.game.state.player.energy_current + "/" + State.game.state.player.energy_max;
-
-	//Set player deck size text
-	this.playerDeck.text = State.game.state.player.deckSize.toString();
-
-	//Set opponent energy text
-	this.opponentEnergy.text = State.game.state.opponent.energy_current + "/" + State.game.state.opponent.energy_max;
-
-	//Set opponent deck size text
-	this.opponentDeck.text = State.game.state.opponent.deckSize.toString();
+	// opponent info
+	this.text_opponent_energy.text = State.game.state.opponent.energy_current + "/" + State.game.state.opponent.energy_max;
+	this.text_opponent_deck.text = State.game.state.opponent.deckSize.toString();
 
 	this.render();	
 };
