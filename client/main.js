@@ -89,9 +89,11 @@ const processes =
 		
 		Data.creatures.by_id = {};
 		Data.creatures.by_name = {};
+		console.log("Before while loop" + dataview.byteLength);
 		while(index < dataview.byteLength)
 		{
 			const id_creature = read_string(dataview, index);
+			console.log(id_creature);
 			index += id_creature.length + 1;
 			
 			const name = read_string(dataview, index);
