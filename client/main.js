@@ -262,7 +262,7 @@ const processes =
 		for(let i = 0; i < handSizeArrayLength; i++)
 		{
 			gameState.player.hand.push(read_string(dataview, currentDataviewIndex));
-			currentDataviewIndex += hand[i].length + 1; //Increment index by length of string + 1 because of null termination of strings
+			currentDataviewIndex += gameState.player.hand[i].length + 1; //Increment index by length of string + 1 because of null termination of strings
 		}
 
 		//opponent energy max
@@ -319,7 +319,7 @@ const processes =
 		gameState.turn = read_int(dataview, currentDataviewIndex++);
 
 		//Set the state game state to...the uhh...game state >_>
-		State.game.state_get(gameState);
+		State.game.state_set(gameState);
 		console.log(gameState);
 	},
 
