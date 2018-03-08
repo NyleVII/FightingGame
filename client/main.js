@@ -168,6 +168,8 @@ const processes =
 	{
 		const id_opponent = read_string(dataview, 1);
 		
+		console.log(id_opponent);
+		
 		DOMRenderer.gamescreen_show();
 		State.game = new Game(DOMRenderer.gamerenderer, Data.players[id_opponent]);
 		State.game.render();

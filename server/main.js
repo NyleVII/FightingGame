@@ -114,9 +114,13 @@ const processes =
 				
 				connection.game = opponent.game = new Game(connection.player, opponent.player);
 				
-				const buffer_gamestart = Buffer.from([0x09]);
-				connection.sendBytes(buffer_gamestart);
-				opponent.sendBytes(buffer_gamestart);
+				const buffer_player = [0x09];
+				buffer_string(buffer_player, opponent.player._id);
+				connection.sendBytes(Buffer.from(buffer_player));
+				
+				const buffer_opponent = [0x09];
+				buffer_string(buffer_opponent, connection.player._id);
+				opponent.sendBytes(Buffer.from(buffer_opponent));
 				
 				delete queue[id_opponent];
 				len_queue--;
