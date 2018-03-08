@@ -106,6 +106,7 @@ Game.prototype.encodestate = function(index_player)
 		BufferWriter.string(buffer, player.hand[i]);
 	
 	// opponent
+	buffer.push(opponent.energy_max);
 	buffer.push(opponent.energy_current);
 	buffer.push(opponent.deck.length);
 	
