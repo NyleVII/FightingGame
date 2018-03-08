@@ -121,8 +121,14 @@ const processes =
 					const id_player1 = connection.game.players[0]._id;
 					const id_player2 = connection.game.players[1]._id;
 					
-					connections[id_player1].sendBytes(Buffer.from(connection.game.encodestate(0).unshift(0x0A)));
-					connections[id_player2].sendBytes(Buffer.from(connection.game.encodestate(1).unshift(0x0A)));
+					const state1 = connection.game.encodestate(0);
+					const state2 = connection.game.encodestate(1);
+					
+					state1.unshift(0x0A);
+					state2.unshift(0x0A);
+					
+					connections[id_player1].sendBytes(Buffer.from(state1));
+					connections[id_player2].sendBytes(Buffer.from(state2));
 					
 					connections[connection.game.players[connection.game.state.index_currentplayer]._id].sendBytes(Buffer.from([0x0B]));
 				});
