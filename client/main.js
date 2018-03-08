@@ -13,6 +13,15 @@ function read_string(dataview, index)
 	return string;
 }
 
+function read_int(dataview, index)
+{
+	if(index < dataview.byteLength)
+	{
+		return dataview.getInt8(index);
+	}
+	console.error("index out of dataview bounds at index " + index);
+}
+
 
 // network/state message handler
 const processes =
@@ -176,9 +185,127 @@ const processes =
 	},
 
 	// 0x0A game state
-	function()
+	function(dataview)
 	{
 		// TODO(shawn): update game state
+		const gameState =
+		{
+			player: 
+			{
+				creatures: [],
+				hand: [],
+			},
+			opponent:
+			{
+				creatures: [],
+			},
+		};
+		let currentDataviewIndex = 1;
+		
+		//player energy max
+		gameState.player.energy_max = read_int(dataview, currentDataviewIndex++);
+		
+		//player energy current
+		gameState.player.energy_current = read_int(dataview, currentDataviewIndex++);
+
+		//player deck size
+		gameState.player.deck_size = read_int(dataview, currentDataviewIndex++);
+
+		//player creatures
+		for(let i = 0; i< 3; i++) //Loop through the three creatures
+		{
+			//initalize creature to avoid null errors
+			const creature = {
+				abilities: [],
+				effects: [],
+			};
+
+			//creature id
+			creature.id = read_string(dataview, currentDataviewIndex);
+			currentDataviewIndex += creature.id.length + 1; //Increment index by length of string + 1 because of null termination of strings
+
+			//creature hp
+			creature.hp = read_int(dataview, currentDataviewIndex++);
+
+			//creature abilities
+			abilityArrayLength = read_int(dataview, currentDataviewIndex++);
+			for(let j = 0; j < abilityArrayLength; j++)
+			{
+				creature.abilities.push(read_string(dataview, currentDataviewIndex));
+				currentDataviewIndex += creature.abilities[j].length + 1; //Increment index by length of string + 1 because of null termination of strings
+			}
+
+			//creature effects
+			effectArrayLength = read_int(dataview, currentDataviewIndex++);
+			for(let k = 0; k < effectArrayLength; k++)
+			{
+				creature.effects.push(read_string(dataview, currentDataviewIndex));
+				currentDataviewIndex += creature.effects[k].length + 1; //Increment index by length of string + 1 because of null termination of strings
+			}
+
+			gameState.player.creatures.push(creature);
+		}
+
+		//player hand
+		handSizeArrayLength = read_int(dataview, currentDataviewIndex++);
+		for(let i = 0; i < handSizeArrayLength; i++)
+		{
+			gameState.player.hand.push(read_string(dataview, currentDataviewIndex));
+			currentDataviewIndex += hand[i].length + 1; //Increment index by length of string + 1 because of null termination of strings
+		}
+
+		//opponent energy max
+		gameState.opponent.energy_max = read_int(dataview, currentDataviewIndex++);
+		
+		//opponent energy current
+		gameState.opponent.energy_current = read_int(dataview, currentDataviewIndex++);
+
+		//opponent deck size
+		gameState.opponent.deck_size = read_int(dataview, currentDataviewIndex++);
+
+		//opponent creatures
+		for(let i = 0; i< 3; i++) //Loop through the three creatures
+		{
+			//initalize creature to avoid null errors
+			const creature = {
+				abilities: [],
+				effects: [],
+			};
+
+			//creature id
+			creature.id = read_string(dataview, currentDataviewIndex);
+			currentDataviewIndex += creature.id.length + 1; //Increment index by length of string + 1 because of null termination of strings
+
+			//creature hp
+			creature.hp = read_int(dataview, currentDataviewIndex++);
+
+			//creature abilities
+			abilityArrayLength = read_int(dataview, currentDataviewIndex++);
+			for(let j = 0; j < abilityArrayLength; j++)
+			{
+				creature.abilities.push(read_string(dataview, currentDataviewIndex));
+				currentDataviewIndex += creature.abilities[j].length + 1; //Increment index by length of string + 1 because of null termination of strings
+			}
+
+			//creature effects
+			effectArrayLength = read_int(dataview, currentDataviewIndex++);
+			for(let k = 0; k < effectArrayLength; k++)
+			{
+				creature.effects.push(read_string(dataview, currentDataviewIndex));
+				currentDataviewIndex += creature.effects[k].length + 1; //Increment index by length of string + 1 because of null termination of strings
+			}
+
+			gameState.opponent.creatures.push(creature);
+		}
+
+		//opponent hand
+		gameState.opponent.handSize = read_int(dataview, currentDataviewIndex++);
+
+		//current player
+		gameState.is_opponents_turn = read_int(dataview, currentDataviewIndex++); //0 (false) means it's my turn, 1 opponents
+
+		//current turn
+		gameState.turn = read_int(dataview, currentDataviewIndex++);
 	},
 
 	// 0x0B your turn
@@ -249,6 +376,12 @@ const processes =
 		const id_creature = game.state.opponent.creatures[index_creature].id;
 		
 		console.log("Your opponents " + Data.creatures.by_id[id_creature].name + " used...an ability with some kind of ID");
+	},
+
+	// 0x14 not your turn
+	function()
+	{
+		console.log("It is not your turn");
 	}
 ];
 
