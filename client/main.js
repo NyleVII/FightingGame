@@ -301,6 +301,9 @@ const processes =
 		//opponent hand
 		gameState.opponent.handSize = read_int(dataview, currentDataviewIndex++);
 
+		//current player
+		gameState.is_opponents_turn = read_int(dataview, currentDataviewIndex++); //0 (false) means it's my turn, 1 opponents
+
 		//current turn
 		gameState.turn = read_int(dataview, currentDataviewIndex++);
 	},
@@ -373,6 +376,12 @@ const processes =
 		const id_creature = game.state.opponent.creatures[index_creature].id;
 		
 		console.log("Your opponents " + Data.creatures.by_id[id_creature].name + " used...an ability with some kind of ID");
+	},
+
+	// 0x14 not your turn
+	function()
+	{
+		console.log("It is not your turn");
 	}
 ];
 

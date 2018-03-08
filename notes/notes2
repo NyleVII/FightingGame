@@ -61,7 +61,7 @@ Server Game State
 	},
 
 
-	player_current: <PLAYER1 OR PLAYER2>,
+	player_current: <BOOL INT>,
 	turn: <INT>	
 }
 
@@ -105,6 +105,6 @@ Client Game State
 	},
 
 
-	player_current: <PLAYER1 OR PLAYER2>,
+	is_opponents_turn: <BOOL INT>, //0 (false) means it's my turn, 1 opponents
 	turn: <INT>	
 }
