@@ -26,7 +26,17 @@ function init_player(loadout)
 	const player = {
 		energy_max: 2,
 		energy_current: 0,
-		creatures: loadout.creatures,
+		creatures: loadout.creatures.map(function(id_creature)
+		{
+			const creature = Data.creatures[id_creature];
+			
+			return {
+				id: creature._id,
+				hp: creature.health,
+				abilities: [],
+				effects: []
+			};
+		}),
 		hand: [],
 		deck: cards
 	};
@@ -79,8 +89,8 @@ Game.prototype.encodestate = function(index_player)
 	{
 		const creature = player.creatures[i];
 		
-		BufferWriter.string(creature._id);
-		buffer.push(creature.hp);
+		BufferWriter.string(creature.id);
+		buffer.push(creature.health);
 		
 		buffer.push(creature.abilities.length);
 		for(let j = 0; j < creature.abilities.length; ++j)
@@ -103,8 +113,8 @@ Game.prototype.encodestate = function(index_player)
 	{
 		const creature = opponent.creatures[i];
 		
-		BufferWriter.string(creature._id);
-		buffer.push(creature.hp);
+		BufferWriter.string(creature.id);
+		buffer.push(creature.health);
 		
 		buffer.push(creature.abilities.length);
 		for(let j = 0; j < creature.abilities.length; ++j)
