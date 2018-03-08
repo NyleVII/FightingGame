@@ -181,18 +181,23 @@ Game.prototype.state_set = function(state)
 		this.sprite_player_effecthand[i].texture = PIXI.loader.resources[state.player.hand[i] + "_card"].texture;
 	}
 	
-	/*
-	for (let i = 0; i < state.player.creaturehand.length; ++i)
-		this.sprite_player_creaturehand[i].texture = PIXI.loader.resources[state.player.creaturehand[i] + "_card"].texture;
-	*/
+
 	
 	const texture_cardback = PIXI.loader.resources.cardBack.texture;
 	for (let i = 0; i < MAX_EFFECTHANDSIZE; ++i)
 		this.sprite_opponent_effecthand[i].texture = (i < state.opponent.handSize) ? texture_cardback : undefined;
-	/*
-	for (let i = 0; i < MAX_CREATUREHANDSIZE; ++i)
-		this.sprite_opponent_creaturehand[i].texture = (i < state.opponent.creaturehandsize) ? texture_cardback : undefined;
-	*/
+
+	//Set player energy text
+	this.playerEnergy.text = State.game.state.player.energy_current + "/" + State.game.state.player.energy_max;
+
+	//Set player deck size text
+	this.playerDeck.text = State.game.state.player.deckSize.toString();
+
+	//Set opponent energy text
+	this.opponentEnergy.text = State.game.state.opponent.energy_current + "/" + State.game.state.opponent.energy_max;
+
+	//Set opponent deck size text
+	this.opponentDeck.text = State.game.state.opponent.deckSize.toString();
 
 	this.render();	
 };

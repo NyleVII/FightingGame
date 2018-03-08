@@ -222,7 +222,7 @@ const processes =
 		gameState.player.energy_current = read_int(dataview, currentDataviewIndex++);
 
 		//player deck size
-		gameState.player.deck_size = read_int(dataview, currentDataviewIndex++);
+		gameState.player.deckSize = read_int(dataview, currentDataviewIndex++);
 
 		//player creatures
 		for(let i = 0; i< 3; i++) //Loop through the three creatures
@@ -274,7 +274,7 @@ const processes =
 		gameState.opponent.energy_current = read_int(dataview, currentDataviewIndex++);
 
 		//opponent deck size
-		gameState.opponent.deck_size = read_int(dataview, currentDataviewIndex++);
+		gameState.opponent.deckSize = read_int(dataview, currentDataviewIndex++);
 
 		//opponent creatures
 		for(let i = 0; i< 3; i++) //Loop through the three creatures
