@@ -5,6 +5,7 @@ const server_http = require("./http.js");
 const config = require("./config.json");
 const Game = require("./game/game.js");
 const Data = require("./data.js");
+const BufferWriter = require("./bufferwriter.js");
 
 
 // global variables
@@ -61,13 +62,6 @@ function broadcast(buffer)
 		connections[id_player].sendBytes(buffer);
 }
 
-function buffer_string(buffer, string)
-{
-	for(let i = 0; i < string.length; ++i)
-		buffer.push(string.charCodeAt(i) & 0xff);
-	buffer.push(0x00);
-}
-
 function read_string(buffer, index)
 {
 	let char, string = "";
@@ -86,7 +80,7 @@ const processes =
 	{
 		const buffer = [0x00];
 		
-		buffer_string(buffer, connection.player._id);
+		BufferWriter.string(buffer, connection.player._id);
 		for(let i = 1; i < buffer_process.length; ++i)
 			buffer.push(buffer_process.readUInt8(i));
 		broadcast(Buffer.from(buffer));
@@ -115,11 +109,11 @@ const processes =
 				connection.game = opponent.game = new Game(connection.player, opponent.player);
 				
 				const buffer_player = [0x09];
-				buffer_string(buffer_player, opponent.player._id);
+				BufferWriter.string(buffer_player, opponent.player._id);
 				connection.sendBytes(Buffer.from(buffer_player));
 				
 				const buffer_opponent = [0x09];
-				buffer_string(buffer_opponent, connection.player._id);
+				BufferWriter.string(buffer_opponent, connection.player._id);
 				opponent.sendBytes(Buffer.from(buffer_opponent));
 				
 				delete queue[id_opponent];
@@ -151,8 +145,6 @@ const processes =
 	function(connection, buffer_process)
 	{
 		const id_loadout = read_string(buffer_process, 1);
-		
-		console.log(id_loadout);
 		
 		// TODO(shawn): implement
 		connection.sendBytes(Buffer.from([0x08]));
@@ -229,7 +221,7 @@ server_websocket.on("request", function(request)
 					
 					// broadcast player left message
 					buffer = [0x06];
-					buffer_string(buffer, player._id);
+					BufferWriter.string(buffer, player._id);
 					broadcast(Buffer.from(buffer));
 					console.log(player.name + " disconnected.");
 				});
@@ -247,20 +239,20 @@ server_websocket.on("request", function(request)
 				buffer = [0x04];
 				for(const id_player in connections)
 				{
-					buffer_string(buffer, id_player);
-					buffer_string(buffer, connections[id_player].player.name);
+					BufferWriter.string(buffer, id_player);
+					BufferWriter.string(buffer, connections[id_player].player.name);
 				}
 				connection.sendBytes(Buffer.from(buffer));
 				
 				// send login success message
 				buffer = [0x07];
-				buffer_string(buffer, player._id);
+				BufferWriter.string(buffer, player._id);
 				connection.sendBytes(Buffer.from(buffer));
 				
 				// broadcast player join message
 				buffer = [0x05];
-				buffer_string(buffer, player._id);
-				buffer_string(buffer, player.name);
+				BufferWriter.string(buffer, player._id);
+				BufferWriter.string(buffer, player.name);
 				broadcast(Buffer.from(buffer));
 				console.log(player.name + " connected.");
 				
@@ -270,8 +262,8 @@ server_websocket.on("request", function(request)
 				{
 					const ability = Data.abilities[i];
 					
-					buffer_string(buffer, ability._id);
-					buffer_string(buffer, ability.name);
+					BufferWriter.string(buffer, ability._id);
+					BufferWriter.string(buffer, ability.name);
 				}
 				connection.sendBytes(Buffer.from(buffer));
 				
@@ -281,8 +273,8 @@ server_websocket.on("request", function(request)
 				{
 					const card = Data.cards[i];
 					
-					buffer_string(buffer, card._id);
-					buffer_string(buffer, card.name);
+					BufferWriter.string(buffer, card._id);
+					BufferWriter.string(buffer, card.name);
 					buffer.push(card.cost);
 				}
 				connection.sendBytes(Buffer.from(buffer));
@@ -293,8 +285,8 @@ server_websocket.on("request", function(request)
 				{
 					const creature = Data.creatures[i];
 					
-					buffer_string(buffer, creature._id);
-					buffer_string(buffer, creature.name);
+					BufferWriter.string(buffer, creature._id);
+					BufferWriter.string(buffer, creature.name);
 					buffer.push(creature.attack);
 					buffer.push(creature.health);
 				}

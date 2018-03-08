@@ -1,4 +1,5 @@
 const Data = require("../data.js");
+const BufferWriter = require("../bufferwriter.js");
 
 
 function shuffle(list)
@@ -61,6 +62,64 @@ function Game(player1, player2)
 	});
 }
 
+
+Game.prototype.encodestate = function(index_player)
+{
+	const buffer = [];
+	
+	const player = this.state.players[index_player];
+	const opponent = this.state.players[index_player ^ 1];
+	
+	// player
+	buffer.push(player.energy_max);
+	buffer.push(player.energy_current);
+	buffer.push(player.deck.length);
+	
+	for(let i = 0; i < player.creatures.length; ++i)
+	{
+		const creature = player.creatures[i];
+		
+		BufferWriter.string(creature._id);
+		buffer.push(creature.hp);
+		
+		buffer.push(creature.abilities.length);
+		for(let j = 0; j < creature.abilities.length; ++j)
+			BufferWriter.string(buffer, creature.abilities[j]);
+		
+		buffer.push(creature.effects.length);
+		for(let j = 0; j < creature.effects.length; ++j)
+			BufferWriter.string(buffer, creature.effects[j]);
+	}
+	
+	buffer.push(player.hand.length);
+	for(let i = 0; i < player.hand.length; ++i)
+		BufferWriter.string(buffer, player.hand[i]);
+	
+	// opponent
+	buffer.push(opponent.energy_current);
+	buffer.push(opponent.deck.length);
+	
+	for(let i = 0; i < opponent.creatures.length; ++i)
+	{
+		const creature = opponent.creatures[i];
+		
+		BufferWriter.string(creature._id);
+		buffer.push(creature.hp);
+		
+		buffer.push(creature.abilities.length);
+		for(let j = 0; j < creature.abilities.length; ++j)
+			BufferWriter.string(buffer, creature.abilities[j]);
+		
+		buffer.push(creature.effects.length);
+		for(let j = 0; j < creature.effects.length; ++j)
+			BufferWriter.string(buffer, creature.effects[j]);
+	}
+	
+	buffer.push(opponent.hand.length);
+	
+	buffer.push(index_player ^ this.state.index_currentplayer);
+	buffer.push(this.state.turn);
+};
 
 Game.prototype.endturn = function()
 {
