@@ -275,9 +275,9 @@ server_websocket.on("request", function(request)
 				
 				// send ability data dump
 				buffer = [0x01];
-				for(let i = 0; i < Data.abilities.length; ++i)
+				for(const id_ability in Data.abilities)
 				{
-					const ability = Data.abilities[i];
+					const ability = Data.abilities[id_ability];
 					
 					BufferWriter.string(buffer, ability._id);
 					BufferWriter.string(buffer, ability.name);
@@ -286,9 +286,9 @@ server_websocket.on("request", function(request)
 				
 				// send card data dump
 				buffer = [0x02];
-				for(let i = 0; i < Data.cards.length; ++i)
+				for(const id_card in Data.cards)
 				{
-					const card = Data.cards[i];
+					const card = Data.cards[id_card];
 					
 					BufferWriter.string(buffer, card._id);
 					BufferWriter.string(buffer, card.name);
@@ -298,9 +298,9 @@ server_websocket.on("request", function(request)
 				
 				// send creature data dump
 				buffer = [0x03];
-				for(let i = 0; i < Data.creatures.length; ++i)
+				for(const id_creature in Data.creatures)
 				{
-					const creature = Data.creatures[i];
+					const creature = Data.creatures[id_creature];
 					
 					BufferWriter.string(buffer, creature._id);
 					BufferWriter.string(buffer, creature.name);
