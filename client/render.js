@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function()
 	document.getElementById("queueButton").onclick = function(event)
 	{
 		
-		if(queued === true)
+		if(State.queued === true)
 		{
 			console.log("In queue, will cancel queue");
 			socket.send(new Uint8Array([0x02])); //leave queue
