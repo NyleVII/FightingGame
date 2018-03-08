@@ -225,7 +225,7 @@ const processes =
 			currentDataviewIndex += creature.id.length + 1; //Increment index by length of string + 1 because of null termination of strings
 
 			//creature hp
-			creature.hp = read_int(dataview, currentDataviewIndex++);
+			creature.health = read_int(dataview, currentDataviewIndex++);
 
 			//creature abilities
 			abilityArrayLength = read_int(dataview, currentDataviewIndex++);
@@ -277,7 +277,7 @@ const processes =
 			currentDataviewIndex += creature.id.length + 1; //Increment index by length of string + 1 because of null termination of strings
 
 			//creature hp
-			creature.hp = read_int(dataview, currentDataviewIndex++);
+			creature.health = read_int(dataview, currentDataviewIndex++);
 
 			//creature abilities
 			abilityArrayLength = read_int(dataview, currentDataviewIndex++);
