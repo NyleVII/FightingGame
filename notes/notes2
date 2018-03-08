@@ -72,7 +72,8 @@ Client Game State
 	player:
 	{
 		energy_max: <INT>,
-		energy_current: <INT>
+		energy_current: <INT>,
+		deckSize: <INT>,
 		creatures:
 		[
 			{
@@ -84,12 +85,12 @@ Client Game State
 			...
 		],
 		hand: [<ID_CARD>, ...],
-		deckSize: <INT>
 	},
 	opponent:
 	{
 		energy_max: <INT>,
-		energy_current: <INT>
+		energy_current: <INT>,
+		deckSize: <INT>,
 		creatures:
 		[
 			{
@@ -100,8 +101,7 @@ Client Game State
 			},
 			...
 		],
-		handSize: <INT>,
-		deckSize: <INT>
+		handSize: <INT>
 	},
 
 
