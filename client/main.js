@@ -166,9 +166,11 @@ const processes =
 	// 0x09 game started
 	function(dataview)
 	{
+		const id_opponent = read_string(dataview, 1);
+		
 		DOMRenderer.gamescreen_show();
-		const id_player = read_string(dataview, 1);
-		game = new Game(renderer, Data.players[id_player]);
+		State.game = new Game(DOMRenderer.gamerenderer, Data.players[id_opponent]);
+		State.game.render();
 	},
 
 	// 0x0A game state

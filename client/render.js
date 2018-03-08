@@ -38,30 +38,9 @@ document.addEventListener("DOMContentLoaded", function()
 		dom_tooltip.style.top = event.clientY + 16 + "px";
 	};
 	
-	const renderer = PIXI.autoDetectRenderer();
-	document.getElementById("gamescreen_inner").appendChild(renderer.view);
-	
-	
 	PIXI.loader.add([
 		{name: "energy", url:"assets/images/energy.png"},
 		{name: "deck", url:"assets/images/deck.png"},
 		{name: "cardBack", url:"assets/images/cardBack.png"},
-	]).load(function()
-	{
-		game = new Game(renderer, {name:"Fukme"});
-		/* game.state_set({
-			player:
-			{
-				creatures: [{id: "mewtwo"}, {id: "red_dragon"}, {id: "goblin"}],
-				effecthand: ["fireball", "fireball", "fireball", "fireball", "fireball"],
-
-			},
-			opponent:
-			{
-				creatures: [{id: "mewtwo"}, {id: "gyarados"}, {id: "mewtwo"}],
-				effecthandsize: 5,
-			}
-		}); */
-		game.render();
-	});
+	]);
 });

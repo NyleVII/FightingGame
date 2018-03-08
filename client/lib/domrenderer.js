@@ -3,6 +3,8 @@
 const DOMRenderer = {
 	ready: false,
 	
+	gamerenderer: null,
+	
 	initialize: function()
 	{
 		DOMRenderer.ready = true;
@@ -13,6 +15,9 @@ const DOMRenderer = {
 		DOMRenderer.dom_playerlist = document.getElementById("playerlist");
 		DOMRenderer.dom_tooltip = document.getElementById("tooltip");
 		DOMRenderer.dom_usertext = document.getElementById("usertext");
+		
+		DOMRenderer.gamerenderer = PIXI.autoDetectRenderer();
+		document.getElementById("gamescreen_inner").appendChild(DOMRenderer.gamerenderer.view);
 	},
 	
 	callback_link_mouseover: function(event)
