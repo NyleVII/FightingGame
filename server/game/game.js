@@ -119,6 +119,8 @@ Game.prototype.encodestate = function(index_player)
 	
 	buffer.push(index_player ^ this.state.index_currentplayer);
 	buffer.push(this.state.turn);
+	
+	return buffer;
 };
 
 Game.prototype.endturn = function()
