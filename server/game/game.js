@@ -53,7 +53,7 @@ function Game(player1, player2)
 	game.players = [player1, player2];
 	shuffle(game.players);
 	
-	Promise.all([
+	game.loaded = Promise.all([
 		global.collections.loadouts.findOne({_id: game.players[0].id_activeloadout}),
 		global.collections.loadouts.findOne({_id: game.players[1].id_activeloadout})
 	]).then(function(loadouts)

@@ -108,21 +108,24 @@ const processes =
 				
 				connection.game = opponent.game = new Game(connection.player, opponent.player);
 				
-				const buffer_player = [0x09];
-				BufferWriter.string(buffer_player, opponent.player._id);
-				connection.sendBytes(Buffer.from(buffer_player));
-				
-				const buffer_opponent = [0x09];
-				BufferWriter.string(buffer_opponent, connection.player._id);
-				opponent.sendBytes(Buffer.from(buffer_opponent));
-				
-				const id_player1 = connection.game.players[0]._id;
-				const id_player2 = connection.game.players[1]._id;
-				
-				connections[id_player1].sendBytes(Buffer.from(connection.game.encodestate(0).unshift(0x0A)));
-				connections[id_player2].sendBytes(Buffer.from(connection.game.encodestate(1).unshift(0x0A)));
-				
-				connections[connection.game.players[connection.game.state.index_currentplayer]._id].sendBytes(Buffer.from([0x0B]));
+				connection.game.loaded.then(function()
+				{
+					const buffer_player = [0x09];
+					BufferWriter.string(buffer_player, opponent.player._id);
+					connection.sendBytes(Buffer.from(buffer_player));
+					
+					const buffer_opponent = [0x09];
+					BufferWriter.string(buffer_opponent, connection.player._id);
+					opponent.sendBytes(Buffer.from(buffer_opponent));
+					
+					const id_player1 = connection.game.players[0]._id;
+					const id_player2 = connection.game.players[1]._id;
+					
+					connections[id_player1].sendBytes(Buffer.from(connection.game.encodestate(0).unshift(0x0A)));
+					connections[id_player2].sendBytes(Buffer.from(connection.game.encodestate(1).unshift(0x0A)));
+					
+					connections[connection.game.players[connection.game.state.index_currentplayer]._id].sendBytes(Buffer.from([0x0B]));
+				});
 				
 				delete queue[id_opponent];
 				len_queue--;
