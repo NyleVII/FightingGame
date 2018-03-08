@@ -87,7 +87,7 @@ function Game(renderer, opponent)
 	this.stage.addChild(playerEnergy);
 
 	//Add player name to game screen
-	const playerName = new PIXI.Text(players[id_player_self].name, textStyle);
+	const playerName = new PIXI.Text(Data.players[State.id_player_self].name, textStyle);
 	playerName.anchor.set(0, 0.5);
 	playerName.x = 20;
 	playerName.y = renderer.height - this.sprite_player_energy.height/2;

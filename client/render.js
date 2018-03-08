@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function()
 	]).load(function()
 	{
 		game = new Game(renderer, {name:"Fukme"});
-		game.state_set({
+		/* game.state_set({
 			player:
 			{
 				creatures: [{id: "mewtwo"}, {id: "red_dragon"}, {id: "goblin"}],
@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function()
 				creatures: [{id: "mewtwo"}, {id: "gyarados"}, {id: "mewtwo"}],
 				effecthandsize: 5,
 			}
-		});
+		}); */
 		game.render();
 	});
 });
