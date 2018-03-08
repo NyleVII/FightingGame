@@ -4,12 +4,13 @@ const mongo = require("mongodb");
 const server_http = require("./http.js");
 const config = require("./config.json");
 const Game = require("./game/game.js");
+const Data = require("./data.js");
 
 
 // global variables
 const connections = {};
 const queue = {};
-const games = {};
+let len_queue = 0;
 
 
 // initialize web server
@@ -25,22 +26,27 @@ mongo.MongoClient.connect("mongodb://" + config.mongo_host + ":" + config.mongo_
 	{
 		const db = client.db("game");
 		
-		global.data = {};
 		global.collections = {};
 		
-		db.collection("abilities").find().toArray(function(error, result)
+		db.collection("abilities").find().toArray(function(error, abilities)
 		{
-			global.data.abilities = result;
+			Data.abilities = {};
+			for(let i = 0; i < abilities.length; ++i)
+				Data.abilities[abilities[i]._id] = abilities[i];
 		});
 		
-		db.collection("cards").find().toArray(function(error, result)
+		db.collection("cards").find().toArray(function(error, cards)
 		{
-			global.data.cards = result;
+			Data.cards = {};
+			for(let i = 0; i < cards.length; ++i)
+				Data.cards[cards[i]._id] = cards[i];
 		});
 		
-		db.collection("creatures").find().toArray(function(error, result)
+		db.collection("creatures").find().toArray(function(error, creatures)
 		{
-			global.data.creatures = result;
+			Data.creatures = {};
+			for(let i = 0; i < creatures.length; ++i)
+				Data.creatures[creatures[i]._id] = creatures[i];
 		});
 		
 		global.collections.loadouts = db.collection("loadouts");
@@ -62,6 +68,16 @@ function buffer_string(buffer, string)
 	buffer.push(0x00);
 }
 
+function read_string(buffer, index)
+{
+	let char, string = "";
+	
+	while(index < buffer.length && (char = buffer.readUInt8(index++)))
+		string += String.fromCharCode(char);
+	
+	return string;
+}
+
 
 const processes =
 [
@@ -79,17 +95,111 @@ const processes =
 	// player joins queue
 	function(connection)
 	{
-		// NOTE(shawn): temp queue code; implement matchmaking
-		if(queue.length)
-		{
-			const id_game = 0;
-			
-			games[id_game] = new Game(connection.player, queue[0].player);
-		}
+		if (queue[connection.player._id])
+			connection.sendBytes(Buffer.from([0x0E]));
 		else
 		{
-			queue.push(connection);
+			connection.sendBytes(Buffer.from([0x0D]));
+			
+			// NOTE(shawn): temp queue code; implement matchmaking
+			if(len_queue > 0)
+			{
+				// get first player in queue
+				let opponent, id_opponent;
+				for(id_opponent in queue)
+				{
+					opponent = queue[id_opponent];
+					break;
+				}
+				
+				connection.game = opponent.game = new Game(connection.player, opponent.player);
+				
+				const buffer_gamestart = Buffer.from([0x09]);
+				connection.sendBytes(buffer_gamestart);
+				opponent.sendBytes(buffer_gamestart);
+				
+				delete queue[id_opponent];
+				len_queue--;
+			}
+			else
+			{
+				queue[connection.player._id] = connection;
+				len_queue++;
+			}
 		}
+	},
+	
+	// player leaves queue
+	function(connection)
+	{
+		if(queue[connection.player._id] === undefined)
+			connection.sendBytes(Buffer.from([0x0F]));
+		else
+		{
+			delete queue[connection.player._id];
+			len_queue--;
+			
+			connection.sendBytes(Buffer.from([0x10]));
+		}
+	},
+	
+	// player changes active loadout
+	function(connection, buffer_process)
+	{
+		const id_loadout = read_string(buffer_process, 1);
+		
+		console.log(id_loadout);
+		
+		// TODO(shawn): implement
+		connection.sendBytes(Buffer.from([0x08]));
+	},
+	
+	// player concedes
+	function(connection)
+	{
+		const game = connection.game;
+		
+		if(game === undefined)
+			connection.sendBytes(Buffer.from([0x0C]));
+		else
+		{
+			const opponent = connections[game.players[0] === connection.player ? 1 : 0];
+			
+			connection.sendBytes(Buffer.from([0x11, 0x00]));
+			opponent.sendBytes(Buffer.from([0x11, 0x01]));
+			
+			delete connection.game;
+			delete opponent.game;
+		}
+	},
+	
+	// play card
+	function()
+	{
+		
+	},
+	
+	// end turn
+	function(connection)
+	{
+		const game = connection.game;
+		
+		if(game === undefined)
+			connection.sendBytes(Buffer.from([0x0C]));
+		else if(connection.player !== game.players[game.state.index_currentplayer])
+			connection.sendBytes(Buffer.from([0x14]));
+		else
+		{
+			game.endturn();
+			
+			
+		}
+	},
+	
+	// use ability
+	function()
+	{
+		
 	}
 ];
 
@@ -152,9 +262,9 @@ server_websocket.on("request", function(request)
 				
 				// send ability data dump
 				buffer = [0x01];
-				for(let i = 0; i < global.data.abilities.length; ++i)
+				for(let i = 0; i < Data.abilities.length; ++i)
 				{
-					const ability = global.data.abilities[i];
+					const ability = Data.abilities[i];
 					
 					buffer_string(buffer, ability._id);
 					buffer_string(buffer, ability.name);
@@ -163,9 +273,9 @@ server_websocket.on("request", function(request)
 				
 				// send card data dump
 				buffer = [0x02];
-				for(let i = 0; i < global.data.cards.length; ++i)
+				for(let i = 0; i < Data.cards.length; ++i)
 				{
-					const card = global.data.cards[i];
+					const card = Data.cards[i];
 					
 					buffer_string(buffer, card._id);
 					buffer_string(buffer, card.name);
@@ -175,9 +285,9 @@ server_websocket.on("request", function(request)
 				
 				// send creature data dump
 				buffer = [0x03];
-				for(let i = 0; i < global.data.creatures.length; ++i)
+				for(let i = 0; i < Data.creatures.length; ++i)
 				{
-					const creature = global.data.creatures[i];
+					const creature = Data.creatures[i];
 					
 					buffer_string(buffer, creature._id);
 					buffer_string(buffer, creature.name);

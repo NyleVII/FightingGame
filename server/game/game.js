@@ -1,3 +1,6 @@
+const Data = require("../data.js");
+
+
 function shuffle(list)
 {
 	for(let i = list.length; i; --i)
@@ -9,52 +12,66 @@ function shuffle(list)
 	}
 }
 
-function drawcard(deck)
+function drawcards(player, num_cards)
 {
-	return deck.splice(0, 1)[0];
+	player.hand.push(...player.deck.splice(0, num_cards));
 }
 
-function init_player(name, loadout)
+function init_player(loadout)
 {
 	const cards = loadout.cards.slice();
 	shuffle(cards);
 	
-	return {
-		name: name,
+	const player = {
 		energy_max: 2,
 		energy_current: 0,
 		creatures: loadout.creatures,
-		hand: [drawcard(cards), drawcard(cards), drawcard(cards), drawcard(cards), drawcard(cards)],
+		hand: [],
 		deck: cards
 	};
+	
+	drawcards(player, 5);
+	
+	return player;
 }
 
 function Game(player1, player2)
 {
 	const game = this;
 	
-	const players = [player1, player2];
-	shuffle(players);
+	game.players = [player1, player2];
+	shuffle(game.players);
 	
 	Promise.all([
-		global.collections.loadouts.findOne({_id: players[0].id_activeloadout}),
-		global.collections.loadouts.findOne({_id: players[1].id_activeloadout})
+		global.collections.loadouts.findOne({_id: game.players[0].id_activeloadout}),
+		global.collections.loadouts.findOne({_id: game.players[1].id_activeloadout})
 	]).then(function(loadouts)
 	{
 		game.state =
 		{
 			players:
 			[
-				init_player(players[0].name, loadouts[0]),
-				init_player(players[1].name, loadouts[1])
+				init_player(loadouts[0]),
+				init_player(loadouts[1])
 			],
 			phase: "game",
-			player_current: 0,
+			index_currentplayer: 0,
 			turn: 0
 		};
 	});
 }
 
+
+Game.prototype.endturn = function()
+{
+	// TODO(shawn): trigger end of turn event
+	this.state.index_currentplayer ^= 1;
+	this.state.turn++;
+	
+	const player_current = this.state.players[this.state.index_currentplayer];
+	player_current.energy_current = player_current.energy_max;
+	drawcards(player_current, 1);
+};
 
 Game.prototype.processes =
 {
@@ -62,9 +79,7 @@ Game.prototype.processes =
 	{
 		card: function(player, action)
 		{
-			const id_card = player.hand[action.index];
-			
-			// TODO(shawn): get card data from data store
+			const card = Data.cards[player.hand[action.index]];
 			
 			// TODO(shawn): send "invalid" message to client
 			if(card.cost > player.energy_current)

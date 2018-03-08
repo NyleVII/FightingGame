@@ -1,7 +1,7 @@
 //Main render of game screen
 document.addEventListener("DOMContentLoaded", function()
 {
-	
+	DOMRenderer.initialize();
 
 	document.getElementById("chat_form").onsubmit = function(event)
 	{
@@ -38,8 +38,6 @@ document.addEventListener("DOMContentLoaded", function()
 		dom_tooltip.style.top = event.clientY + 16 + "px";
 	};
 	
-	renderplayers();
-	
 	const renderer = PIXI.autoDetectRenderer();
 	document.getElementById("gamescreen_inner").appendChild(renderer.view);
 	
@@ -67,17 +65,3 @@ document.addEventListener("DOMContentLoaded", function()
 		game.render();
 	});
 });
-
-function renderplayers()
-{
-	const list = document.getElementById("players_list");
-	list.innerHTML = "";
-	
-	for (const i in players)
-	{
-		const player = document.createElement("div");
-		player.className = "player";
-		player.innerHTML = players[i].name;
-		list.appendChild(player);
-	}
-}
