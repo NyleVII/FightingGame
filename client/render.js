@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function()
 		{name: "cardBack", url:"assets/images/cardBack.png"},
 	]).load(function()
 	{
-		game = new Game(renderer);
+		game = new Game(renderer, {name:"Fukme"});
 		game.state_set({
 			player:
 			{
