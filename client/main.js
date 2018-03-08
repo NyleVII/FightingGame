@@ -29,6 +29,7 @@ const processes =
 	// 0x00 Chat message
 	function(dataview)
 	{
+		console.log("Chat message");
 		const id_player = read_string(dataview, 1);
 		const text = read_string(dataview, id_player.length + 2);
 		
@@ -38,12 +39,14 @@ const processes =
 	// 0x01 ability data dump
 	function()
 	{
+		console.log("Ability data dump");
 		// TODO(shawn): load ability data
 	},
 	
 	// 0x02 card data dump
 	function(dataview)
 	{
+		console.log("Card data dump");
 		let index = 1;
 		
 		Data.cards.by_id = {};
@@ -81,6 +84,7 @@ const processes =
 	// 0x03 creature data dump
 	function(dataview)
 	{
+		console.log("Creature data dump");
 		let index = 1;
 		
 		Data.creatures.by_id = {};
@@ -120,6 +124,7 @@ const processes =
 	// 0x04 full player list
 	function(dataview)
 	{
+		console.log("Full player list");
 		let index = 1;
 		
 		Data.players = {};
@@ -140,6 +145,7 @@ const processes =
 	// 0x05 player joined
 	function(dataview)
 	{
+		console.log("Player joined");
 		const id_player = read_string(dataview, 1);
 		Data.players[id_player] = {name: read_string(dataview, id_player.length + 2)};
 		
@@ -151,6 +157,7 @@ const processes =
 	// 0x06 player left
 	function(dataview)
 	{
+		console.log("Player left");
 		const id_player = read_string(dataview, 1);
 		
 		DOMRenderer.addmessage(Data.players[id_player].name + " left the server.");
@@ -162,6 +169,7 @@ const processes =
 	// 0x07 successful login
 	function(dataview)
 	{
+		console.log("Successful login");
 		State.id_player_self = read_string(dataview, 1);
 		DOMRenderer.usertext("Welcome " + Data.players[State.id_player_self].name);
 	},
@@ -169,12 +177,14 @@ const processes =
 	// 0x08 invalid deck
 	function()
 	{
+		console.log("Invalid deck");
 		// TODO(shawn): handle invalid deck error
 	},
 
 	// 0x09 game started
 	function(dataview)
 	{
+		console.log("Game started");
 		const id_opponent = read_string(dataview, 1);
 		
 		console.log(id_opponent);
@@ -187,6 +197,7 @@ const processes =
 	// 0x0A game state
 	function(dataview)
 	{
+		console.log("Updating game state...");
 		// TODO(shawn): update game state
 		const gameState =
 		{
@@ -309,23 +320,27 @@ const processes =
 
 		//Set the state game state to...the uhh...game state >_>
 		State.game.state_get(gameState);
+		console.log(gameState);
 	},
 
 	// 0x0B your turn
 	function()
 	{
+		console.log("It's your turn");
 		// TODO(shawn): notify player it is their turn
 	},
 
 	// 0x0C not in a game
 	function()
 	{
+		console.log("Not in a game");
 		// TODO(shawn): handle not in game error
 	},
 
 	// 0x0D successfully queued
 	function()
 	{
+		console.log("Successfully queued");
 		State.queued = true;
 		document.getElementById("queueButton").innerText = "In Queue";
 	},
@@ -333,18 +348,21 @@ const processes =
 	// 0x0E already in queue
 	function()
 	{
+		console.log("Already in queue");
 		// TODO(shawn): handle already in queue error
 	},
 
 	// 0x0F not in queue
 	function()
 	{
+		console.log("Not in queue");
 		// TODO(shawn): handle not in queue error
 	},
 
 	// 0x10 left queue
 	function()
 	{
+		console.log("Left the queue");
 		State.queued = false;
 		document.getElementById("queueButton").innerText = "Queue";
 	},
@@ -352,6 +370,7 @@ const processes =
 	// 0x11 game over
 	function(dataview)
 	{
+		console.log("Game over");
 		// TODO(shawn): better game over handling
 		DOMRenderer.gamescreen_hide();
 		
@@ -364,6 +383,7 @@ const processes =
 	// 0x12 play card
 	function(dataview)
 	{
+		console.log("Play card");
 		// TODO(shawn): animations, sound effects, update game state
 		const playedCardID = read_string(dataview, 1);
 		console.log(Data.cards.by_id[playedCardID].name); //Prints name of played card
@@ -372,6 +392,7 @@ const processes =
 	// 0x13 use ability
 	function(dataview)
 	{
+		console.log("Use ability");
 		// TODO(shawn): animations, sound effects, update game state
 		const index_creature = dataview.getInt8(1);
 		const index_ability = dataview.getInt8(2);
@@ -395,6 +416,8 @@ socket.onmessage = function(event)
 	const code = dataview.getInt8(0);
 	
 	const process = processes[code];
+	console.log("Sending Protocol Code: " + code);
 	if(process !== undefined)
 		process(dataview);
+
 };
