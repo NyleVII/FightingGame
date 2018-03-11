@@ -1,17 +1,7 @@
 const Data = require("../data.js");
 const BufferWriter = require("../bufferwriter.js");
+const Random = require("../random.js");
 
-
-function shuffle(list)
-{
-	for(let i = list.length; i; --i)
-	{
-		const j = Math.floor(Math.random()*i);
-		const temp = list[i - 1];
-		list[i - 1] = list[j];
-		list[j] = temp;
-	}
-}
 
 function drawcards(player, num_cards)
 {
@@ -21,7 +11,7 @@ function drawcards(player, num_cards)
 function init_player(loadout)
 {
 	const cards = loadout.cards.slice();
-	shuffle(cards);
+	Random.shuffle(cards);
 	
 	const player = {
 		energy_max: 2,
@@ -51,7 +41,7 @@ function Game(player1, player2)
 	const game = this;
 	
 	game.players = [player1, player2];
-	shuffle(game.players);
+	Random.shuffle(game.players);
 	
 	game.loaded = Promise.all([
 		global.collections.loadouts.findOne({_id: game.players[0].id_activeloadout}),

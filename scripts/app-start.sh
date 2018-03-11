@@ -1,0 +1,1 @@
+ssh -i ~/.ssh/appserver.pem ec2-user@34.217.232.210 "cd app; nohup npm start"

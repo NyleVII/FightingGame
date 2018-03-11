@@ -25,6 +25,8 @@ mongo.MongoClient.connect("mongodb://" + config.mongo_host + ":" + config.mongo_
 		console.error(error);
 	else
 	{
+		console.log("connected to database");
+		
 		const db = client.db("game");
 		
 		global.collections = {};
@@ -235,6 +237,12 @@ server_websocket.on("request", function(request)
 				connection.on("close", function()
 				{
 					delete connections[player._id];
+					
+					if(queue[player._id] !== undefined)
+					{
+						delete queue[player._id];
+						len_queue--;
+					}
 					
 					// broadcast player left message
 					buffer = [0x06];
