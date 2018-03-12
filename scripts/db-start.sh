@@ -1,1 +1,1 @@
-ssh -i ~/.ssh/appserver.pem ec2-user@34.217.232.210 "sudo mongod --config db/config"
+ssh -i ~/.ssh/appserver.pem ec2-user@34.217.232.210 "sudo killall mongod; sudo mongod --config db/config"

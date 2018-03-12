@@ -119,7 +119,7 @@ Game.prototype.state_set = function(state)
 		this.sprite_player_hand[i].texture = PIXI.loader.resources[state.player.hand[i] + "_card"].texture;
 	
 	// opponent hand
-	const texture_cardback = PIXI.loader.resources.cardBack.texture;
+	const texture_cardback = PIXI.loader.resources.cardback.texture;
 	for (let i = 0; i < MAX_EFFECTHANDSIZE; ++i)
 		this.sprite_opponent_hand[i].texture = (i < state.opponent.handSize) ? texture_cardback : undefined;
 	

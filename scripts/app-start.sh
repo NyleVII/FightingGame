@@ -1,1 +1,1 @@
-ssh -i ~/.ssh/appserver.pem ec2-user@34.217.232.210 "cd app; nohup npm start"
+ssh -i ~/.ssh/appserver.pem ec2-user@34.217.232.210 "killall node; cd app; nohup npm start > logs/out.txt 2> err.txt &"

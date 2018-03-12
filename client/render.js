@@ -41,6 +41,6 @@ document.addEventListener("DOMContentLoaded", function()
 	PIXI.loader.add([
 		{name: "energy", url:"assets/images/energy.png"},
 		{name: "deck", url:"assets/images/deck.png"},
-		{name: "cardBack", url:"assets/images/cardBack.png"},
+		{name: "cardback", url:"assets/images/cardback.png"},
 	]);
 });

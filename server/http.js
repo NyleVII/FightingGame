@@ -16,12 +16,19 @@ module.exports = http.createServer(function(request, response)
 		type = "text/javascript";
 	else if(ext === ".css")
 		type = "text/css";
+	else if(ext === ".png")
+		type = "image/png";
 	
 	fs.readFile("client" + filename, function(error, content)
 	{
-		if(!error)
+		if(error === null)
 		{
 			response.writeHead(200, {"Content-Type": type});
+			response.end(content, "utf-8");
+		}
+		else
+		{
+			response.writeHead(404);
 			response.end(content, "utf-8");
 		}
 	});
