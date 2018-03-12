@@ -2,7 +2,7 @@ const websocket = require("websocket");
 const mongo = require("mongodb");
 
 const server_http = require("./http.js");
-const config = require("./config.json");
+const config = require("../appconfig.json");
 const Game = require("./game/game.js");
 const Data = require("./data.js");
 const BufferWriter = require("./bufferwriter.js");
@@ -25,8 +25,6 @@ mongo.MongoClient.connect("mongodb://" + config.mongo_host + ":" + config.mongo_
 		console.error(error);
 	else
 	{
-		console.log("connected to database");
-		
 		const db = client.db("game");
 		
 		global.collections = {};
