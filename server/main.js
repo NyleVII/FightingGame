@@ -6,11 +6,13 @@ const config = require("../appconfig.json");
 const Game = require("./game/game.js");
 const Data = require("./data.js");
 const BufferWriter = require("./bufferwriter.js");
+const Network = require("./network.js");
 
 
 // global variables
 const connections = {};
 const queue = {};
+const games = [];
 let len_queue = 0;
 
 
@@ -90,10 +92,10 @@ const processes =
 	function(connection)
 	{
 		if (queue[connection.player._id])
-			connection.sendBytes(Buffer.from([0x0E]));
+			Network.send(connection, [0x0E]);
 		else
 		{
-			connection.sendBytes(Buffer.from([0x0D]));
+			Network.send(connection, [0x0D]);
 			
 			// NOTE(shawn): temp queue code; implement matchmaking
 			if(len_queue > 0)
@@ -106,31 +108,29 @@ const processes =
 					break;
 				}
 				
-				connection.game = opponent.game = new Game(connection.player, opponent.player);
+				const game = connection.game = opponent.game = new Game(connection, opponent);
+				games.push(game);
 				
-				connection.game.loaded.then(function()
+				game.loaded.then(function()
 				{
 					const buffer_player = [0x09];
 					BufferWriter.string(buffer_player, opponent.player._id);
-					connection.sendBytes(Buffer.from(buffer_player));
+					Network.send(connection, buffer_player);
 					
 					const buffer_opponent = [0x09];
 					BufferWriter.string(buffer_opponent, connection.player._id);
-					opponent.sendBytes(Buffer.from(buffer_opponent));
+					Network.send(opponent, buffer_opponent);
 					
-					const id_player1 = connection.game.players[0]._id;
-					const id_player2 = connection.game.players[1]._id;
-					
-					const state1 = connection.game.encodestate(0);
-					const state2 = connection.game.encodestate(1);
+					const state1 = game.encodestate(0);
+					const state2 = game.encodestate(1);
 					
 					state1.unshift(0x0A);
 					state2.unshift(0x0A);
 					
-					connections[id_player1].sendBytes(Buffer.from(state1));
-					connections[id_player2].sendBytes(Buffer.from(state2));
+					Network.send(game.connections[0], state1);
+					Network.send(game.connections[1], state2);
 					
-					connections[connection.game.players[connection.game.state.index_currentplayer]._id].sendBytes(Buffer.from([0x0B]));
+					Network.send(game.connections[game.state.index_currentplayer], [0x0B]);
 				});
 				
 				delete queue[id_opponent];
@@ -243,7 +243,7 @@ server_websocket.on("request", function(request)
 					}
 					
 					// broadcast player left message
-					buffer = [0x06];
+					const buffer = [0x06];
 					BufferWriter.string(buffer, player._id);
 					broadcast(Buffer.from(buffer));
 					console.log(player.name + " disconnected.");
@@ -314,6 +314,40 @@ server_websocket.on("request", function(request)
 					buffer.push(creature.health);
 				}
 				connection.sendBytes(Buffer.from(buffer));
+				
+				for(let j = 0; j < games.length; ++j)
+				{
+					const game = games[j];
+					
+					if(game.connections[0].player._id === player._id)
+					{
+						const buffer_gamestart = [0x09];
+						BufferWriter.string(buffer_gamestart, game.connections[1].player._id);
+						connection.sendBytes(Buffer.from(buffer_gamestart));
+						
+						const state = game.encodestate(0);
+						state.unshift(0x0A);
+						
+						connection.sendBytes(Buffer.from(state));
+						
+						if(game.state.index_currentplayer === 0)
+							connection.sendBytes(Buffer.from([0x0B]));
+					}
+					else if(game.connections[1].player._id === player._id)
+					{
+						const buffer_gamestart = [0x09];
+						BufferWriter.string(buffer_gamestart, game.connections[0].player._id);
+						connection.sendBytes(Buffer.from(buffer_gamestart));
+						
+						const state = game.encodestate(1);
+						state.unshift(0x0A);
+						
+						connection.sendBytes(Buffer.from(state));
+						
+						if(game.state.index_currentplayer === 1)
+							connection.sendBytes(Buffer.from([0x0B]));
+					}
+				}
 				
 				return;
 			}

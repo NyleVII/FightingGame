@@ -35,8 +35,6 @@ function init_text(stage, x, y, x_anchor, y_anchor)
 
 function Game(renderer, opponent)
 {
-	this.state = {};
-	
 	this.renderer = renderer;
 	this.stage = new PIXI.Container();
 
@@ -67,25 +65,21 @@ function Game(renderer, opponent)
 	
 	// player info sprites
 	this.sprite_player_deck = init_sprite(this.stage, 200, renderer.height, 0, 1, 50, 50, 1);
-	this.sprite_player_deck.texture = PIXI.loader.resources.deck.texture;
 	this.sprite_player_energy = init_sprite(this.stage, 280, renderer.height, 0, 1, 50, 50, 1);
-	this.sprite_player_energy.texture = PIXI.loader.resources.energy.texture;
 	
 	// player info text
-	this.text_player_deck = init_text(this.stage, this.sprite_player_deck.x + this.sprite_player_deck.width, this.sprite_player_deck.y - this.sprite_player_deck.height/2, 0, 0.5);
-	this.text_player_energy = init_text(this.stage, this.sprite_player_energy.x + this.sprite_player_energy.width, this.sprite_player_energy.y - this.sprite_player_energy.height/2, 0, 0.5);
-	this.text_player_name = init_text(this.stage, 20, renderer.height - this.sprite_player_energy.height/2, 0, 0.5);
+	this.text_player_deck = init_text(this.stage, this.sprite_player_deck.x + this.sprite_player_deck._width, this.sprite_player_deck.y - this.sprite_player_deck._height/2, 0, 0.5);
+	this.text_player_energy = init_text(this.stage, this.sprite_player_energy.x + this.sprite_player_energy._width, this.sprite_player_energy.y - this.sprite_player_energy._height/2, 0, 0.5);
+	this.text_player_name = init_text(this.stage, 20, renderer.height - this.sprite_player_energy._height/2, 0, 0.5);
 	this.text_player_name.text = Data.players[State.id_player_self].name;
 	
 	// opponent info sprites
 	this.sprite_opponent_deck = init_sprite(this.stage, 520, 0, 0, 0, 50, 50, 1);
-	this.sprite_opponent_deck.texture = PIXI.loader.resources.deck.texture;
 	this.sprite_opponent_energy = init_sprite(this.stage, renderer.width/2, 0, 0, 0, 50, 50, 1);
-	this.sprite_opponent_energy.texture = PIXI.loader.resources.energy.texture;
 	
 	// opponent info text
-	this.text_opponent_deck = init_text(this.stage, this.sprite_opponent_deck.x + this.sprite_opponent_deck.width, this.sprite_opponent_deck.y + this.sprite_opponent_deck.height/2, 0, 0.5);
-	this.text_opponent_energy = init_text(this.stage, this.sprite_opponent_energy.x + this.sprite_opponent_energy.width, this.sprite_opponent_energy.y + this.sprite_opponent_energy.height/2, 0, 0.5);
+	this.text_opponent_deck = init_text(this.stage, this.sprite_opponent_deck.x + this.sprite_opponent_deck._width, this.sprite_opponent_deck.y + this.sprite_opponent_deck._height/2, 0, 0.5);
+	this.text_opponent_energy = init_text(this.stage, this.sprite_opponent_energy.x + this.sprite_opponent_energy._width, this.sprite_opponent_energy.y + this.sprite_opponent_energy._height/2, 0, 0.5);
 	this.text_opponent_name = init_text(this.stage, renderer.width - 20, 25, 1, 0.5);
 	this.text_opponent_name.text = opponent.name;
 
@@ -97,12 +91,31 @@ function Game(renderer, opponent)
 		this.sprite_player_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_PLAYER.x + i*INCREMENT_EFFECTHAND_PLAYER.x, ANCHOR_EFFECTHAND_PLAYER.y - SIZE_CARD.y + i*INCREMENT_EFFECTHAND_PLAYER.y, 0, 0, SIZE_CARD.x, SIZE_CARD.y, 1));
 		this.sprite_opponent_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_OPPONENT.x + i*INCREMENT_EFFECTHAND_OPPONENT.x, ANCHOR_EFFECTHAND_OPPONENT.y + i*INCREMENT_EFFECTHAND_OPPONENT.y, 0, 0, SIZE_CARD.x, SIZE_CARD.y, 1));
 	}
+	
+	if(State.loaded.all)
+		this.init_textures();
 }
 
+
+Game.prototype.init_textures = function()
+{
+	this.sprite_player_deck.texture = PIXI.loader.resources.deck.texture;
+	this.sprite_opponent_deck.texture = PIXI.loader.resources.deck.texture;
+	this.sprite_player_energy.texture = PIXI.loader.resources.energy.texture;
+	this.sprite_opponent_energy.texture = PIXI.loader.resources.energy.texture;
+	
+	if(this.state)
+		this.state_set(this.state);
+	else
+		this.render();
+};
 
 Game.prototype.state_set = function(state)
 {
 	this.state = state;
+	
+	if(!State.loaded.all)
+		return;
 	
 	// player creatures
 	this.sprite_player_creature_pos3.texture = PIXI.loader.resources[state.player.creatures[2].id + "_creature"].texture;
@@ -115,13 +128,14 @@ Game.prototype.state_set = function(state)
 	this.sprite_opponent_creature_pos3.texture = PIXI.loader.resources[state.opponent.creatures[2].id + "_creature"].texture;
 	
 	// player hand
+	console.log(this.sprite_player_hand[0].texture);
 	for (let i = 0; i < state.player.hand.length; ++i)
 		this.sprite_player_hand[i].texture = PIXI.loader.resources[state.player.hand[i] + "_card"].texture;
 	
 	// opponent hand
 	const texture_cardback = PIXI.loader.resources.cardback.texture;
 	for (let i = 0; i < MAX_EFFECTHANDSIZE; ++i)
-		this.sprite_opponent_hand[i].texture = (i < state.opponent.handSize) ? texture_cardback : undefined;
+		this.sprite_opponent_hand[i].texture = (i < state.opponent.handSize) ? texture_cardback : PIXI.Texture.EMPTY;
 	
 	// player info
 	this.text_player_energy.text = State.game.state.player.energy_current + "/" + State.game.state.player.energy_max;
