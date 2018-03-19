@@ -50,25 +50,40 @@ function Game(renderer, opponent)
 	function onClick_creature()
 	{
 		console.log("Clicked a creature");
+		game.text_command_card.text = "Clicked a creature";
+		game.render();
 	}
 
 	function onHover_creature(event)
 	{
 		console.log("Hovering over creature");
-		game.text_command_card.text = "Hovering over creature";
 		console.log(event.target);
+		let target;
+		if(event.target.is_mine)
+		{
+			target = State.game.state.player.creatures[event.target.creature_index];
+		}
+		else
+		{
+			target = State.game.state.opponent.creatures[event.target.creature_index];
+		}
+		//game.text_command_card.text = "Hovering over creature " + target.id;
+		game.text_command_card.text = "Hovering over " + Data.creatures.by_id[target.id].name;
 		game.render();
 	}
 
 	function onClick_card()
 	{
 		console.log("Clicked a card");
+		game.text_command_card.text = "Clicked a card";
+		game.render();
 	}
 
 	function onHover_card(event)
 	{
 		console.log("Hovering over:");
 		console.log(event.currentTarget);
+
 		game.text_command_card.text = "Hovering over card";
 		game.render();
 	}
@@ -100,14 +115,24 @@ function Game(renderer, opponent)
 	this.sprite_player_creature_pos0 = init_sprite(this.stage, CREATURE_SPACING*2, renderer.height/2, 0, 1, 100, 100, 1, true, onClick_creature, onHover_creature);
 	this.sprite_player_creature_pos0.creature_index = 0;
 	this.sprite_player_creature_pos0.is_mine = true;
-	this.sprite_player_creature_pos1 = init_sprite(this.stage, CREATURE_SPACING, renderer.height/2, 0, 1, 100, 100, 1, true, onClick_creature);
-	this.sprite_player_creature_pos2 = init_sprite(this.stage, 0, renderer.height/2, 0, 1, 100, 100, 1, true, onClick_creature);
+	this.sprite_player_creature_pos1 = init_sprite(this.stage, CREATURE_SPACING, renderer.height/2, 0, 1, 100, 100, 1, true, onClick_creature, onHover_creature);
+	this.sprite_player_creature_pos1.creature_index = 1;
+	this.sprite_player_creature_pos1.is_mine = true;
+	this.sprite_player_creature_pos2 = init_sprite(this.stage, 0, renderer.height/2, 0, 1, 100, 100, 1, true, onClick_creature, onHover_creature);
+	this.sprite_player_creature_pos2.creature_index = 2;
+	this.sprite_player_creature_pos2.is_mine = true;
 	
 	// add opponent creature sprites to game screen
-	this.sprite_opponent_creature_pos0 = init_sprite(this.stage, renderer.width - CREATURE_SPACING*2, renderer.height/2, 0, 1, 100, 100, -1, true, onClick_creature);
-	this.sprite_opponent_creature_pos1 = init_sprite(this.stage, renderer.width - CREATURE_SPACING, renderer.height/2, 0, 1, 100, 100, -1, true, onClick_creature);
-	this.sprite_opponent_creature_pos2 = init_sprite(this.stage, renderer.width, renderer.height/2, 0, 1, 100, 100, -1, true, onClick_creature);
-	
+	this.sprite_opponent_creature_pos0 = init_sprite(this.stage, renderer.width - CREATURE_SPACING*2, renderer.height/2, 0, 1, 100, 100, -1, true, onClick_creature, onHover_creature);
+	this.sprite_opponent_creature_pos0.creature_index = 0;
+	this.sprite_opponent_creature_pos0.is_mine = false;
+	this.sprite_opponent_creature_pos1 = init_sprite(this.stage, renderer.width - CREATURE_SPACING, renderer.height/2, 0, 1, 100, 100, -1, true, onClick_creature, onHover_creature);
+	this.sprite_opponent_creature_pos1.creature_index = 1;
+	this.sprite_opponent_creature_pos1.is_mine = false;
+	this.sprite_opponent_creature_pos2 = init_sprite(this.stage, renderer.width, renderer.height/2, 0, 1, 100, 100, -1, true, onClick_creature, onHover_creature);
+	this.sprite_opponent_creature_pos2.creature_index = 2;
+	this.sprite_opponent_creature_pos2.is_mine = false;
+
 	// player deck and energy info sprites
 	this.sprite_player_deck = init_sprite(this.stage, 200, renderer.height, 0, 1, 50, 50, 1, false);
 	this.sprite_player_deck.texture = PIXI.loader.resources.deck.texture;
@@ -137,8 +162,8 @@ function Game(renderer, opponent)
 	this.sprite_opponent_hand = [];
 	for (let i = 0; i < MAX_EFFECTHANDSIZE; ++i)
 	{
-		this.sprite_player_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_PLAYER.x + i*INCREMENT_EFFECTHAND_PLAYER.x, ANCHOR_EFFECTHAND_PLAYER.y - SIZE_CARD.y + i*INCREMENT_EFFECTHAND_PLAYER.y, 0, 0, SIZE_CARD.x, SIZE_CARD.y, 1, true, onClick_card));
-		this.sprite_opponent_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_OPPONENT.x + i*INCREMENT_EFFECTHAND_OPPONENT.x, ANCHOR_EFFECTHAND_OPPONENT.y + i*INCREMENT_EFFECTHAND_OPPONENT.y, 0, 0, SIZE_CARD.x, SIZE_CARD.y, 1, true, onClick_card));
+		this.sprite_player_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_PLAYER.x + i*INCREMENT_EFFECTHAND_PLAYER.x, ANCHOR_EFFECTHAND_PLAYER.y - SIZE_CARD.y + i*INCREMENT_EFFECTHAND_PLAYER.y, 0, 0, SIZE_CARD.x, SIZE_CARD.y, 1, true, onClick_card, onHover_card));
+		this.sprite_opponent_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_OPPONENT.x + i*INCREMENT_EFFECTHAND_OPPONENT.x, ANCHOR_EFFECTHAND_OPPONENT.y + i*INCREMENT_EFFECTHAND_OPPONENT.y, 0, 0, SIZE_CARD.x, SIZE_CARD.y, 1, true, onClick_card, onHover_card));
 	}
 }
 
