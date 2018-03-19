@@ -42,5 +42,9 @@ document.addEventListener("DOMContentLoaded", function()
 		{name: "energy", url:"assets/images/energy.png"},
 		{name: "deck", url:"assets/images/deck.png"},
 		{name: "cardback", url:"assets/images/cardback.png"},
-	]);
+	]).load(function()
+	{
+		State.loaded.assets_misc = true;
+		State.loaded_process();
+	});
 });

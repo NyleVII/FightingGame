@@ -59,7 +59,11 @@ const processes =
 				url: "assets/images/cards/" + id_card + ".png"
 			});
 		
-		PIXI.loader.add(assets).load();
+		PIXI.loader.add(assets).load(function()
+		{
+			State.loaded.assets_cards = true;
+			State.loaded_process();
+		});
 	},
 	
 	// 0x03 creature data dump
@@ -89,7 +93,11 @@ const processes =
 				url: "assets/images/creatures/" + id_creature + ".png"
 			});
 		
-		PIXI.loader.add(assets).load();
+		PIXI.loader.add(assets).load(function()
+		{
+			State.loaded.assets_creatures = true;
+			State.loaded_process();
+		});
 	},
 	
 	// 0x04 full player list
@@ -148,6 +156,8 @@ const processes =
 	{
 		const id_opponent = reader.read_string();
 		
+		console.log("game starting");
+		
 		DOMRenderer.gamescreen_show();
 		State.game = new Game(DOMRenderer.gamerenderer, Data.players[id_opponent]);
 		State.game.render();
@@ -174,17 +184,12 @@ const processes =
 		// player creatures
 		for(let i = 0; i < 3; ++i)
 		{
-			const creature = {
-				abilities: [],
-				effects: [],
-			};
+			const creature = {effects: []};
 			
 			creature.id = reader.read_string();
 			creature.health = reader.read_int8();
 			
-			const len_abilities = reader.read_int8();
-			for(let j = 0; j < len_abilities; ++j)
-				creature.abilities.push(reader.read_string());
+			creature.id_ability = reader.read_string();
 			
 			const len_effects = reader.read_int8();
 			for(let j = 0; j < len_effects; ++j)
@@ -206,17 +211,12 @@ const processes =
 		// opponent creatures
 		for(let i = 0; i < 3; ++i)
 		{
-			const creature = {
-				abilities: [],
-				effects: [],
-			};
+			const creature = {effects: []};
 			
 			creature.id = reader.read_string();
 			creature.health = reader.read_int8();
 			
-			const len_abilities = reader.read_int8();
-			for(let j = 0; j < len_abilities; ++j)
-				creature.abilities.push(reader.read_string());
+			creature.id_ability = reader.read_string();
 			
 			const len_effects = reader.read_int8();
 			for(let j = 0; j < len_effects; ++j)

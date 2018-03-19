@@ -1,0 +1,55 @@
+{
+	"client": {
+		"LOGIN": 0,
+		"CHAT": 1,
+		"QUEUE_JOIN": 2,
+		"QUEUE_LEAVE": 3,
+		"CHANGELOADOUT": 4,
+		"GAME": 5,
+		
+		"game": {
+			"CONCEDE": 0,
+			"ENDTURN": 1,
+			"PLAY_CARD": 2,
+			"PLAY_ABILITY": 3
+		}
+	},
+	
+	"server": {
+		"LOGIN": 0,
+		"CHAT": 1,
+		"DATADUMP_ABILITY": 2,
+		"DATADUMP_CREATURE": 3,
+		"DATADUMP_CARD": 4,
+		"PLAYER_LIST": 5,
+		"PLAYER_JOINED": 6,
+		"PLAYER_LEFT": 7,
+		"ERROR": 8,
+		"GAMESTART": 9,
+		"GAME": 10,
+		
+		"game": {
+			"STATE": 0,
+			"TURN_START": 1,
+			"TURN_END": 2,
+			"PLAY_CARD_PLAYER": 3,
+			"PLAY_CARD_OPPONENT": 4,
+			"PLAY_ABILITY_PLAYER": 5,
+			"PLAY_ABILITY_OPPONENT": 6,
+			"DRAW_PLAYER": 7,
+			"DRAW_OPPONENT": 8,
+			"MILL_PLAYER": 9,
+			"MILL_OPPONENT": 10,
+			"GAINMAXENERGY_PLAYER": 11,
+			"GAINMAXENERGY_OPPONENT": 12,
+			"GAINENERGY_PLAYER": 13,
+			"GAINENERGY_OPPONENT": 14,
+			"DAMAGE_PLAYER": 15,
+			"DAMAGE_OPPONENT": 16,
+			"HEAL_PLAYER": 17,
+			"HEAL_OPPONENT": 18,
+			"DESTROY_PLAYER": 19,
+			"DESTROY_OPPONENT": 20
+		}
+	}
+}
