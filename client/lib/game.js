@@ -47,10 +47,20 @@ function init_text(stage, x, y, x_anchor, y_anchor)
 function Game(renderer, opponent)
 {
 	const game = this;
-	function onClick_creature()
+	function onClick_creature(event)
 	{
 		console.log("Clicked a creature");
 		game.text_command_card.text = "Clicked a creature";
+		let target;
+		if(event.target.is_mine)
+		{
+			target = State.game.state.player.creatures[event.target.creature_index];
+		}
+		else
+		{
+			target = State.game.state.opponent.creatures[event.target.creature_index];
+		}
+		game.text_command_card.text = "Clicked on " + Data.creatures.by_id[target.id].name;
 		game.render();
 	}
 
@@ -67,24 +77,25 @@ function Game(renderer, opponent)
 		{
 			target = State.game.state.opponent.creatures[event.target.creature_index];
 		}
-		//game.text_command_card.text = "Hovering over creature " + target.id;
 		game.text_command_card.text = "Hovering over " + Data.creatures.by_id[target.id].name;
 		game.render();
 	}
 
-	function onClick_card()
+	function onClick_card(event)
 	{
 		console.log("Clicked a card");
-		game.text_command_card.text = "Clicked a card";
+		let target;
+		target = State.game.state.player.hand[event.target.card_index];
+		game.text_command_card.text = "Clicked " + Data.cards.by_id[target].name;
 		game.render();
 	}
 
 	function onHover_card(event)
 	{
 		console.log("Hovering over:");
-		console.log(event.currentTarget);
-
-		game.text_command_card.text = "Hovering over card";
+		let target;
+		target = State.game.state.player.hand[event.target.card_index];
+		game.text_command_card.text = "Hovering over " + Data.cards.by_id[target].name;
 		game.render();
 	}
 
@@ -163,6 +174,7 @@ function Game(renderer, opponent)
 	for (let i = 0; i < MAX_EFFECTHANDSIZE; ++i)
 	{
 		this.sprite_player_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_PLAYER.x + i*INCREMENT_EFFECTHAND_PLAYER.x, ANCHOR_EFFECTHAND_PLAYER.y - SIZE_CARD.y + i*INCREMENT_EFFECTHAND_PLAYER.y, 0, 0, SIZE_CARD.x, SIZE_CARD.y, 1, true, onClick_card, onHover_card));
+		this.sprite_player_hand[i].card_index = i;
 		this.sprite_opponent_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_OPPONENT.x + i*INCREMENT_EFFECTHAND_OPPONENT.x, ANCHOR_EFFECTHAND_OPPONENT.y + i*INCREMENT_EFFECTHAND_OPPONENT.y, 0, 0, SIZE_CARD.x, SIZE_CARD.y, 1, true, onClick_card, onHover_card));
 	}
 }
