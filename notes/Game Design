@@ -1,1 +1,28 @@
 Game Design Document for "Fighting Game"
+
+3v3 combat of creatures augmented with cards
+
+Creature characteristics:
+    - Each creature has properties
+        health
+        power
+        passive
+    - Each creature can only learn one ability at a time
+
+
+What differentiates creatures from one another?
+    - starting "power" of their ability 
+        Power is a measurement of how potent an ability is (3 dmg == 3 power? for example)
+    - starting health
+    - one starting ability (Deal damage, heal, draw card, protect, etc.)
+    - passive effects (on death, trigger, auras, evolution)
+
+
+Teaching a creature a different ability will be uncommon
+    Generally strong, meant for late game
+
+For later design:
+    Board effects
+        Weather? (fog, rain, etc.)
+        Enchantments
+
