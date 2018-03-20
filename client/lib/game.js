@@ -123,6 +123,7 @@ function Game(renderer, opponent)
 	this.sprite_player_creature_pos0 = init_sprite(this.stage, CREATURE_SPACING*2, renderer.height/2, 0, 1, 100, 100, 1, true, onClick_creature, onHover_creature);
 	this.sprite_player_creature_pos0.creature_index = 0;
 	this.sprite_player_creature_pos0.is_mine = true;
+	this.text_player_creature_health_pos0 = init_text(this.stage, this.sprite_player_creature_pos0.x, this.sprite_player_creature_pos0.y, 0, 0);
 	this.sprite_player_creature_pos1 = init_sprite(this.stage, CREATURE_SPACING, renderer.height/2, 0, 1, 100, 100, 1, true, onClick_creature, onHover_creature);
 	this.sprite_player_creature_pos1.creature_index = 1;
 	this.sprite_player_creature_pos1.is_mine = true;
@@ -202,6 +203,9 @@ Game.prototype.state_set = function(state)
 	this.sprite_player_creature_pos2.texture = PIXI.loader.resources[state.player.creatures[2].id + "_creature"].texture;
 	this.sprite_player_creature_pos1.texture = PIXI.loader.resources[state.player.creatures[1].id + "_creature"].texture;
 	this.sprite_player_creature_pos0.texture = PIXI.loader.resources[state.player.creatures[0].id + "_creature"].texture;
+
+	// player creature health text
+	this.text_player_creature_health_pos0.text = State.game.state.player.creatures[0].health;
 	
 	// opponent creatures
 	this.sprite_opponent_creature_pos0.texture = PIXI.loader.resources[state.opponent.creatures[0].id + "_creature"].texture;
