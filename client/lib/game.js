@@ -177,6 +177,99 @@ function Game(renderer, opponent)
 }
 
 
+Game.prototype.processes = {};
+
+Game.prototype.processes[NetProtocol.client.game.STATE] = function(reader)
+{
+	const state = {
+		player: {
+			creatures: [],
+			hand: [],
+		},
+		opponent: {
+			creatures: [],
+		}
+	};
+	
+	// player state
+	state.player.energy_max = reader.read_int8();
+	state.player.energy_current = reader.read_int8();
+	state.player.deckSize = reader.read_int8();
+
+	// player creatures
+	for(let i = 0; i < 3; ++i)
+	{
+		const creature = {effects: []};
+		
+		creature.id = reader.read_string();
+		creature.health = reader.read_int8();
+		
+		creature.id_ability = reader.read_string();
+		
+		const len_effects = reader.read_int8();
+		for(let j = 0; j < len_effects; ++j)
+			creature.effects.push(reader.read_string());
+
+		state.player.creatures.push(creature);
+	}
+
+	// player hand
+	const len_hand = reader.read_int8();
+	for(let i = 0; i < len_hand; ++i)
+		state.player.hand.push(reader.read_string());
+	
+	// opponent state
+	state.opponent.energy_max = reader.read_int8();
+	state.opponent.energy_current = reader.read_int8();
+	state.opponent.deckSize = reader.read_int8();
+
+	// opponent creatures
+	for(let i = 0; i < 3; ++i)
+	{
+		const creature = {effects: []};
+		
+		creature.id = reader.read_string();
+		creature.health = reader.read_int8();
+		
+		creature.id_ability = reader.read_string();
+		
+		const len_effects = reader.read_int8();
+		for(let j = 0; j < len_effects; ++j)
+			creature.effects.push(reader.read_string());
+
+		state.opponent.creatures.push(creature);
+	}
+
+	// opponent hand
+	state.opponent.handSize = reader.read_int8();
+
+	// game state
+	state.is_opponents_turn = reader.read_int8(); //0 (false) means it's my turn, 1 opponents
+	state.turn = reader.read_int8();
+
+	//Set the state game state to...the uhh...game state >_>
+	this.state_set(state);
+};
+
+Game.prototype.processes[NetProtocol.client.game.TURN_START] = function()
+{
+	console.log("It is your turn.");
+};
+
+Game.prototype.processes[NetProtocol.client.game.TURN_START] = function()
+{
+	console.log("Your turn has ended.");
+};
+
+Game.prototype.process = function(reader)
+{
+	const code = reader.read_int8();
+	
+	const process = this.processes[code];
+	if(process !== undefined)
+		process.call(this, reader);
+};
+
 Game.prototype.init_textures = function()
 {
 	this.sprite_player_deck.texture = PIXI.loader.resources.deck.texture;
