@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function()
 		
 		const text = document.getElementById("chat_text");
 		
-		const buffer_text = [0x00];
+		const buffer_text = [NetProtocol.server.CHAT];
 		for(let i = 0; i < text.value.length; ++i)
 			buffer_text.push(text.value.charCodeAt(i) & 0xff);
 		socket.send(new Uint8Array(buffer_text));
@@ -22,12 +22,12 @@ document.addEventListener("DOMContentLoaded", function()
 		if(State.queued === true)
 		{
 			console.log("In queue, will cancel queue");
-			socket.send(new Uint8Array([0x02])); //leave queue
+			socket.send(new Uint8Array([NetProtocol.server.QUEUE_LEAVE]));
 		}
 		else 
 		{
 			console.log("Attempting to join queue");
-			socket.send(new Uint8Array([0x01])); //join queue
+			socket.send(new Uint8Array([NetProtocol.server.QUEUE_JOIN]));
 		}
 	};
 	

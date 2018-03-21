@@ -1,10 +1,10 @@
 {
-	"client": {
+	"server": {
 		"LOGIN": 0,
 		"CHAT": 1,
 		"QUEUE_JOIN": 2,
 		"QUEUE_LEAVE": 3,
-		"CHANGELOADOUT": 4,
+		"LOADOUT_ACTIVE": 4,
 		"GAME": 5,
 		
 		"game": {
@@ -15,7 +15,7 @@
 		}
 	},
 	
-	"server": {
+	"client": {
 		"LOGIN": 0,
 		"CHAT": 1,
 		"DATADUMP_ABILITY": 2,
@@ -24,9 +24,10 @@
 		"PLAYER_LIST": 5,
 		"PLAYER_JOINED": 6,
 		"PLAYER_LEFT": 7,
-		"ERROR": 8,
-		"GAMESTART": 9,
-		"GAME": 10,
+		"QUEUE_JOINED": 8,
+		"QUEUE_LEFT": 9,
+		"GAMESTART": 10,
+		"GAME": 11,
 		
 		"game": {
 			"STATE": 0,
@@ -50,6 +51,16 @@
 			"HEAL_OPPONENT": 18,
 			"DESTROY_PLAYER": 19,
 			"DESTROY_OPPONENT": 20
+		},
+		
+		"ERROR": 255,
+		
+		"error":
+		{
+			"ALREADY_IN_QUEUE": 0,
+			"NOT_IN_QUEUE": 1,
+			"NOT_IN_GAME": 2,
+			"INVALID_LOADOUT": 3
 		}
 	}
 }
