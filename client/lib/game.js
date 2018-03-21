@@ -87,6 +87,8 @@ function Game(renderer, opponent)
 		let target;
 		target = State.game.state.player.hand[event.target.card_index];
 		game.text_command_card.text = "Clicked " + Data.cards.by_id[target].name;
+		//Sends play card message to the server
+		socket.send(new Uint8Array([NetProtocol.server.GAME, NetProtocol.server.game.PLAY_CARD, event.target.card_index]));
 		game.render();
 	}
 
@@ -127,9 +129,11 @@ function Game(renderer, opponent)
 	this.sprite_player_creature_pos1 = init_sprite(this.stage, CREATURE_SPACING, renderer.height/2, 0, 1, 100, 100, 1, true, onClick_creature, onHover_creature);
 	this.sprite_player_creature_pos1.creature_index = 1;
 	this.sprite_player_creature_pos1.is_mine = true;
+	this.text_player_creature_health_pos1 = init_text(this.stage, this.sprite_player_creature_pos1.x + this.sprite_player_creature_pos1._width/2, this.sprite_player_creature_pos1.y, 0.5, 0);
 	this.sprite_player_creature_pos2 = init_sprite(this.stage, 0, renderer.height/2, 0, 1, 100, 100, 1, true, onClick_creature, onHover_creature);
 	this.sprite_player_creature_pos2.creature_index = 2;
 	this.sprite_player_creature_pos2.is_mine = true;
+	this.text_player_creature_health_pos2 = init_text(this.stage, this.sprite_player_creature_pos2.x + this.sprite_player_creature_pos2._width/2, this.sprite_player_creature_pos2.y, 0.5, 0);
 	
 	// add opponent creature sprites to game screen
 	this.sprite_opponent_creature_pos0 = init_sprite(this.stage, renderer.width - CREATURE_SPACING*2, renderer.height/2, 0, 1, 100, 100, -1, true, onClick_creature, onHover_creature);
@@ -299,6 +303,8 @@ Game.prototype.state_set = function(state)
 
 	// player creature health text
 	this.text_player_creature_health_pos0.text = State.game.state.player.creatures[0].health;
+	this.text_player_creature_health_pos1.text = State.game.state.player.creatures[1].health;
+	this.text_player_creature_health_pos2.text = State.game.state.player.creatures[2].health;
 	
 	// opponent creatures
 	this.sprite_opponent_creature_pos0.texture = PIXI.loader.resources[state.opponent.creatures[0].id + "_creature"].texture;
