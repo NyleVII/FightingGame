@@ -165,9 +165,15 @@ processes[NetProtocol.client.GAME] = function(reader)
 		State.game.process(reader);
 };
 
-processes[NetProtocol.client.ERROR] = function()
+processes[NetProtocol.client.ERROR] = function(reader)
 {
-	console.error("An error occurred but I'm too lazy to print out what it is.");
+	const code = reader.read_int8();
+	for(const key in NetProtocol.client.error)
+		if(NetProtocol.client.error[key] === code)
+		{
+			console.error("An error occurred: " + key);
+			break;
+		}
 };
 
 /*

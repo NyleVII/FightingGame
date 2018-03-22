@@ -3,7 +3,7 @@ const BufferWriter = require("../bufferwriter.js");
 const Random = require("../random.js");
 const Player = require("./player.js");
 const Network = require("../network.js");
-const Protocol = require("../../netprotocol.json");
+const NetProtocol = require("../../netprotocol.json");
 
 
 function Game(connection1, connection2)
@@ -41,6 +41,8 @@ function Game(connection1, connection2)
 			index_currentplayer: 0,
 			turn: 0
 		};
+		
+		game.state.players[0].energy_current = game.state.players[0].energy_max;
 	});
 }
 
@@ -57,35 +59,35 @@ Game.prototype.communicate = {
 	{
 		const index_player = this.state.players.indexOf(params.target);
 		
-		Network.send(this.connections[index_player], [Protocol.server.game.TURN_START]);
+		Network.send(this.connections[index_player], [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START]);
 	},
 	
 	endturn: function(params)
 	{
 		const index_player = this.state.players.indexOf(params.target);
 		
-		Network.send(this.connections[index_player], [Protocol.server.game.TURN_END]);
+		Network.send(this.connections[index_player], [NetProtocol.client.GAME, NetProtocol.client.game.TURN_END]);
 	},
 	
 	draw: function(params)
 	{
 		const index_player = this.state.players.indexOf(params.source);
 		
-		const buffer_player = [Protocol.server.game.DRAW_PLAYER];
+		const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.DRAW_PLAYER];
 		BufferWriter.string(buffer_player, params.target);
 		
 		Network.send(this.connections[index_player], buffer_player);
-		Network.send(this.connections[index_player ^ 1], [Protocol.server.game.DRAW_OPPONENT]);
+		Network.send(this.connections[index_player ^ 1], [NetProtocol.client.GAME, NetProtocol.client.game.DRAW_OPPONENT]);
 	},
 	
 	mill: function(params)
 	{
 		const index_player = this.state.players.indexOf(params.source);
 		
-		const buffer_player = [Protocol.server.game.MILL_PLAYER];
+		const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.MILL_PLAYER];
 		BufferWriter.string(buffer_player, params.target);
 		
-		const buffer_opponent = [Protocol.server.game.MILL_OPPONENT];
+		const buffer_opponent = [NetProtocol.client.GAME, NetProtocol.client.game.MILL_OPPONENT];
 		BufferWriter.string(buffer_opponent, params.target);
 		
 		Network.send(this.connections[index_player], buffer_player);
@@ -96,8 +98,8 @@ Game.prototype.communicate = {
 	{
 		const index_player = this.state.players.indexOf(params.source);
 		
-		const buffer_player = [Protocol.server.game.GAINMAXENERGY_PLAYER, params.amount];
-		const buffer_opponent = [Protocol.server.game.GAINMAXENERGY_OPPONENT, params.amount];
+		const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.GAINMAXENERGY_PLAYER, params.amount];
+		const buffer_opponent = [NetProtocol.client.GAME, NetProtocol.client.game.GAINMAXENERGY_OPPONENT, params.amount];
 		
 		Network.send(this.connections[index_player], buffer_player);
 		Network.send(this.connections[index_player ^ 1], buffer_opponent);
@@ -107,8 +109,8 @@ Game.prototype.communicate = {
 	{
 		const index_player = this.state.players.indexOf(params.source);
 		
-		const buffer_player = [Protocol.server.game.GAINENERGY_PLAYER, params.amount];
-		const buffer_opponent = [Protocol.server.game.GAINENERGY_OPPONENT, params.amount];
+		const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.GAINENERGY_PLAYER, params.amount];
+		const buffer_opponent = [NetProtocol.client.GAME, NetProtocol.client.game.GAINENERGY_OPPONENT, params.amount];
 		
 		Network.send(this.connections[index_player], buffer_player);
 		Network.send(this.connections[index_player ^ 1], buffer_opponent);
@@ -129,11 +131,68 @@ Game.prototype.communicate = {
 	}
 };
 
+
+Game.prototype.processes = {};
+
+Game.prototype.processes[NetProtocol.server.game.PLAY_CARD] = function(index_player, buffer_process)
+{
+	const connection = this.connections[index_player];
+	
+	if(index_player !== this.state.index_currentplayer)
+		Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.ERROR, NetProtocol.client.game.error.NOT_YOUR_TURN]);
+	else
+	{
+		const index_card = buffer_process.readUInt8(2);
+		const player = this.state.players[index_player];
+		
+		if(index_card < 0 || index_card >= player.hand.length)
+			Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.ERROR, NetProtocol.client.game.error.CARD_INDEX_OUT_OF_BOUNDS]);
+		else
+		{
+			const card = Data.cards[player.hand[index_card]];
+			
+			if(player.energy_current < card.cost)
+				Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.ERROR, NetProtocol.client.game.error.NOT_ENOUGH_ENERGY]);
+			else
+			{
+				const id_card = player.hand.splice(index_card, 1)[0];
+				
+				const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.PLAY_CARD_PLAYER, index_card];
+				BufferWriter.string(buffer_player, id_card);
+				Network.send(connection, buffer_player);
+				
+				const buffer_opponent = [NetProtocol.client.GAME, NetProtocol.client.game.PLAY_CARD_OPPONENT, index_card];
+				BufferWriter.string(buffer_opponent, id_card);
+				Network.send(this.connections[index_player ^ 1], buffer_opponent);
+				
+				const buffer = card.effect;
+				let index_buffer = 0;
+				
+				const num_effects = buffer[index_buffer++];
+				for(let i = 0; i < num_effects; ++i)
+				{
+					const type = buffer[index_buffer++];
+					index_buffer = this.process_effects[type].call(this, index_player, player, buffer, index_buffer);
+				}
+			}
+		}
+	}
+};
+
+Game.prototype.process = function(index_player, buffer_process)
+{
+	const process = this.processes[buffer_process.readUInt8(1)];
+	if(process !== undefined)
+		process.call(this, index_player, buffer_process);
+};
+
 Game.prototype.process_effects = [
 	function(index_player, source, buffer, index) // DRAW
 	{
 		const flags_allegiance = buffer[index++];
 		const amount = buffer[index++];
+		
+		console.log("Player " + (index_player + 1) + " drawing cards");
 		
 		if(flags_allegiance & ALLEGIANCE_FRIENDLY)
 			for(let i = 0; i < amount; ++i)
@@ -289,25 +348,6 @@ Game.prototype.process_effects = [
 	}
 ];
 
-Game.prototype.playcard = function(index_player, index_card)
-{
-	const player = this.state.players[index_player];
-	const card = Data.cards[player.hand[index_card]];
-	
-	if(player.energy < card.cost)
-		return -1;
-	
-	const buffer = card.effect;
-	let index = 0;
-	
-	const num_effects = buffer[index++];
-	for(let i = 0; i < num_effects; ++i)
-	{
-		const type = buffer[index++];
-		index = this.process_effects[type].call(this, index_player, player, buffer, index);
-	}
-};
-
 Game.prototype.endturn = function()
 {
 	const player_current = this.state.players[this.state.index_currentplayer];
@@ -332,6 +372,8 @@ Game.prototype.listen = function(event, listener)
 
 Game.prototype.dispatch = function(event, params)
 {
+	this.communicate[event].call(this, params);
+	
 	const e = this.listeners[event];
 	for(let i = 0; i < e.length; ++i)
 		e[i].notify(params);
@@ -355,7 +397,7 @@ Game.prototype.encodestate = function(index_player)
 		const creature = player.creatures[i];
 		
 		BufferWriter.string(buffer, creature.id);
-		buffer.push(creature.health);
+		buffer.push(creature.health_current);
 		
 		BufferWriter.string(buffer, creature.id_ability);
 		
@@ -378,7 +420,7 @@ Game.prototype.encodestate = function(index_player)
 		const creature = opponent.creatures[i];
 		
 		BufferWriter.string(buffer, creature.id);
-		buffer.push(creature.health);
+		buffer.push(creature.health_current);
 		
 		BufferWriter.string(buffer, creature.id_ability);
 		

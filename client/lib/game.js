@@ -66,8 +66,6 @@ function Game(renderer, opponent)
 
 	function onHover_creature(event)
 	{
-		console.log("Hovering over creature");
-		console.log(event.target);
 		let target;
 		if(event.target.is_mine)
 		{
@@ -107,7 +105,7 @@ function Game(renderer, opponent)
 	//TEMPORARY
 	//Graphics to draw grid lines to double check spacing
 	this.graphics = new PIXI.Graphics();
-	this.graphics.lineStyle(1, 0xffffff, 1);
+	this.graphics.lineStyle(2, 0xffffff, 1);
 	this.graphics.moveTo(0, 300);
 	this.graphics.lineTo(800, 300);
 	this.graphics.moveTo(400, 0);
@@ -263,9 +261,64 @@ Game.prototype.processes[NetProtocol.client.game.TURN_START] = function()
 	console.log("It is your turn.");
 };
 
-Game.prototype.processes[NetProtocol.client.game.TURN_START] = function()
+Game.prototype.processes[NetProtocol.client.game.TURN_END] = function()
 {
 	console.log("Your turn has ended.");
+};
+
+Game.prototype.processes[NetProtocol.client.game.PLAY_CARD_PLAYER] = function(reader)
+{
+	const index_card = reader.read_int8();
+	const id_card = reader.read_string();
+	
+	const id_card_client = this.state.player.hand.splice(index_card, 1)[0];
+	if(id_card_client !== id_card)
+		console.error("Card ID mismatch");
+	
+	console.log("You played " + Data.cards.by_id[id_card].name);
+	
+	this.state_set(this.state);
+};
+
+Game.prototype.processes[NetProtocol.client.game.PLAY_CARD_OPPONENT] = function(reader)
+{
+	const index_card = reader.read_int8();
+	const id_card = reader.read_string();
+	
+	console.log("Your opponent played " + Data.cards.by_id[id_card].name);
+	
+	this.state_set(this.state);
+};
+
+Game.prototype.processes[NetProtocol.client.game.DRAW_PLAYER] = function(reader)
+{
+	const id_card = reader.read_string();
+	
+	console.log("You drew a " + Data.cards.by_id[id_card].name);
+	
+	this.state.player.hand.push(id_card);
+	
+	this.state_set(this.state);
+};
+
+Game.prototype.processes[NetProtocol.client.game.DRAW_OPPONENT] = function()
+{
+	console.log("Your opponent drew a card.");
+	
+	this.state.opponent.handSize++;
+	
+	this.state_set(this.state);
+};
+
+Game.prototype.processes[NetProtocol.client.game.ERROR] = function(reader)
+{
+	const code = reader.read_int8();
+	for(const key in NetProtocol.client.game.error)
+		if(NetProtocol.client.game.error[key] === code)
+		{
+			console.error("Game error: " + key);
+			break;
+		}
 };
 
 Game.prototype.process = function(reader)
@@ -293,8 +346,6 @@ Game.prototype.init_textures = function()
 Game.prototype.state_set = function(state)
 {
 	this.state = state;
-	
-	console.log(state);
 	
 	if(!State.loaded.all)
 		return;

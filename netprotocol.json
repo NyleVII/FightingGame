@@ -50,10 +50,19 @@
 			"HEAL_PLAYER": 17,
 			"HEAL_OPPONENT": 18,
 			"DESTROY_PLAYER": 19,
-			"DESTROY_OPPONENT": 20
+			"DESTROY_OPPONENT": 20,
+			
+			"ERROR": 100,
+			
+			"error":
+			{
+				"NOT_YOUR_TURN": 0,
+				"NOT_ENOUGH_ENERGY": 1,
+				"CARD_INDEX_OUT_OF_BOUNDS": 2
+			}
 		},
 		
-		"ERROR": 255,
+		"ERROR": 100,
 		
 		"error":
 		{

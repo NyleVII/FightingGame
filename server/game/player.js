@@ -2,7 +2,7 @@ const Random = require("../random.js");
 const Creature = require("./creature.js");
 
 
-const NUM_STARTINGENERGY = 2;
+const NUM_STARTINGENERGY = 5;
 const NUM_STARTINGCARDS = 4;
 
 
