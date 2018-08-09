@@ -1,12 +1,12 @@
-const MAX_EFFECTHANDSIZE = 5;
+const MAX_EFFECTHANDSIZE = 8;
 const ANCHOR_EFFECTHAND_PLAYER = {x: 400, y: 600};
-const ANCHOR_EFFECTHAND_OPPONENT = {x: 25, y: 0};
+const ANCHOR_EFFECTHAND_OPPONENT = {x: 0, y: 0};
 const INCREMENT_EFFECTHAND_PLAYER = {x: 50, y: 0};
 const INCREMENT_EFFECTHAND_OPPONENT = {x: 50, y: 0}; //OPPONENT HAND GROWS TO THE LEFT
 const CREATURE_SPACING = 110;
 const SIZE_CARD = {x: 75, y: 100};
 
-		//init_sprite(<stage>, num, num, num, num, num, num, num, boolean, function)
+//init_sprite(<stage>, num, num, num, num, num, num, num, boolean, function)
 function init_sprite(stage, x, y, x_anchor, y_anchor, width, height, scale_x, interactive, onClick, onHover)
 {
 	const sprite = new PIXI.Sprite();
@@ -73,6 +73,7 @@ function Game(renderer, opponent)
 			target = State.game.state.opponent.creatures[event.target.creature_index];
 		}
 		game.text_command_card.text = "Hovering over " + Data.creatures.by_id[target.id].name;
+
 		game.render();
 	}
 
@@ -109,6 +110,16 @@ function Game(renderer, opponent)
 	this.text_command_card = init_text(this.stage, 20, 380, 0, 0);
 	this.text_command_card.text = "TEST";
 	this.stage.addChild(this.graphics);
+
+	//Draw creature ability rectangle
+	this.graphics.beginFill(0xFF0000); //Red
+	this.sprite_ability_box = init_sprite(this.stage, 400, 300, 0.5, 1, 100, 50, 1, true, function(){/*onClick*/}, function(){/*onHover*/});
+	
+	//End Turn Button
+	this.sprite_end_turn_button = init_sprite(this.stage, 800, 450, 1, 0.5, 120, 50, 1, true, function(){socket.send(new Uint8Array([NetProtocol.server.GAME, NetProtocol.server.game.ENDTURN]));}, function(){/*onHover*/});
+	this.end_turn_text = init_text(this.stage, this.sprite_end_turn_button.x - this.sprite_end_turn_button._width/2, this.sprite_end_turn_button.y, 0.5, 0.5);
+	this.end_turn_text.text = "End Turn";
+	
 	
 	// add player creature sprites to game screen
 	this.sprite_player_creature_pos0 = init_sprite(this.stage, CREATURE_SPACING*2, renderer.height/2, 0, 1, 100, 100, 1, true, onClick_creature, onHover_creature);
@@ -473,6 +484,8 @@ Game.prototype.init_textures = function()
 	this.sprite_opponent_deck.texture = PIXI.loader.resources.deck.texture;
 	this.sprite_player_energy.texture = PIXI.loader.resources.energy.texture;
 	this.sprite_opponent_energy.texture = PIXI.loader.resources.energy.texture;
+	this.sprite_ability_box.texture = PIXI.loader.resources.ability_box.texture;
+	this.sprite_end_turn_button.texture = PIXI.loader.resources.end_turn.texture;
 	
 	if(this.state)
 		this.state_set(this.state);
