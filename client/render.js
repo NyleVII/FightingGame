@@ -9,10 +9,16 @@ document.addEventListener("DOMContentLoaded", function()
 		
 		const text = document.getElementById("chat_text");
 		
-		const buffer_text = [NetProtocol.server.CHAT];
-		for(let i = 0; i < text.value.length; ++i)
-			buffer_text.push(text.value.charCodeAt(i) & 0xff);
-		socket.send(new Uint8Array(buffer_text));
+		if(text.value === "/end")
+			socket.send(new Uint8Array([NetProtocol.server.GAME, NetProtocol.server.game.ENDTURN]));
+		else
+		{
+			const buffer_text = [NetProtocol.server.CHAT];
+			for(let i = 0; i < text.value.length; ++i)
+				buffer_text.push(text.value.charCodeAt(i) & 0xff);
+			socket.send(new Uint8Array(buffer_text));
+		}
+		
 		text.value = "";
 	};
 

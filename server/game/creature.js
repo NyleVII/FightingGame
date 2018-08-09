@@ -1,7 +1,7 @@
 const Data = require("../data.js");
 
 
-function Creature(game, id_creature)
+function Creature(game, id_creature, owner)
 {
 	this.game = game;
 	
@@ -12,6 +12,7 @@ function Creature(game, id_creature)
 	this.health_max = data_creature.health;
 	this.id_ability = data_creature.id_ability;
 	this.effects = [];
+	this.owner = owner;
 }
 
 Creature.prototype.damage = function(source, amount)
@@ -35,7 +36,7 @@ Creature.prototype.destroy = function(source)
 
 Creature.prototype.heal = function(source, amount)
 {
-	if(this.health > 0)
+	if(this.health_current > 0)
 	{
 		if(amount > this.health_max - this.health_current)
 			amount = this.health_max - this.health_current;

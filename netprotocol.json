@@ -31,8 +31,8 @@
 		
 		"game": {
 			"STATE": 0,
-			"TURN_START": 1,
-			"TURN_END": 2,
+			"TURN_START_PLAYER": 1,
+			"TURN_START_OPPONENT": 2,
 			"PLAY_CARD_PLAYER": 3,
 			"PLAY_CARD_OPPONENT": 4,
 			"PLAY_ABILITY_PLAYER": 5,
@@ -49,8 +49,8 @@
 			"DAMAGE_OPPONENT": 16,
 			"HEAL_PLAYER": 17,
 			"HEAL_OPPONENT": 18,
-			"DESTROY_PLAYER": 19,
-			"DESTROY_OPPONENT": 20,
+			"DEATH_PLAYER": 19,
+			"DEATH_OPPONENT": 20,
 			
 			"ERROR": 100,
 			

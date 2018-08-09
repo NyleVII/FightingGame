@@ -59,14 +59,8 @@ Game.prototype.communicate = {
 	{
 		const index_player = this.state.players.indexOf(params.target);
 		
-		Network.send(this.connections[index_player], [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START]);
-	},
-	
-	endturn: function(params)
-	{
-		const index_player = this.state.players.indexOf(params.target);
-		
-		Network.send(this.connections[index_player], [NetProtocol.client.GAME, NetProtocol.client.game.TURN_END]);
+		Network.send(this.connections[index_player], [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START_PLAYER]);
+		Network.send(this.connections[index_player ^ 1], [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START_OPPONENT]);
 	},
 	
 	draw: function(params)
@@ -96,7 +90,7 @@ Game.prototype.communicate = {
 	
 	gainmaxenergy: function(params)
 	{
-		const index_player = this.state.players.indexOf(params.source);
+		const index_player = this.state.players.indexOf(params.target);
 		
 		const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.GAINMAXENERGY_PLAYER, params.amount];
 		const buffer_opponent = [NetProtocol.client.GAME, NetProtocol.client.game.GAINMAXENERGY_OPPONENT, params.amount];
@@ -107,7 +101,7 @@ Game.prototype.communicate = {
 	
 	gainenergy: function(params)
 	{
-		const index_player = this.state.players.indexOf(params.source);
+		const index_player = this.state.players.indexOf(params.target);
 		
 		const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.GAINENERGY_PLAYER, params.amount];
 		const buffer_opponent = [NetProtocol.client.GAME, NetProtocol.client.game.GAINENERGY_OPPONENT, params.amount];
@@ -116,23 +110,55 @@ Game.prototype.communicate = {
 		Network.send(this.connections[index_player ^ 1], buffer_opponent);
 	},
 	
-	damage: function()
+	damage: function(params)
 	{
+		const index_player = this.state.players.indexOf(params.target.owner);
+		const index_creature = params.target.owner.creatures.indexOf(params.target);
+		
+		const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.DAMAGE_PLAYER, index_creature, params.amount];
+		const buffer_opponent = [NetProtocol.client.GAME, NetProtocol.client.game.DAMAGE_OPPONENT, index_creature, params.amount];
+		
+		Network.send(this.connections[index_player], buffer_player);
+		Network.send(this.connections[index_player ^ 1], buffer_opponent);
 	},
 	
-	death: function()
+	death: function(params)
 	{
+		const index_player = this.state.players.indexOf(params.target.owner);
+		const index_creature = params.target.owner.creatures.indexOf(params.target);
 		
+		const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.DEATH_PLAYER, index_creature];
+		const buffer_opponent = [NetProtocol.client.GAME, NetProtocol.client.game.DEATH_OPPONENT, index_creature];
+		
+		Network.send(this.connections[index_player], buffer_player);
+		Network.send(this.connections[index_player ^ 1], buffer_opponent);
 	},
 	
-	heal: function()
+	heal: function(params)
 	{
+		const index_player = this.state.players.indexOf(params.target.owner);
+		const index_creature = params.target.owner.creatures.indexOf(params.target);
 		
+		const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.HEAL_PLAYER, index_creature, params.amount];
+		const buffer_opponent = [NetProtocol.client.GAME, NetProtocol.client.game.HEAL_OPPONENT, index_creature, params.amount];
+		
+		Network.send(this.connections[index_player], buffer_player);
+		Network.send(this.connections[index_player ^ 1], buffer_opponent);
 	}
 };
 
 
 Game.prototype.processes = {};
+
+Game.prototype.processes[NetProtocol.server.game.ENDTURN] = function(index_player)
+{
+	const connection = this.connections[index_player];
+	
+	if(index_player !== this.state.index_currentplayer)
+		Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.ERROR, NetProtocol.client.game.error.NOT_YOUR_TURN]);
+	else
+		this.endturn();
+};
 
 Game.prototype.processes[NetProtocol.server.game.PLAY_CARD] = function(index_player, buffer_process)
 {
@@ -156,6 +182,8 @@ Game.prototype.processes[NetProtocol.server.game.PLAY_CARD] = function(index_pla
 			else
 			{
 				const id_card = player.hand.splice(index_card, 1)[0];
+				
+				player.energy_current -= card.cost;
 				
 				const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.PLAY_CARD_PLAYER, index_card];
 				BufferWriter.string(buffer_player, id_card);
@@ -192,8 +220,6 @@ Game.prototype.process_effects = [
 		const flags_allegiance = buffer[index++];
 		const amount = buffer[index++];
 		
-		console.log("Player " + (index_player + 1) + " drawing cards");
-		
 		if(flags_allegiance & ALLEGIANCE_FRIENDLY)
 			for(let i = 0; i < amount; ++i)
 				this.state.players[index_player].draw();
@@ -229,9 +255,9 @@ Game.prototype.process_effects = [
 			if(flags_position & POSITION_FRONT)
 				player.creatures[0].damage(source, amount);
 			if(flags_position & POSITION_MIDDLE)
-				player.creatures[0].damage(source, amount);
+				player.creatures[1].damage(source, amount);
 			if(flags_position & POSITION_BACK)
-				player.creatures[0].damage(source, amount);
+				player.creatures[2].damage(source, amount);
 		}
 		
 		return index;
@@ -290,17 +316,13 @@ Game.prototype.process_effects = [
 		if(flags_allegiance & ALLEGIANCE_FRIENDLY)
 		{
 			const player = this.state.players[index_player];
-			
-			player.energy_max += amount;
-			this.dispatch("gainmaxenergy", {target: player});
+			player.gainmaxenergy(amount);
 		}
 		
 		if(flags_allegiance & ALLEGIANCE_ENEMY)
 		{
 			const player = this.state.players[index_player ^ 1];
-			
-			player.energy_max += amount;
-			this.dispatch("gainmaxenergy", {target: player});
+			player.gainmaxenergy(amount);
 		}
 		
 		return index;
@@ -361,7 +383,7 @@ Game.prototype.endturn = function()
 	
 	this.dispatch("startturn", {target: player_next});
 	
-	player_next.energy_current = player_current.energy_max;
+	player_next.energy_current = player_next.energy_max;
 	player_next.draw();
 };
 
@@ -372,7 +394,9 @@ Game.prototype.listen = function(event, listener)
 
 Game.prototype.dispatch = function(event, params)
 {
-	this.communicate[event].call(this, params);
+	const communicate = this.communicate[event];
+	if(communicate !== undefined)
+		communicate.call(this, params);
 	
 	const e = this.listeners[event];
 	for(let i = 0; i < e.length; ++i)

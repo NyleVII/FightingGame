@@ -129,7 +129,8 @@ processes[NetProtocol.server.QUEUE_JOIN] = function(connection)
 				Network.send(game.connections[0], prefix.concat(game.encodestate(0)));
 				Network.send(game.connections[1], prefix.concat(game.encodestate(1)));
 				
-				Network.send(game.connections[game.state.index_currentplayer], [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START]);
+				Network.send(game.connections[game.state.index_currentplayer], [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START_PLAYER]);
+				Network.send(game.connections[game.state.index_currentplayer ^ 1], [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START_OPPONENT]);
 			});
 			
 			delete queue[id_opponent];
@@ -283,7 +284,7 @@ server_websocket.on("request", function(request)
 						Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.STATE].concat(game.encodestate(0)));
 						
 						if(game.state.index_currentplayer === 0)
-							Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START]);
+							Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START_PLAYER]);
 					}
 					else if(game.connections[1].player._id === player._id)
 					{
@@ -294,7 +295,7 @@ server_websocket.on("request", function(request)
 						Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.STATE].concat(game.encodestate(1)));
 						
 						if(game.state.index_currentplayer === 1)
-							Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START]);
+							Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START_PLAYER]);
 					}
 				}
 				

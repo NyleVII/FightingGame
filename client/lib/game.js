@@ -9,7 +9,6 @@ const SIZE_CARD = {x: 75, y: 100};
 		//init_sprite(<stage>, num, num, num, num, num, num, num, boolean, function)
 function init_sprite(stage, x, y, x_anchor, y_anchor, width, height, scale_x, interactive, onClick, onHover)
 {
-	console.log("Initiating sprite...");
 	const sprite = new PIXI.Sprite();
 	
 	sprite.anchor.set(x_anchor, y_anchor);
@@ -22,7 +21,6 @@ function init_sprite(stage, x, y, x_anchor, y_anchor, width, height, scale_x, in
 	sprite.buttonMode = interactive;
 	if(interactive)
 	{
-		console.log("Interactive is true");
 		sprite.on("click", onClick);
 		sprite.on("mouseover", onHover);
 	}
@@ -47,10 +45,9 @@ function init_text(stage, x, y, x_anchor, y_anchor)
 function Game(renderer, opponent)
 {
 	const game = this;
+	
 	function onClick_creature(event)
 	{
-		console.log("Clicked a creature");
-		game.text_command_card.text = "Clicked a creature";
 		let target;
 		if(event.target.is_mine)
 		{
@@ -81,21 +78,15 @@ function Game(renderer, opponent)
 
 	function onClick_card(event)
 	{
-		console.log("Clicked a card");
-		let target;
-		target = State.game.state.player.hand[event.target.card_index];
-		game.text_command_card.text = "Clicked " + Data.cards.by_id[target].name;
 		//Sends play card message to the server
 		socket.send(new Uint8Array([NetProtocol.server.GAME, NetProtocol.server.game.PLAY_CARD, event.target.card_index]));
-		game.render();
 	}
 
 	function onHover_card(event)
 	{
-		console.log("Hovering over:");
-		let target;
-		target = State.game.state.player.hand[event.target.card_index];
-		game.text_command_card.text = "Hovering over " + Data.cards.by_id[target].name;
+		const id_card = State.game.state.player.hand[event.target.card_index];
+		
+		game.text_command_card.text = "Hovering over " + Data.cards.by_id[id_card].name;
 		game.render();
 	}
 	
@@ -174,7 +165,7 @@ function Game(renderer, opponent)
 	{
 		this.sprite_player_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_PLAYER.x + i*INCREMENT_EFFECTHAND_PLAYER.x, ANCHOR_EFFECTHAND_PLAYER.y - SIZE_CARD.y + i*INCREMENT_EFFECTHAND_PLAYER.y, 0, 0, SIZE_CARD.x, SIZE_CARD.y, 1, true, onClick_card, onHover_card));
 		this.sprite_player_hand[i].card_index = i;
-		this.sprite_opponent_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_OPPONENT.x + i*INCREMENT_EFFECTHAND_OPPONENT.x, ANCHOR_EFFECTHAND_OPPONENT.y + i*INCREMENT_EFFECTHAND_OPPONENT.y, 0, 0, SIZE_CARD.x, SIZE_CARD.y, 1, true, onClick_card, onHover_card));
+		this.sprite_opponent_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_OPPONENT.x + i*INCREMENT_EFFECTHAND_OPPONENT.x, ANCHOR_EFFECTHAND_OPPONENT.y + i*INCREMENT_EFFECTHAND_OPPONENT.y, 0, 0, SIZE_CARD.x, SIZE_CARD.y, 1));
 	}
 	
 	if(State.loaded.all)
@@ -207,7 +198,7 @@ Game.prototype.processes[NetProtocol.client.game.STATE] = function(reader)
 		const creature = {effects: []};
 		
 		creature.id = reader.read_string();
-		creature.health = reader.read_int8();
+		creature.health_current = reader.read_int8();
 		
 		creature.id_ability = reader.read_string();
 		
@@ -234,7 +225,7 @@ Game.prototype.processes[NetProtocol.client.game.STATE] = function(reader)
 		const creature = {effects: []};
 		
 		creature.id = reader.read_string();
-		creature.health = reader.read_int8();
+		creature.health_current = reader.read_int8();
 		
 		creature.id_ability = reader.read_string();
 		
@@ -256,14 +247,22 @@ Game.prototype.processes[NetProtocol.client.game.STATE] = function(reader)
 	this.state_set(state);
 };
 
-Game.prototype.processes[NetProtocol.client.game.TURN_START] = function()
+Game.prototype.processes[NetProtocol.client.game.TURN_START_PLAYER] = function()
 {
-	console.log("It is your turn.");
+	console.log("It is your turn");
+	
+	this.state.player.energy_current = this.state.player.energy_max;
+	
+	this.state_set(this.state);
 };
 
-Game.prototype.processes[NetProtocol.client.game.TURN_END] = function()
+Game.prototype.processes[NetProtocol.client.game.TURN_START_OPPONENT] = function()
 {
-	console.log("Your turn has ended.");
+	console.log("It is your opponent's turn");
+	
+	this.state.opponent.energy_current = this.state.opponent.energy_max;
+	
+	this.state_set(this.state);
 };
 
 Game.prototype.processes[NetProtocol.client.game.PLAY_CARD_PLAYER] = function(reader)
@@ -277,6 +276,8 @@ Game.prototype.processes[NetProtocol.client.game.PLAY_CARD_PLAYER] = function(re
 	
 	console.log("You played " + Data.cards.by_id[id_card].name);
 	
+	this.state.player.energy_current -= Data.cards.by_id[id_card].cost;
+	
 	this.state_set(this.state);
 };
 
@@ -287,6 +288,9 @@ Game.prototype.processes[NetProtocol.client.game.PLAY_CARD_OPPONENT] = function(
 	
 	console.log("Your opponent played " + Data.cards.by_id[id_card].name);
 	
+	this.state.opponent.handSize--;
+	this.state.opponent.energy_current -= Data.cards.by_id[id_card].cost;
+	
 	this.state_set(this.state);
 };
 
@@ -294,8 +298,9 @@ Game.prototype.processes[NetProtocol.client.game.DRAW_PLAYER] = function(reader)
 {
 	const id_card = reader.read_string();
 	
-	console.log("You drew a " + Data.cards.by_id[id_card].name);
+	console.log("You drew " + Data.cards.by_id[id_card].name);
 	
+	this.state.player.deckSize--;
 	this.state.player.hand.push(id_card);
 	
 	this.state_set(this.state);
@@ -303,9 +308,134 @@ Game.prototype.processes[NetProtocol.client.game.DRAW_PLAYER] = function(reader)
 
 Game.prototype.processes[NetProtocol.client.game.DRAW_OPPONENT] = function()
 {
-	console.log("Your opponent drew a card.");
+	console.log("Your opponent drew a card");
 	
+	this.state.opponent.deckSize--;
 	this.state.opponent.handSize++;
+	
+	this.state_set(this.state);
+};
+
+Game.prototype.processes[NetProtocol.client.game.MILL_PLAYER] = function(reader)
+{
+	const id_card = reader.read_string();
+	
+	console.log("You milled " + Data.cards.by_id[id_card].name);
+	
+	this.state.player.deckSize--;
+	
+	this.state_set(this.state);
+};
+
+Game.prototype.processes[NetProtocol.client.game.MILL_OPPONENT] = function(reader)
+{
+	const id_card = reader.read_string();
+	
+	console.log("Your opponent milled " + Data.cards.by_id[id_card].name);
+	
+	this.state.opponent.deckSize--;
+	
+	this.state_set(this.state);
+};
+
+Game.prototype.processes[NetProtocol.client.game.GAINMAXENERGY_PLAYER] = function(reader)
+{
+	const amount = reader.read_int8();
+	
+	console.log("You gained " + amount + " max energy");
+	
+	this.state.player.energy_max += amount;
+	
+	this.state_set(this.state);
+};
+
+Game.prototype.processes[NetProtocol.client.game.GAINMAXENERGY_OPPONENT] = function(reader)
+{
+	const amount = reader.read_int8();
+	
+	console.log("Your opponent gained " + amount + " max energy");
+	
+	this.state.opponent.energy_max += amount;
+	
+	this.state_set(this.state);
+};
+
+Game.prototype.processes[NetProtocol.client.game.DAMAGE_PLAYER] = function(reader)
+{
+	const index_creature = reader.read_int8();
+	const amount = reader.read_int8();
+	
+	const creature = this.state.player.creatures[index_creature];
+	
+	console.log("Your " + Data.creatures.by_id[creature.id].name + " took " + amount + " damage");
+	
+	creature.health_current -= amount;
+	
+	this.state_set(this.state);
+};
+
+Game.prototype.processes[NetProtocol.client.game.DAMAGE_OPPONENT] = function(reader)
+{
+	const index_creature = reader.read_int8();
+	const amount = reader.read_int8();
+	
+	const creature = this.state.opponent.creatures[index_creature];
+	
+	console.log("Your opponent's " + Data.creatures.by_id[creature.id].name + " took " + amount + " damage");
+	
+	creature.health_current -= amount;
+	
+	this.state_set(this.state);
+};
+
+Game.prototype.processes[NetProtocol.client.game.HEAL_PLAYER] = function(reader)
+{
+	const index_creature = reader.read_int8();
+	const amount = reader.read_int8();
+	
+	const creature = this.state.player.creatures[index_creature];
+	
+	console.log("Your " + Data.creatures.by_id[creature.id].name + " restored " + amount + " health");
+	
+	creature.health_current += amount;
+	
+	this.state_set(this.state);
+};
+
+Game.prototype.processes[NetProtocol.client.game.HEAL_OPPONENT] = function(reader)
+{
+	const index_creature = reader.read_int8();
+	const amount = reader.read_int8();
+	
+	const creature = this.state.opponent.creatures[index_creature];
+	
+	console.log("Your opponent's " + Data.creatures.by_id[creature.id].name + " restored " + amount + " health");
+	
+	creature.health_current += amount;
+	
+	this.state_set(this.state);
+};
+
+Game.prototype.processes[NetProtocol.client.game.DEATH_PLAYER] = function(reader)
+{
+	const index_creature = reader.read_int8();
+	const creature = this.state.player.creatures[index_creature];
+	
+	console.log("Your " + Data.creatures.by_id[creature.id].name + " died");
+	
+	creature.health_current = 0;
+	
+	this.state_set(this.state);
+};
+
+Game.prototype.processes[NetProtocol.client.game.DEATH_OPPONENT] = function(reader)
+{
+	const index_creature = reader.read_int8();
+	const creature = this.state.opponent.creatures[index_creature];
+	
+	console.log("Your opponent's " + Data.creatures.by_id[creature.id].name + " died");
+	
+	creature.health_current = 0;
 	
 	this.state_set(this.state);
 };
@@ -328,6 +458,13 @@ Game.prototype.process = function(reader)
 	const process = this.processes[code];
 	if(process !== undefined)
 		process.call(this, reader);
+	else
+		for(const key in NetProtocol.client.game)
+			if(NetProtocol.client.game[key] === code)
+			{
+				console.error("Unhandled game message: " + key);
+				break;
+			}
 };
 
 Game.prototype.init_textures = function()
@@ -343,6 +480,7 @@ Game.prototype.init_textures = function()
 		this.render();
 };
 
+// TODO(shawn): should be able to update individual parts of the game state without calling this
 Game.prototype.state_set = function(state)
 {
 	this.state = state;
@@ -350,15 +488,27 @@ Game.prototype.state_set = function(state)
 	if(!State.loaded.all)
 		return;
 	
+	for(let i = 0; i < state.player.creatures.length; ++i)
+	{
+		const creature = state.player.creatures[i];
+		creature.health_max = Data.creatures.by_id[creature.id].health;
+	}
+	
+	for(let i = 0; i < state.opponent.creatures.length; ++i)
+	{
+		const creature = state.opponent.creatures[i];
+		creature.health_max = Data.creatures.by_id[creature.id].health;
+	}
+	
 	// player creatures
 	this.sprite_player_creature_pos2.texture = PIXI.loader.resources[state.player.creatures[2].id + "_creature"].texture;
 	this.sprite_player_creature_pos1.texture = PIXI.loader.resources[state.player.creatures[1].id + "_creature"].texture;
 	this.sprite_player_creature_pos0.texture = PIXI.loader.resources[state.player.creatures[0].id + "_creature"].texture;
 
 	// player creature health text
-	this.text_player_creature_health_pos0.text = State.game.state.player.creatures[0].health;
-	this.text_player_creature_health_pos1.text = State.game.state.player.creatures[1].health;
-	this.text_player_creature_health_pos2.text = State.game.state.player.creatures[2].health;
+	this.text_player_creature_health_pos0.text = State.game.state.player.creatures[0].health_current + "/" + State.game.state.player.creatures[0].health_max;
+	this.text_player_creature_health_pos1.text = State.game.state.player.creatures[1].health_current + "/" + State.game.state.player.creatures[1].health_max;
+	this.text_player_creature_health_pos2.text = State.game.state.player.creatures[2].health_current + "/" + State.game.state.player.creatures[2].health_max;
 	
 	// opponent creatures
 	this.sprite_opponent_creature_pos0.texture = PIXI.loader.resources[state.opponent.creatures[0].id + "_creature"].texture;
@@ -366,14 +516,13 @@ Game.prototype.state_set = function(state)
 	this.sprite_opponent_creature_pos2.texture = PIXI.loader.resources[state.opponent.creatures[2].id + "_creature"].texture;
 
 	// opponent creature health text
-	this.text_opponent_creature_health_pos0.text = State.game.state.opponent.creatures[0].health;
-	this.text_opponent_creature_health_pos1.text = State.game.state.opponent.creatures[1].health;
-	this.text_opponent_creature_health_pos2.text = State.game.state.opponent.creatures[2].health;
+	this.text_opponent_creature_health_pos0.text = State.game.state.opponent.creatures[0].health_current + "/" + State.game.state.opponent.creatures[0].health_max;
+	this.text_opponent_creature_health_pos1.text = State.game.state.opponent.creatures[1].health_current + "/" + State.game.state.opponent.creatures[1].health_max;
+	this.text_opponent_creature_health_pos2.text = State.game.state.opponent.creatures[2].health_current + "/" + State.game.state.opponent.creatures[2].health_max;
 	
 	// player hand
-	console.log(this.sprite_player_hand[0].texture);
-	for (let i = 0; i < state.player.hand.length; ++i)
-		this.sprite_player_hand[i].texture = PIXI.loader.resources[state.player.hand[i] + "_card"].texture;
+	for (let i = 0; i < MAX_EFFECTHANDSIZE; ++i)
+		this.sprite_player_hand[i].texture = (i < state.player.hand.length) ? PIXI.loader.resources[state.player.hand[i] + "_card"].texture : PIXI.Texture.EMPTY;
 	
 	// opponent hand
 	const texture_cardback = PIXI.loader.resources.cardback.texture;
@@ -388,7 +537,7 @@ Game.prototype.state_set = function(state)
 	this.text_opponent_energy.text = State.game.state.opponent.energy_current + "/" + State.game.state.opponent.energy_max;
 	this.text_opponent_deck.text = State.game.state.opponent.deckSize.toString();
 
-	this.render();	
+	this.render();
 };
 
 Game.prototype.render = function()

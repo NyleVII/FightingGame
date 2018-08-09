@@ -2,25 +2,27 @@ const Random = require("../random.js");
 const Creature = require("./creature.js");
 
 
-const NUM_STARTINGENERGY = 5;
-const NUM_STARTINGCARDS = 4;
+const NUM_STARTINGENERGY = 3;
+const NUM_STARTINGCARDS = 3;
 
 
 function Player(game, loadout)
 {
-	this.game = game;
+	const player = this;
+	
+	player.game = game;
 	
 	const cards = loadout.cards.slice();
 	Random.shuffle(cards);
 	
-	this.energy_max = NUM_STARTINGENERGY;
-	this.energy_current = 0;
-	this.creatures = loadout.creatures.map(function(id_creature)
+	player.energy_max = NUM_STARTINGENERGY;
+	player.energy_current = 0;
+	player.creatures = loadout.creatures.map(function(id_creature)
 	{
-		return new Creature(game, id_creature);
+		return new Creature(game, id_creature, player);
 	});
-	this.hand = cards.splice(0, NUM_STARTINGCARDS);
-	this.deck = cards;
+	player.hand = cards.splice(0, NUM_STARTINGCARDS);
+	player.deck = cards;
 }
 
 
@@ -40,11 +42,18 @@ Player.prototype.draw = function()
 	}
 };
 
-Player.prototype.gainmaxenergy = function()
+Player.prototype.gainenergy = function(amount)
 {
-	this.energy_max++;
+	this.energy_current += amount;
 	
-	this.game.dispatch("gainmaxenergy", {source: this});
+	this.game.dispatch("gainenergy", {target: this, amount: amount});
+};
+
+Player.prototype.gainmaxenergy = function(amount)
+{
+	this.energy_max += amount;
+	
+	this.game.dispatch("gainmaxenergy", {target: this, amount: amount});
 };
 
 
