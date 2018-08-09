@@ -5,7 +5,7 @@ Stephen Antymis
 Shawn Sutherland
 
 RUN LOCALLY:
-npm run start:db
+npm run start
 npm start
 
 TO DO:
