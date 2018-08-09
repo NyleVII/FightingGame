@@ -1,28 +1,20 @@
-card: <num_effects>, [<effect>]
+card: int(num_effects), [<effect>]
 
 effect:
-	DRAW -> <allegiance>, amount
-	DAMAGE -> <allegiance>, <position>, amount
-	HEAL -> <allegiance>, <position>, amount
-	SHUFFLE -> <allegiance>
-	GAIN_MAXENERGY -> <allegiance>, amount
-	GAIN_ENERGY -> amount
-	DESTROY -> <allegiance>, <position>
-	TEACH -> <allegiance>, <position>, id_ability
+	DRAW, <allegiance>, int(amount)
+	DAMAGE, <allegiance>, <position>, int(amount)
+	HEAL, <allegiance>, <position>, int(amount)
+	SHUFFLE, <allegiance>
+	GAIN_MAXENERGY, <allegiance>, int(amount)
+	GAIN_ENERGY, int(amount)
+	DESTROY, <allegiance>, <position>
 
-allegiance:
-	FRIENDLY
-	ENEMY
-	ALL
+allegiance: FRIENDLY|ENEMY
 
-position:
-	0
-	1
-	2
-	ALL
+position: FRONT|MIDDLE|BACK
 
 
 arcane_intellect: [1, DRAW, FRIENDLY, 2]
-hellfire: [1, DAMAGE, ALL, 3]
+hellfire: [1, DAMAGE, FRIENDLY|ENEMY, 3]
 flamestrike: [1, DAMAGE, ENEMY, 4]
 sprint: [1, DRAW, FRIENDLY, 4]
