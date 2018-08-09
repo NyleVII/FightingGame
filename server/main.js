@@ -6,11 +6,14 @@ const config = require("../appconfig.json");
 const Game = require("./game/game.js");
 const Data = require("./data.js");
 const BufferWriter = require("./bufferwriter.js");
+const Network = require("./network.js");
+const NetProtocol = require("../netprotocol.json");
 
 
 // global variables
 const connections = {};
 const queue = {};
+const games = [];
 let len_queue = 0;
 
 
@@ -73,148 +76,101 @@ function read_string(buffer, index)
 }
 
 
-const processes =
-[
-	// chat message
-	function(connection, buffer_process)
+const processes = {};
+
+processes[NetProtocol.server.LOGIN] = function()
+{
+	// LOGIN
+};
+
+processes[NetProtocol.server.CHAT] = function(connection, buffer_process)
+{
+	const buffer = [NetProtocol.client.CHAT];
+	
+	BufferWriter.string(buffer, connection.player._id);
+	for(let i = 1; i < buffer_process.length; ++i)
+		buffer.push(buffer_process.readUInt8(i));
+	broadcast(Buffer.from(buffer));
+};
+
+processes[NetProtocol.server.QUEUE_JOIN] = function(connection)
+{
+	if (queue[connection.player._id])
+		Network.send(connection, [NetProtocol.client.ERROR, NetProtocol.client.error.ALREADY_IN_QUEUE]);
+	else
 	{
-		const buffer = [0x00];
+		Network.send(connection, [NetProtocol.client.QUEUE_JOINED]);
 		
-		BufferWriter.string(buffer, connection.player._id);
-		for(let i = 1; i < buffer_process.length; ++i)
-			buffer.push(buffer_process.readUInt8(i));
-		broadcast(Buffer.from(buffer));
-	},
-	
-	// player joins queue
-	function(connection)
-	{
-		if (queue[connection.player._id])
-			connection.sendBytes(Buffer.from([0x0E]));
-		else
+		// NOTE(shawn): temp queue code; implement matchmaking
+		if(len_queue > 0)
 		{
-			connection.sendBytes(Buffer.from([0x0D]));
+			// get first player in queue
+			let opponent, id_opponent;
+			for(id_opponent in queue)
+			{
+				opponent = queue[id_opponent];
+				break;
+			}
 			
-			// NOTE(shawn): temp queue code; implement matchmaking
-			if(len_queue > 0)
+			const game = connection.game = opponent.game = new Game(connection, opponent);
+			games.push(game);
+			
+			game.loaded.then(function()
 			{
-				// get first player in queue
-				let opponent, id_opponent;
-				for(id_opponent in queue)
-				{
-					opponent = queue[id_opponent];
-					break;
-				}
+				const buffer_player = [NetProtocol.client.GAMESTART];
+				BufferWriter.string(buffer_player, opponent.player._id);
+				Network.send(connection, buffer_player);
 				
-				connection.game = opponent.game = new Game(connection.player, opponent.player);
+				const buffer_opponent = [NetProtocol.client.GAMESTART];
+				BufferWriter.string(buffer_opponent, connection.player._id);
+				Network.send(opponent, buffer_opponent);
 				
-				connection.game.loaded.then(function()
-				{
-					const buffer_player = [0x09];
-					BufferWriter.string(buffer_player, opponent.player._id);
-					connection.sendBytes(Buffer.from(buffer_player));
-					
-					const buffer_opponent = [0x09];
-					BufferWriter.string(buffer_opponent, connection.player._id);
-					opponent.sendBytes(Buffer.from(buffer_opponent));
-					
-					const id_player1 = connection.game.players[0]._id;
-					const id_player2 = connection.game.players[1]._id;
-					
-					const state1 = connection.game.encodestate(0);
-					const state2 = connection.game.encodestate(1);
-					
-					state1.unshift(0x0A);
-					state2.unshift(0x0A);
-					
-					connections[id_player1].sendBytes(Buffer.from(state1));
-					connections[id_player2].sendBytes(Buffer.from(state2));
-					
-					connections[connection.game.players[connection.game.state.index_currentplayer]._id].sendBytes(Buffer.from([0x0B]));
-				});
+				const prefix = [NetProtocol.client.GAME, NetProtocol.client.game.STATE];
+				Network.send(game.connections[0], prefix.concat(game.encodestate(0)));
+				Network.send(game.connections[1], prefix.concat(game.encodestate(1)));
 				
-				delete queue[id_opponent];
-				len_queue--;
-			}
-			else
-			{
-				queue[connection.player._id] = connection;
-				len_queue++;
-			}
-		}
-	},
-	
-	// player leaves queue
-	function(connection)
-	{
-		if(queue[connection.player._id] === undefined)
-			connection.sendBytes(Buffer.from([0x0F]));
-		else
-		{
-			delete queue[connection.player._id];
+				Network.send(game.connections[game.state.index_currentplayer], [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START_PLAYER]);
+				Network.send(game.connections[game.state.index_currentplayer ^ 1], [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START_OPPONENT]);
+			});
+			
+			delete queue[id_opponent];
 			len_queue--;
-			
-			connection.sendBytes(Buffer.from([0x10]));
 		}
-	},
-	
-	// player changes active loadout
-	function(connection, buffer_process)
-	{
-		const id_loadout = read_string(buffer_process, 1);
-		
-		// TODO(shawn): implement
-		connection.sendBytes(Buffer.from([0x08]));
-	},
-	
-	// player concedes
-	function(connection)
-	{
-		const game = connection.game;
-		
-		if(game === undefined)
-			connection.sendBytes(Buffer.from([0x0C]));
 		else
 		{
-			const opponent = connections[game.players[0] === connection.player ? 1 : 0];
-			
-			connection.sendBytes(Buffer.from([0x11, 0x00]));
-			opponent.sendBytes(Buffer.from([0x11, 0x01]));
-			
-			delete connection.game;
-			delete opponent.game;
+			queue[connection.player._id] = connection;
+			len_queue++;
 		}
-	},
-	
-	// play card
-	function()
-	{
-		
-	},
-	
-	// end turn
-	function(connection)
-	{
-		const game = connection.game;
-		
-		if(game === undefined)
-			connection.sendBytes(Buffer.from([0x0C]));
-		else if(connection.player !== game.players[game.state.index_currentplayer])
-			connection.sendBytes(Buffer.from([0x14]));
-		else
-		{
-			game.endturn();
-			
-			
-		}
-	},
-	
-	// use ability
-	function()
-	{
-		
 	}
-];
+};
+
+processes[NetProtocol.server.QUEUE_LEAVE] = function(connection)
+{
+	if(queue[connection.player._id] === undefined)
+		Network.send(connection, [NetProtocol.client.ERROR, NetProtocol.client.error.NOT_IN_QUEUE]);
+	else
+	{
+		delete queue[connection.player._id];
+		len_queue--;
+		
+		Network.send(connection, [NetProtocol.client.QUEUE_LEFT]);
+	}
+};
+
+processes[NetProtocol.server.LOADOUT_ACTIVE] = function(connection)
+{
+	// TODO(shawn): implement
+	// const id_loadout = read_string(buffer_process, 1);
+	Network.send(connection, [NetProtocol.client.ERROR, NetProtocol.client.error.INVALID_LOADOUT]);
+};
+
+processes[NetProtocol.server.GAME] = function(connection, buffer_process)
+{
+	if(connection.game === undefined)
+		Network.send(connection, [NetProtocol.client.ERROR, NetProtocol.client.error.NOT_IN_GAME]);
+	else
+		connection.game.process(connection.game.connections.indexOf(connection), buffer_process);
+};
 
 
 server_websocket.on("request", function(request)
@@ -243,7 +199,7 @@ server_websocket.on("request", function(request)
 					}
 					
 					// broadcast player left message
-					buffer = [0x06];
+					const buffer = [NetProtocol.client.PLAYER_LEFT];
 					BufferWriter.string(buffer, player._id);
 					broadcast(Buffer.from(buffer));
 					console.log(player.name + " disconnected.");
@@ -259,28 +215,28 @@ server_websocket.on("request", function(request)
 				});
 				
 				// send full player list
-				buffer = [0x04];
+				buffer = [NetProtocol.client.PLAYER_LIST];
 				for(const id_player in connections)
 				{
 					BufferWriter.string(buffer, id_player);
 					BufferWriter.string(buffer, connections[id_player].player.name);
 				}
-				connection.sendBytes(Buffer.from(buffer));
+				Network.send(connection, buffer);
 				
 				// send login success message
-				buffer = [0x07];
+				buffer = [NetProtocol.client.LOGIN];
 				BufferWriter.string(buffer, player._id);
-				connection.sendBytes(Buffer.from(buffer));
+				Network.send(connection, buffer);
 				
 				// broadcast player join message
-				buffer = [0x05];
+				buffer = [NetProtocol.client.PLAYER_JOINED];
 				BufferWriter.string(buffer, player._id);
 				BufferWriter.string(buffer, player.name);
 				broadcast(Buffer.from(buffer));
 				console.log(player.name + " connected.");
 				
 				// send ability data dump
-				buffer = [0x01];
+				buffer = [NetProtocol.client.DATADUMP_ABILITY];
 				for(const id_ability in Data.abilities)
 				{
 					const ability = Data.abilities[id_ability];
@@ -288,10 +244,10 @@ server_websocket.on("request", function(request)
 					BufferWriter.string(buffer, ability._id);
 					BufferWriter.string(buffer, ability.name);
 				}
-				connection.sendBytes(Buffer.from(buffer));
+				Network.send(connection, buffer);
 				
 				// send card data dump
-				buffer = [0x02];
+				buffer = [NetProtocol.client.DATADUMP_CARD];
 				for(const id_card in Data.cards)
 				{
 					const card = Data.cards[id_card];
@@ -300,10 +256,10 @@ server_websocket.on("request", function(request)
 					BufferWriter.string(buffer, card.name);
 					buffer.push(card.cost);
 				}
-				connection.sendBytes(Buffer.from(buffer));
+				Network.send(connection, buffer);
 				
 				// send creature data dump
-				buffer = [0x03];
+				buffer = [NetProtocol.client.DATADUMP_CREATURE];
 				for(const id_creature in Data.creatures)
 				{
 					const creature = Data.creatures[id_creature];
@@ -313,7 +269,35 @@ server_websocket.on("request", function(request)
 					buffer.push(creature.attack);
 					buffer.push(creature.health);
 				}
-				connection.sendBytes(Buffer.from(buffer));
+				Network.send(connection, buffer);
+				
+				for(let j = 0; j < games.length; ++j)
+				{
+					const game = games[j];
+					
+					if(game.connections[0].player._id === player._id)
+					{
+						const buffer_gamestart = [NetProtocol.client.GAMESTART];
+						BufferWriter.string(buffer_gamestart, game.connections[1].player._id);
+						Network.send(connection, buffer_gamestart);
+						
+						Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.STATE].concat(game.encodestate(0)));
+						
+						if(game.state.index_currentplayer === 0)
+							Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START_PLAYER]);
+					}
+					else if(game.connections[1].player._id === player._id)
+					{
+						const buffer_gamestart = [NetProtocol.client.GAMESTART];
+						BufferWriter.string(buffer_gamestart, game.connections[0].player._id);
+						Network.send(connection, buffer_gamestart);
+						
+						Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.STATE].concat(game.encodestate(1)));
+						
+						if(game.state.index_currentplayer === 1)
+							Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START_PLAYER]);
+					}
+				}
 				
 				return;
 			}

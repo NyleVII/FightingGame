@@ -1,66 +1,407 @@
 const Data = require("../data.js");
 const BufferWriter = require("../bufferwriter.js");
 const Random = require("../random.js");
+const Player = require("./player.js");
+const Network = require("../network.js");
+const NetProtocol = require("../../netprotocol.json");
 
 
-function drawcards(player, num_cards)
-{
-	player.hand.push(...player.deck.splice(0, num_cards));
-}
-
-function init_player(loadout)
-{
-	const cards = loadout.cards.slice();
-	Random.shuffle(cards);
-	
-	const player = {
-		energy_max: 2,
-		energy_current: 0,
-		creatures: loadout.creatures.map(function(id_creature)
-		{
-			const creature = Data.creatures[id_creature];
-			
-			return {
-				id: creature._id,
-				health: creature.health,
-				abilities: [],
-				effects: []
-			};
-		}),
-		hand: [],
-		deck: cards
-	};
-	
-	drawcards(player, 5);
-	
-	return player;
-}
-
-function Game(player1, player2)
+function Game(connection1, connection2)
 {
 	const game = this;
 	
-	game.players = [player1, player2];
-	Random.shuffle(game.players);
+	game.listeners = {
+		startturn: [],
+		endturn: [],
+		draw: [],
+		mill: [],
+		gainmaxenergy: [],
+		gainenergy: [],
+		damage: [],
+		death: [],
+		heal: []
+	};
+	
+	game.connections = [connection1, connection2];
+	Random.shuffle(game.connections);
 	
 	game.loaded = Promise.all([
-		global.collections.loadouts.findOne({_id: game.players[0].id_activeloadout}),
-		global.collections.loadouts.findOne({_id: game.players[1].id_activeloadout})
+		global.collections.loadouts.findOne({_id: game.connections[0].player.id_activeloadout}),
+		global.collections.loadouts.findOne({_id: game.connections[1].player.id_activeloadout})
 	]).then(function(loadouts)
 	{
 		game.state =
 		{
 			players:
 			[
-				init_player(loadouts[0]),
-				init_player(loadouts[1])
+				new Player(game, loadouts[0]),
+				new Player(game, loadouts[1])
 			],
 			phase: "game",
 			index_currentplayer: 0,
 			turn: 0
 		};
+		
+		game.state.players[0].energy_current = game.state.players[0].energy_max;
 	});
 }
+
+
+const ALLEGIANCE_FRIENDLY = 0x01;
+const ALLEGIANCE_ENEMY = 0x02;
+
+const POSITION_FRONT = 0x01;
+const POSITION_MIDDLE = 0x02;
+const POSITION_BACK = 0x04;
+
+Game.prototype.communicate = {
+	startturn: function(params)
+	{
+		const index_player = this.state.players.indexOf(params.target);
+		
+		Network.send(this.connections[index_player], [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START_PLAYER]);
+		Network.send(this.connections[index_player ^ 1], [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START_OPPONENT]);
+	},
+	
+	draw: function(params)
+	{
+		const index_player = this.state.players.indexOf(params.source);
+		
+		const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.DRAW_PLAYER];
+		BufferWriter.string(buffer_player, params.target);
+		
+		Network.send(this.connections[index_player], buffer_player);
+		Network.send(this.connections[index_player ^ 1], [NetProtocol.client.GAME, NetProtocol.client.game.DRAW_OPPONENT]);
+	},
+	
+	mill: function(params)
+	{
+		const index_player = this.state.players.indexOf(params.source);
+		
+		const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.MILL_PLAYER];
+		BufferWriter.string(buffer_player, params.target);
+		
+		const buffer_opponent = [NetProtocol.client.GAME, NetProtocol.client.game.MILL_OPPONENT];
+		BufferWriter.string(buffer_opponent, params.target);
+		
+		Network.send(this.connections[index_player], buffer_player);
+		Network.send(this.connections[index_player ^ 1], buffer_opponent);
+	},
+	
+	gainmaxenergy: function(params)
+	{
+		const index_player = this.state.players.indexOf(params.target);
+		
+		const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.GAINMAXENERGY_PLAYER, params.amount];
+		const buffer_opponent = [NetProtocol.client.GAME, NetProtocol.client.game.GAINMAXENERGY_OPPONENT, params.amount];
+		
+		Network.send(this.connections[index_player], buffer_player);
+		Network.send(this.connections[index_player ^ 1], buffer_opponent);
+	},
+	
+	gainenergy: function(params)
+	{
+		const index_player = this.state.players.indexOf(params.target);
+		
+		const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.GAINENERGY_PLAYER, params.amount];
+		const buffer_opponent = [NetProtocol.client.GAME, NetProtocol.client.game.GAINENERGY_OPPONENT, params.amount];
+		
+		Network.send(this.connections[index_player], buffer_player);
+		Network.send(this.connections[index_player ^ 1], buffer_opponent);
+	},
+	
+	damage: function(params)
+	{
+		const index_player = this.state.players.indexOf(params.target.owner);
+		const index_creature = params.target.owner.creatures.indexOf(params.target);
+		
+		const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.DAMAGE_PLAYER, index_creature, params.amount];
+		const buffer_opponent = [NetProtocol.client.GAME, NetProtocol.client.game.DAMAGE_OPPONENT, index_creature, params.amount];
+		
+		Network.send(this.connections[index_player], buffer_player);
+		Network.send(this.connections[index_player ^ 1], buffer_opponent);
+	},
+	
+	death: function(params)
+	{
+		const index_player = this.state.players.indexOf(params.target.owner);
+		const index_creature = params.target.owner.creatures.indexOf(params.target);
+		
+		const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.DEATH_PLAYER, index_creature];
+		const buffer_opponent = [NetProtocol.client.GAME, NetProtocol.client.game.DEATH_OPPONENT, index_creature];
+		
+		Network.send(this.connections[index_player], buffer_player);
+		Network.send(this.connections[index_player ^ 1], buffer_opponent);
+	},
+	
+	heal: function(params)
+	{
+		const index_player = this.state.players.indexOf(params.target.owner);
+		const index_creature = params.target.owner.creatures.indexOf(params.target);
+		
+		const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.HEAL_PLAYER, index_creature, params.amount];
+		const buffer_opponent = [NetProtocol.client.GAME, NetProtocol.client.game.HEAL_OPPONENT, index_creature, params.amount];
+		
+		Network.send(this.connections[index_player], buffer_player);
+		Network.send(this.connections[index_player ^ 1], buffer_opponent);
+	}
+};
+
+
+Game.prototype.processes = {};
+
+Game.prototype.processes[NetProtocol.server.game.ENDTURN] = function(index_player)
+{
+	const connection = this.connections[index_player];
+	
+	if(index_player !== this.state.index_currentplayer)
+		Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.ERROR, NetProtocol.client.game.error.NOT_YOUR_TURN]);
+	else
+		this.endturn();
+};
+
+Game.prototype.processes[NetProtocol.server.game.PLAY_CARD] = function(index_player, buffer_process)
+{
+	const connection = this.connections[index_player];
+	
+	if(index_player !== this.state.index_currentplayer)
+		Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.ERROR, NetProtocol.client.game.error.NOT_YOUR_TURN]);
+	else
+	{
+		const index_card = buffer_process.readUInt8(2);
+		const player = this.state.players[index_player];
+		
+		if(index_card < 0 || index_card >= player.hand.length)
+			Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.ERROR, NetProtocol.client.game.error.CARD_INDEX_OUT_OF_BOUNDS]);
+		else
+		{
+			const card = Data.cards[player.hand[index_card]];
+			
+			if(player.energy_current < card.cost)
+				Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.ERROR, NetProtocol.client.game.error.NOT_ENOUGH_ENERGY]);
+			else
+			{
+				const id_card = player.hand.splice(index_card, 1)[0];
+				
+				player.energy_current -= card.cost;
+				
+				const buffer_player = [NetProtocol.client.GAME, NetProtocol.client.game.PLAY_CARD_PLAYER, index_card];
+				BufferWriter.string(buffer_player, id_card);
+				Network.send(connection, buffer_player);
+				
+				const buffer_opponent = [NetProtocol.client.GAME, NetProtocol.client.game.PLAY_CARD_OPPONENT, index_card];
+				BufferWriter.string(buffer_opponent, id_card);
+				Network.send(this.connections[index_player ^ 1], buffer_opponent);
+				
+				const buffer = card.effect;
+				let index_buffer = 0;
+				
+				const num_effects = buffer[index_buffer++];
+				for(let i = 0; i < num_effects; ++i)
+				{
+					const type = buffer[index_buffer++];
+					index_buffer = this.process_effects[type].call(this, index_player, player, buffer, index_buffer);
+				}
+			}
+		}
+	}
+};
+
+Game.prototype.process = function(index_player, buffer_process)
+{
+	const process = this.processes[buffer_process.readUInt8(1)];
+	if(process !== undefined)
+		process.call(this, index_player, buffer_process);
+};
+
+Game.prototype.process_effects = [
+	function(index_player, source, buffer, index) // DRAW
+	{
+		const flags_allegiance = buffer[index++];
+		const amount = buffer[index++];
+		
+		if(flags_allegiance & ALLEGIANCE_FRIENDLY)
+			for(let i = 0; i < amount; ++i)
+				this.state.players[index_player].draw();
+		if(flags_allegiance & ALLEGIANCE_ENEMY)
+			for(let i = 0; i < amount; ++i)
+				this.state.players[index_player ^ 1].draw();
+		
+		return index;
+	},
+	
+	function(index_player, source, buffer, index) // DAMAGE
+	{
+		const flags_allegiance = buffer[index++];
+		const flags_position = buffer[index++];
+		const amount = buffer[index++];
+		
+		if(flags_allegiance & ALLEGIANCE_FRIENDLY)
+		{
+			const player = this.state.players[index_player];
+			
+			if(flags_position & POSITION_FRONT)
+				player.creatures[0].damage(source, amount);
+			if(flags_position & POSITION_MIDDLE)
+				player.creatures[1].damage(source, amount);
+			if(flags_position & POSITION_BACK)
+				player.creatures[2].damage(source, amount);
+		}
+		
+		if(flags_allegiance & ALLEGIANCE_ENEMY)
+		{
+			const player = this.state.players[index_player ^ 1];
+			
+			if(flags_position & POSITION_FRONT)
+				player.creatures[0].damage(source, amount);
+			if(flags_position & POSITION_MIDDLE)
+				player.creatures[1].damage(source, amount);
+			if(flags_position & POSITION_BACK)
+				player.creatures[2].damage(source, amount);
+		}
+		
+		return index;
+	},
+	
+	function(index_player, source, buffer, index) // HEAL
+	{
+		const flags_allegiance = buffer[index++];
+		const flags_position = buffer[index++];
+		const amount = buffer[index++];
+		
+		if(flags_allegiance & ALLEGIANCE_FRIENDLY)
+		{
+			const player = this.state.players[index_player];
+			
+			if(flags_position & POSITION_FRONT)
+				player.creatures[0].heal(source, amount);
+			if(flags_position & POSITION_MIDDLE)
+				player.creatures[1].heal(source, amount);
+			if(flags_position & POSITION_BACK)
+				player.creatures[2].heal(source, amount);
+		}
+		
+		if(flags_allegiance & ALLEGIANCE_ENEMY)
+		{
+			const player = this.state.players[index_player ^ 1];
+			
+			if(flags_position & POSITION_FRONT)
+				player.creatures[0].heal(source, amount);
+			if(flags_position & POSITION_MIDDLE)
+				player.creatures[1].heal(source, amount);
+			if(flags_position & POSITION_BACK)
+				player.creatures[2].heal(source, amount);
+		}
+		
+		return index;
+	},
+	
+	function(index_player, source, buffer, index) // SHUFFLE
+	{
+		const flags_allegiance = buffer[index++];
+		
+		if(flags_allegiance & ALLEGIANCE_FRIENDLY)
+			Random.shuffle(this.state.players[index_player].creatures);
+		if(flags_allegiance & ALLEGIANCE_ENEMY)
+			Random.shuffle(this.state.players[index_player ^ 1].creatures);
+		
+		return index;
+	},
+	
+	function(index_player, source, buffer, index) // GAIN MAX ENERGY
+	{
+		const flags_allegiance = buffer[index++];
+		const amount = buffer[index++];
+		
+		if(flags_allegiance & ALLEGIANCE_FRIENDLY)
+		{
+			const player = this.state.players[index_player];
+			player.gainmaxenergy(amount);
+		}
+		
+		if(flags_allegiance & ALLEGIANCE_ENEMY)
+		{
+			const player = this.state.players[index_player ^ 1];
+			player.gainmaxenergy(amount);
+		}
+		
+		return index;
+	},
+	
+	function(index_player, source, buffer, index) // GAIN ENERGY
+	{
+		const amount = buffer[index++];
+		
+		this.state.players[index_player].energy_current += amount;
+		
+		return index;
+	},
+	
+	function(index_player, source, buffer, index) // DESTROY
+	{
+		const flags_allegiance = buffer[index++];
+		const flags_position = buffer[index++];
+		
+		if(flags_allegiance & ALLEGIANCE_FRIENDLY)
+		{
+			const player = this.state.players[index_player];
+			
+			if(flags_position & POSITION_FRONT)
+				player.creatures[0].destroy(source);
+			if(flags_position & POSITION_MIDDLE)
+				player.creatures[1].destroy(source);
+			if(flags_position & POSITION_BACK)
+				player.creatures[2].destroy(source);
+		}
+		
+		if(flags_allegiance & ALLEGIANCE_ENEMY)
+		{
+			const player = this.state.players[index_player ^ 1];
+			
+			if(flags_position & POSITION_FRONT)
+				player.creatures[0].destroy(source);
+			if(flags_position & POSITION_MIDDLE)
+				player.creatures[1].destroy(source);
+			if(flags_position & POSITION_BACK)
+				player.creatures[2].destroy(source);
+		}
+		
+		return index;
+	}
+];
+
+Game.prototype.endturn = function()
+{
+	const player_current = this.state.players[this.state.index_currentplayer];
+	
+	this.dispatch("endturn", {target: player_current});
+	
+	this.state.index_currentplayer ^= 1;
+	this.state.turn++;
+	
+	const player_next = this.state.players[this.state.index_currentplayer];
+	
+	this.dispatch("startturn", {target: player_next});
+	
+	player_next.energy_current = player_next.energy_max;
+	player_next.draw();
+};
+
+Game.prototype.listen = function(event, listener)
+{
+	this.listeners[event].push(listener);
+};
+
+Game.prototype.dispatch = function(event, params)
+{
+	const communicate = this.communicate[event];
+	if(communicate !== undefined)
+		communicate.call(this, params);
+	
+	const e = this.listeners[event];
+	for(let i = 0; i < e.length; ++i)
+		e[i].notify(params);
+};
 
 
 Game.prototype.encodestate = function(index_player)
@@ -80,11 +421,9 @@ Game.prototype.encodestate = function(index_player)
 		const creature = player.creatures[i];
 		
 		BufferWriter.string(buffer, creature.id);
-		buffer.push(creature.health);
+		buffer.push(creature.health_current);
 		
-		buffer.push(creature.abilities.length);
-		for(let j = 0; j < creature.abilities.length; ++j)
-			BufferWriter.string(buffer, creature.abilities[j]);
+		BufferWriter.string(buffer, creature.id_ability);
 		
 		buffer.push(creature.effects.length);
 		for(let j = 0; j < creature.effects.length; ++j)
@@ -105,11 +444,9 @@ Game.prototype.encodestate = function(index_player)
 		const creature = opponent.creatures[i];
 		
 		BufferWriter.string(buffer, creature.id);
-		buffer.push(creature.health);
+		buffer.push(creature.health_current);
 		
-		buffer.push(creature.abilities.length);
-		for(let j = 0; j < creature.abilities.length; ++j)
-			BufferWriter.string(buffer, creature.abilities[j]);
+		BufferWriter.string(buffer, creature.id_ability);
 		
 		buffer.push(creature.effects.length);
 		for(let j = 0; j < creature.effects.length; ++j)
@@ -124,45 +461,5 @@ Game.prototype.encodestate = function(index_player)
 	return buffer;
 };
 
-Game.prototype.endturn = function()
-{
-	// TODO(shawn): trigger end of turn event
-	this.state.index_currentplayer ^= 1;
-	this.state.turn++;
-	
-	const player_current = this.state.players[this.state.index_currentplayer];
-	player_current.energy_current = player_current.energy_max;
-	drawcards(player_current, 1);
-};
-
-Game.prototype.processes =
-{
-	main:
-	{
-		card: function(player, action)
-		{
-			const card = Data.cards[player.hand[action.index]];
-			
-			// TODO(shawn): send "invalid" message to client
-			if(card.cost > player.energy_current)
-				return;
-			
-			// deduct card cost from player energy
-			player.energy_current -= card.cost;
-			
-			// remove card from hand
-			player.hand.splice(action.index, 1);
-			
-			// TODO(shawn): resolve card effect
-		}
-	}
-};
-
-Game.prototype.process = function(index_player, action)
-{
-	const process = this.processes[this.phase][action.type];
-	if(process !== undefined)
-		process.call(this, this.players[index_player], action);
-};
 
 module.exports = Game;

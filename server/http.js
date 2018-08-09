@@ -9,17 +9,27 @@ module.exports = http.createServer(function(request, response)
 	if(filename === "/")
 		filename = "/index.html";
 	
-	const ext = path.extname(filename);
 	let type = "text/html";
+	if(filename === "/protocol")
+	{
+		type = "application/json";
+		filename = "netprotocol.json";
+	}
+	else
+	{
+		const ext = path.extname(filename);
+		
+		if(ext === ".js")
+			type = "application/javascript";
+		else if(ext === ".css")
+			type = "text/css";
+		else if(ext === ".png")
+			type = "image/png";
+		
+		filename = "client" + filename;
+	}
 	
-	if(ext === ".js")
-		type = "text/javascript";
-	else if(ext === ".css")
-		type = "text/css";
-	else if(ext === ".png")
-		type = "image/png";
-	
-	fs.readFile("client" + filename, function(error, content)
+	fs.readFile(filename, function(error, content)
 	{
 		if(error === null)
 		{

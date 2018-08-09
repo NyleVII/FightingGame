@@ -1,0 +1,28 @@
+card: <num_effects>, [<effect>]
+
+effect:
+	DRAW -> <allegiance>, amount
+	DAMAGE -> <allegiance>, <position>, amount
+	HEAL -> <allegiance>, <position>, amount
+	SHUFFLE -> <allegiance>
+	GAIN_MAXENERGY -> <allegiance>, amount
+	GAIN_ENERGY -> amount
+	DESTROY -> <allegiance>, <position>
+	TEACH -> <allegiance>, <position>, id_ability
+
+allegiance:
+	FRIENDLY
+	ENEMY
+	ALL
+
+position:
+	0
+	1
+	2
+	ALL
+
+
+arcane_intellect: [1, DRAW, FRIENDLY, 2]
+hellfire: [1, DAMAGE, ALL, 3]
+flamestrike: [1, DAMAGE, ENEMY, 4]
+sprint: [1, DRAW, FRIENDLY, 4]
