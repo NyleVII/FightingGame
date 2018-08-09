@@ -285,6 +285,8 @@ server_websocket.on("request", function(request)
 						
 						if(game.state.index_currentplayer === 0)
 							Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START_PLAYER]);
+						
+						connection.game = game;
 					}
 					else if(game.connections[1].player._id === player._id)
 					{
@@ -296,6 +298,8 @@ server_websocket.on("request", function(request)
 						
 						if(game.state.index_currentplayer === 1)
 							Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START_PLAYER]);
+						
+						connection.game = game;
 					}
 				}
 				
