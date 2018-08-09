@@ -287,6 +287,7 @@ server_websocket.on("request", function(request)
 							Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START_PLAYER]);
 						
 						connection.game = game;
+						game.connections[0] = connection;
 					}
 					else if(game.connections[1].player._id === player._id)
 					{
@@ -300,6 +301,7 @@ server_websocket.on("request", function(request)
 							Network.send(connection, [NetProtocol.client.GAME, NetProtocol.client.game.TURN_START_PLAYER]);
 						
 						connection.game = game;
+						game.connections[1] = connection;
 					}
 				}
 				
