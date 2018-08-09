@@ -1,13 +1,15 @@
 const MAX_EFFECTHANDSIZE = 8;
 const ANCHOR_EFFECTHAND_PLAYER = {x: 400, y: 600};
 const ANCHOR_EFFECTHAND_OPPONENT = {x: 0, y: 0};
-const INCREMENT_EFFECTHAND_PLAYER = {x: 50, y: 0};
-const INCREMENT_EFFECTHAND_OPPONENT = {x: 50, y: 0}; //OPPONENT HAND GROWS TO THE LEFT
+const INCREMENT_EFFECTHAND_PLAYER = {x: 45, y: 0};
+const INCREMENT_EFFECTHAND_OPPONENT = {x: 45, y: 0}; //OPPONENT HAND GROWS TO THE LEFT
 const CREATURE_SPACING = 110;
 const SIZE_CARD = {x: 75, y: 100};
 
+let counter_mouseover = 0;
+
 //init_sprite(<stage>, num, num, num, num, num, num, num, boolean, function)
-function init_sprite(stage, x, y, x_anchor, y_anchor, width, height, scale_x, interactive, onClick, onHover)
+function init_sprite(stage, x, y, x_anchor, y_anchor, width, height, scale_x, interactive, onClick, onHover, onMouseout)
 {
 	const sprite = new PIXI.Sprite();
 	
@@ -23,6 +25,7 @@ function init_sprite(stage, x, y, x_anchor, y_anchor, width, height, scale_x, in
 	{
 		sprite.on("click", onClick);
 		sprite.on("mouseover", onHover);
+		sprite.on("mouseout", onMouseout);
 	}
 	
 	stage.addChild(sprite);
@@ -81,14 +84,40 @@ function Game(renderer, opponent)
 	{
 		//Sends play card message to the server
 		socket.send(new Uint8Array([NetProtocol.server.GAME, NetProtocol.server.game.PLAY_CARD, event.target.card_index]));
+		onMouseout_card();
 	}
 
 	function onHover_card(event)
 	{
+		console.log("In onHover_card");
+
+		counter_mouseover++; //Increment variable to track hover events so onMouseout doesn't trigger before we want
 		const id_card = State.game.state.player.hand[event.target.card_index];
 		
+		//Update command card text
 		game.text_command_card.text = "Hovering over " + Data.cards.by_id[id_card].name;
+
+		//Update card preview sprite on hover
+		game.sprite_card_hover.texture = PIXI.loader.resources[id_card + "_card"].texture;
+		game.sprite_card_hover.x = game.sprite_player_hand[event.target.card_index].x;
 		game.render();
+	}
+
+	function onMouseout_card(event)
+	{
+		console.log("In onMouseout_card");
+		counter_mouseover--;
+		if(counter_mouseover <= 0)
+		{			
+			counter_mouseover = 0;
+			//Update command card text
+			game.text_command_card.text = "";
+
+			//Update card preview sprite on hover
+			game.sprite_card_hover.texture = PIXI.Texture.EMPTY;
+			game.render();
+		}
+		
 	}
 	
 	this.renderer = renderer;
@@ -114,9 +143,10 @@ function Game(renderer, opponent)
 	//Draw creature ability rectangle
 	this.graphics.beginFill(0xFF0000); //Red
 	this.sprite_ability_box = init_sprite(this.stage, 400, 300, 0.5, 1, 100, 50, 1, true, function(){/*onClick*/}, function(){/*onHover*/});
+
 	
 	//End Turn Button
-	this.sprite_end_turn_button = init_sprite(this.stage, 800, 450, 1, 0.5, 120, 50, 1, true, function(){socket.send(new Uint8Array([NetProtocol.server.GAME, NetProtocol.server.game.ENDTURN]));}, function(){/*onHover*/});
+	this.sprite_end_turn_button = init_sprite(this.stage, 800, 350, 1, 0.5, 120, 50, 1, true, function(){socket.send(new Uint8Array([NetProtocol.server.GAME, NetProtocol.server.game.ENDTURN]));}, function(){/*onHover*/});
 	this.end_turn_text = init_text(this.stage, this.sprite_end_turn_button.x - this.sprite_end_turn_button._width/2, this.sprite_end_turn_button.y, 0.5, 0.5);
 	this.end_turn_text.text = "End Turn";
 	
@@ -174,11 +204,14 @@ function Game(renderer, opponent)
 	this.sprite_opponent_hand = [];
 	for (let i = 0; i < MAX_EFFECTHANDSIZE; ++i)
 	{
-		this.sprite_player_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_PLAYER.x + i*INCREMENT_EFFECTHAND_PLAYER.x, ANCHOR_EFFECTHAND_PLAYER.y - SIZE_CARD.y + i*INCREMENT_EFFECTHAND_PLAYER.y, 0, 0, SIZE_CARD.x, SIZE_CARD.y, 1, true, onClick_card, onHover_card));
+		this.sprite_player_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_PLAYER.x + i*INCREMENT_EFFECTHAND_PLAYER.x, ANCHOR_EFFECTHAND_PLAYER.y - SIZE_CARD.y + i*INCREMENT_EFFECTHAND_PLAYER.y, 0, 0, SIZE_CARD.x, SIZE_CARD.y, 1, true, onClick_card, onHover_card, onMouseout_card));
 		this.sprite_player_hand[i].card_index = i;
 		this.sprite_opponent_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_OPPONENT.x + i*INCREMENT_EFFECTHAND_OPPONENT.x, ANCHOR_EFFECTHAND_OPPONENT.y + i*INCREMENT_EFFECTHAND_OPPONENT.y, 0, 0, SIZE_CARD.x, SIZE_CARD.y, 1));
 	}
 	
+	//Card Hover Sprite
+	this.sprite_card_hover = init_sprite(this.stage, 200, 600, 0.5, 1, 200, 300, 1, false);
+
 	if(State.loaded.all)
 		this.init_textures();
 }
@@ -486,6 +519,7 @@ Game.prototype.init_textures = function()
 	this.sprite_opponent_energy.texture = PIXI.loader.resources.energy.texture;
 	this.sprite_ability_box.texture = PIXI.loader.resources.ability_box.texture;
 	this.sprite_end_turn_button.texture = PIXI.loader.resources.end_turn.texture;
+	this.sprite_card_hover.texture = PIXI.Texture.EMPTY;
 	
 	if(this.state)
 		this.state_set(this.state);
