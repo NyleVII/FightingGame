@@ -5,14 +5,17 @@
 	},
 	"globals":
 	{
-		"Data": false,
-		"DataReader": false,
-		"DataView": false,
-		"DOMRenderer": false,
-		"Game": false,
-		"NetProtocol": false,
-		"PIXI": false,
-		"State": false,
-		"WebSocket": false
+		"BufferWriter": "readonly",
+		"Data": "readonly",
+		"DataReader": "readonly",
+		"DataView": "readonly",
+		"DOM": "readonly",
+		"DOMRenderer": "readonly",
+		"Game": "readonly",
+		"Log": "readonly",
+		"NetProtocol": "readonly",
+		"PIXI": "readonly",
+		"State": "readonly",
+		"WebSocket": "readonly"
 	}
 }

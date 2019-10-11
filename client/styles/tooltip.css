@@ -1,13 +1,13 @@
 #tooltip
 {
-	background-color: #1f262e;
+	background-color: #202030;
 	border-radius: 4px;
 	box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.5);
 	display: none;
 	font-size: 0.75rem;
 	padding: 8px;
 	position: fixed;
-	min-width: 8rem;
+	width: 12rem;
 }
 
 #tooltip.visible

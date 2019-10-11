@@ -1,0 +1,187 @@
+#friends-tab
+{
+	background-color: #303038;
+	border-radius: 0.125rem;
+	bottom: 0.25rem;
+	box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.5);
+	cursor: pointer;
+	font-size: 0.75rem;
+	height: 2rem;
+	left: 0.25rem;
+	line-height: 1rem;
+	padding: 0.5rem 1rem;
+	position: absolute;
+	text-align: center;
+}
+
+#friends-container
+{
+	bottom: 0;
+	left: 0;
+	position: fixed;
+}
+
+#friends-listpanel, #friends-chatpanel
+{
+	background-color: #303038;
+	border-radius: 0.125rem;
+	box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.5);
+	display: inline-block;
+	height: 24rem;
+	margin: 0 0 0.25rem 0.25rem;
+	padding: 0.25rem;
+	vertical-align: bottom;
+}
+
+#friends-listpanel
+{
+	width: 16rem;
+}
+
+#friends-chatpanel
+{
+	width: 32rem;
+}
+
+#friends-list
+{
+	background-color: #101014;
+	border-radius: 0.125rem;
+	box-shadow: inset 2px 2px 2px 0 rgba(0, 0, 0, 0.5);
+	height: 21rem;
+	margin-top: 0.5rem;
+	padding: 0.125rem 0.125rem 0;
+	width: 100%;
+}
+
+#friends-list .friend
+{
+	border-radius: 0.125rem;
+	box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.5);
+	font-size: 0.75rem;
+	height: 1.5rem;
+	line-height: 1rem;
+	margin-bottom: 0.125rem;
+	padding: 0.25rem 0.5rem;
+	white-space: nowrap;
+}
+
+#friends-list .friend.offline
+{
+	background-color: #202024;
+	color: #404048;
+	cursor: default;
+}
+
+#friends-list .friend.online
+{
+	background-color: #202030;
+	cursor: pointer;
+}
+
+#friends-list .friend .presence
+{
+	border-radius: 100%;
+	display: inline-block;
+	height: 0.5rem;
+	margin: 0.25rem 0.5rem 0.25rem 0;
+	vertical-align: bottom;
+	width: 0.5rem;
+}
+
+#friends-list .friend.offline .presence
+{
+	background-color: #606060;
+}
+
+#friends-list .friend.online .presence
+{
+	background-color: #408040;
+	box-shadow: 0 0 0.5rem 0.125rem #408040;
+}
+
+#friends-chatlines
+{
+	background-color: #101014;
+	border-radius: 0.125rem;
+	box-shadow: inset 2px 2px 2px 0 rgba(0, 0, 0, 0.5);
+	height: 18.75rem;
+	margin-top: 0.5rem;
+	padding: 0.125rem 0.125rem 0;
+	width: 100%;
+}
+
+
+
+.chatline, .chatmessage
+{
+	font-size: 0.75rem;
+	overflow-wrap: break-word;
+	padding-bottom: 0.125rem;
+}
+
+.chatline
+{
+	color: #8f99a3;
+}
+
+.chatmessage
+{
+	font-style: italic;
+	color: #52667a;
+}
+
+.chatlink
+{
+	color: #c08040;
+}
+
+.chatname
+{
+	color: #c2ccd6;
+	display: inline;
+	font-weight: bold;
+	padding-right: 0.125rem;
+}
+
+#friends-chatform
+{
+	background-color: #101014;
+	border-radius: 0.125rem;
+	box-shadow: inset 2px 2px 2px 0 rgba(0, 0, 0, 0.5);
+	height: 2rem;
+	margin-top: 0.25rem;
+	padding: 1px;
+}
+
+#friends-chatform input
+{
+	font-size: 0.75rem;
+	line-height: 1rem;
+}
+
+#friends-chatform-text
+{
+	overflow: hidden;
+}
+
+#friends-chatform-input
+{
+	background: none;
+	color: #8f99a3;
+	height: 100%;
+	padding: 0 0.5rem;
+	width: 100%;
+}
+
+#friends-chatform-send
+{
+	background-color: #303038;
+	border-bottom-right-radius: 0.125rem;
+	border-top-right-radius: 0.125rem;
+	color: #c2ccd6;
+	cursor: pointer;
+	height: 100%;
+	float: right;
+	padding: 0 0.75rem;
+}

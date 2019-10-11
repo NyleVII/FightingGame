@@ -1,8 +1,11 @@
 <html>
 	<head>
-		<title>Fight Lobby</title>
+		<title>Test</title>
 		<meta charset="UTF-8">
 		<script src="lib/pixi.min.js"></script>
+		<script src="lib/log.js"></script>
+		<script src="lib/dom.js"></script>
+		<script src="lib/bufferwriter.js"></script>
 		<script src="lib/network.js"></script>
 		<script src="lib/data.js"></script>
 		<script src="lib/datareader.js"></script>
@@ -10,59 +13,49 @@
 		<script src="lib/game.js"></script>
 		<script src="lib/state.js"></script>
 		<script src="main.js"></script>
-		<script src="render.js"></script>
-		<link rel="stylesheet" type="text/css" href="styles/chat.css">
 		<link rel="stylesheet" type="text/css" href="styles/gamescreen.css">
 		<link rel="stylesheet" type="text/css" href="styles/layout.css">
 		<link rel="stylesheet" type="text/css" href="styles/main.css">
 		<link rel="stylesheet" type="text/css" href="styles/nav.css">
-		<link rel="stylesheet" type="text/css" href="styles/players.css">
+		<link rel="stylesheet" type="text/css" href="styles/friends.css">
 		<link rel="stylesheet" type="text/css" href="styles/tooltip.css">
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans">
 	</head>
-	
+
 	<body>
 		<div id="nav">
-			<div id="logo">Fight Lobby v0.01</div>
-			<div id="usertext">Welcome Player!</div>
+			<div id="logo">Test v0.01</div>
 			<ul id="nav_menu">
-				<li id="queueButton">Queue</li>
-				<li><a href="/collection">Collection</a></li>
-				<li>Logout</li>
+				<li id="btn_options">Options</li>
+				<li id="btn_logout">Logout</li>
 			</ul>
 		</div>
 		<div id="page">
-			<div id="players" class="column">
-				<span class="title">Connected Players</span>
-				<div id="players_container">
-					<div id="players_inner" class="scroll">
-						<div id="playerlist"></div>
-					</div>
-				</div>
-				<span class="title">Player Info</span>
-				<div id="players_info">
-					<div id="players_infocontent"></div>
-				</div>
-			</div>
+			<!--
 			<div id="gamescreen" class="column">
 				<div id="gamescreen_inner"></div>
-			</div>
-			<div id="chat" class="column">
-				<div id="chat_container">
-					<div id="chat_inner" class="scroll">
-						<div id="chat_lines"></div>
-					</div>
-					<form id="chat_form">
-						<input id="chat_send" type="submit" value="Chat">
-						<div id="chat_input">
-							<input id="chat_text" type="text" autocomplete="off">
-						</div>
-					</form>
-				</div>
 			</div>
 			<div id="tooltip">
 				<span id="tooltip-title" class="title"></span>
 				<div id="tooltip-content"></div>
+			</div>
+			-->
+			<div id="friends-tab">Friends</div>
+			<div id="friends-container" class="hidden">
+				<div id="friends-listpanel">
+					<div id="friends-listtitle" class="title"></div>
+					<div id="friends-list" class="scroll"></div>
+				</div>
+				<div id="friends-chatpanel" class="hidden">
+					<div id="friends-chattitle" class="title"></div>
+					<div id="friends-chatlines" class="scroll"></div>
+					<form id="friends-chatform">
+						<input id="friends-chatform-send" type="submit" value="Send">
+						<div id="friends-chatform-text">
+							<input id="friends-chatform-input" type="text" autocomplete="off">
+						</div>
+					</form>
+				</div>
 			</div>
 		</div>
 	</body>

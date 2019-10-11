@@ -1,22 +1,24 @@
 CLIENT -> SERVER
 
-BYTE CODE	| MEANING				| PROTOCOL
+BYTE CODE	| MEANING				| PARAMETERS
 ----------------------------------------------
-0x00		| Chat message			| <text>
-0x01		| Join queue			|
-0x02		| Leave queue			|
-0x03		| Change active loadout	| <loadout.id>0
-0x04		| Concede				|
-0x05		| Play card				| <index_card><?>
-0x06		| End turn				| 
-0x07		| Use ability			| <index_creature><index_ability><?>
+0x00		| Login					| string: name, string: password
+0x01		| Logout				|
+0x02		| Chat message			| string: id_player, string: message
+0x03		| Join queue			|
+0x04		| Leave queue			|
+0x05		| Change active loadout	| string: id
+0x06		| Game					|
+0x05		| Play card				| int: index
+0x06		| End turn				|
+0x07		| Use ability			| int: index_creature, int: index_ability
 
 
 SERVER -> CLIENT
 
 BYTE CODE	| MEANING				| PROTOCOL
 ----------------------------------------------
-0x00		| Chat message			| <player.id>0<text>0
+0x00		| Chat message			| string: id_player, string: message
 0x01		| Ability data dump		| [<ability.id>0<ability.name>0]
 0x02		| Card data dump		| [<card.id>0<card.name>0<card.cost>]
 0x03		| Creature data dump	| [<creature.id>0<creature.name>0]
@@ -32,8 +34,8 @@ BYTE CODE	| MEANING				| PROTOCOL
 0x0D		| Successfully queued	|
 0x0E		| Already in queue		|
 0x0F		| Not in queue			|
-0x10		| Left queue            |
+0x10		| Left queue			|
 0x11		| Game over				| <who won>
 0x12		| Play card				| <card.id>0<?>
-0x13        | Use ability			| <index_creature><index_ability><?>
+0x13		| Use ability			| <index_creature><index_ability><?>
 0x14		| Not your turn			|

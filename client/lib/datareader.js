@@ -20,3 +20,10 @@ DataReader.prototype.read_int8 = function()
 		return this.dataview.getInt8(this.index++);
 	return 0;
 };
+
+DataReader.prototype.read_uint8 = function()
+{
+	if(this.index < this.dataview.byteLength)
+		return this.dataview.getUint8(this.index++);
+	return 0;
+};

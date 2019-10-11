@@ -3,6 +3,5 @@
 const Data = {
 	abilities: {},
 	cards: {},
-	creatures: {},
-	players: {}
+	creatures: {}
 };
