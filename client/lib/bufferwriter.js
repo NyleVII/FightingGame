@@ -1,4 +1,6 @@
-module.exports = {
+/* exported BufferWriter */
+
+const BufferWriter = {
 	string: function(buffer, string)
 	{
 		// TODO(shawn): support utf encoding

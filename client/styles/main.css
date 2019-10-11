@@ -14,7 +14,7 @@ html
 
 body
 {
-	background-color: #0a0d0f;
+	background-color: #0c0c10;
 	color: #c2ccd6;
 	height: 100%;
 	margin: 0;
@@ -31,15 +31,28 @@ a
 	outline: none;
 }
 
+input
+{
+	border: none;
+	font-family: inherit;
+}
+
 .title
 {
 	border-bottom: 1px solid #52667a;
 	display: block;
 	font-size: 1rem;
+	height: 2rem;
 	line-height: 1rem;
-	padding: 0.5rem 0 calc(0.5rem - 1px);
+	padding: 0.5rem 0;
 	text-align: center;
+	white-space: nowrap;
 	width: 100%;
+}
+
+.hidden
+{
+	display: none!important;
 }
 
 .label

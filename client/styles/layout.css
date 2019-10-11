@@ -2,12 +2,5 @@
 {
 	font-size: 0;
 	height: 100%;
-	padding-top: calc(4rem + 8px);
-}
-
-.column
-{
-	font-size: 0.75rem;
-	height: 100%;
-	padding: 8px;
+	padding-top: 3.5rem;
 }

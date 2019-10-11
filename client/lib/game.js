@@ -89,7 +89,7 @@ function Game(renderer, opponent)
 
 	function onHover_card(event)
 	{
-		console.log("In onHover_card");
+		Log.message("In onHover_card");
 
 		counter_mouseover++; //Increment variable to track hover events so onMouseout doesn't trigger before we want
 		const id_card = State.game.state.player.hand[event.target.card_index];
@@ -103,9 +103,9 @@ function Game(renderer, opponent)
 		game.render();
 	}
 
-	function onMouseout_card(event)
+	function onMouseout_card()
 	{
-		console.log("In onMouseout_card");
+		Log.message("In onMouseout_card");
 		counter_mouseover--;
 		if(counter_mouseover <= 0)
 		{			
@@ -293,7 +293,7 @@ Game.prototype.processes[NetProtocol.client.game.STATE] = function(reader)
 
 Game.prototype.processes[NetProtocol.client.game.TURN_START_PLAYER] = function()
 {
-	console.log("It is your turn");
+	Log.message("It is your turn");
 	
 	this.state.player.energy_current = this.state.player.energy_max;
 	
@@ -302,7 +302,7 @@ Game.prototype.processes[NetProtocol.client.game.TURN_START_PLAYER] = function()
 
 Game.prototype.processes[NetProtocol.client.game.TURN_START_OPPONENT] = function()
 {
-	console.log("It is your opponent's turn");
+	Log.message("It is your opponent's turn");
 	
 	this.state.opponent.energy_current = this.state.opponent.energy_max;
 	
@@ -316,9 +316,9 @@ Game.prototype.processes[NetProtocol.client.game.PLAY_CARD_PLAYER] = function(re
 	
 	const id_card_client = this.state.player.hand.splice(index_card, 1)[0];
 	if(id_card_client !== id_card)
-		console.error("Card ID mismatch");
+		Log.error("Card ID mismatch");
 	
-	console.log("You played " + Data.cards.by_id[id_card].name);
+	Log.message("You played " + Data.cards.by_id[id_card].name);
 	
 	this.state.player.energy_current -= Data.cards.by_id[id_card].cost;
 	
@@ -327,10 +327,10 @@ Game.prototype.processes[NetProtocol.client.game.PLAY_CARD_PLAYER] = function(re
 
 Game.prototype.processes[NetProtocol.client.game.PLAY_CARD_OPPONENT] = function(reader)
 {
-	const index_card = reader.read_int8();
+	/*const index_card = */reader.read_int8();
 	const id_card = reader.read_string();
 	
-	console.log("Your opponent played " + Data.cards.by_id[id_card].name);
+	Log.message("Your opponent played " + Data.cards.by_id[id_card].name);
 	
 	this.state.opponent.handSize--;
 	this.state.opponent.energy_current -= Data.cards.by_id[id_card].cost;
@@ -342,7 +342,7 @@ Game.prototype.processes[NetProtocol.client.game.DRAW_PLAYER] = function(reader)
 {
 	const id_card = reader.read_string();
 	
-	console.log("You drew " + Data.cards.by_id[id_card].name);
+	Log.message("You drew " + Data.cards.by_id[id_card].name);
 	
 	this.state.player.deckSize--;
 	this.state.player.hand.push(id_card);
@@ -352,7 +352,7 @@ Game.prototype.processes[NetProtocol.client.game.DRAW_PLAYER] = function(reader)
 
 Game.prototype.processes[NetProtocol.client.game.DRAW_OPPONENT] = function()
 {
-	console.log("Your opponent drew a card");
+	Log.message("Your opponent drew a card");
 	
 	this.state.opponent.deckSize--;
 	this.state.opponent.handSize++;
@@ -364,7 +364,7 @@ Game.prototype.processes[NetProtocol.client.game.MILL_PLAYER] = function(reader)
 {
 	const id_card = reader.read_string();
 	
-	console.log("You milled " + Data.cards.by_id[id_card].name);
+	Log.message("You milled " + Data.cards.by_id[id_card].name);
 	
 	this.state.player.deckSize--;
 	
@@ -375,7 +375,7 @@ Game.prototype.processes[NetProtocol.client.game.MILL_OPPONENT] = function(reade
 {
 	const id_card = reader.read_string();
 	
-	console.log("Your opponent milled " + Data.cards.by_id[id_card].name);
+	Log.message("Your opponent milled " + Data.cards.by_id[id_card].name);
 	
 	this.state.opponent.deckSize--;
 	
@@ -386,7 +386,7 @@ Game.prototype.processes[NetProtocol.client.game.GAINMAXENERGY_PLAYER] = functio
 {
 	const amount = reader.read_int8();
 	
-	console.log("You gained " + amount + " max energy");
+	Log.message("You gained " + amount + " max energy");
 	
 	this.state.player.energy_max += amount;
 	
@@ -397,7 +397,7 @@ Game.prototype.processes[NetProtocol.client.game.GAINMAXENERGY_OPPONENT] = funct
 {
 	const amount = reader.read_int8();
 	
-	console.log("Your opponent gained " + amount + " max energy");
+	Log.message("Your opponent gained " + amount + " max energy");
 	
 	this.state.opponent.energy_max += amount;
 	
@@ -411,7 +411,7 @@ Game.prototype.processes[NetProtocol.client.game.DAMAGE_PLAYER] = function(reade
 	
 	const creature = this.state.player.creatures[index_creature];
 	
-	console.log("Your " + Data.creatures.by_id[creature.id].name + " took " + amount + " damage");
+	Log.message("Your " + Data.creatures.by_id[creature.id].name + " took " + amount + " damage");
 	
 	creature.health_current -= amount;
 	
@@ -425,7 +425,7 @@ Game.prototype.processes[NetProtocol.client.game.DAMAGE_OPPONENT] = function(rea
 	
 	const creature = this.state.opponent.creatures[index_creature];
 	
-	console.log("Your opponent's " + Data.creatures.by_id[creature.id].name + " took " + amount + " damage");
+	Log.message("Your opponent's " + Data.creatures.by_id[creature.id].name + " took " + amount + " damage");
 	
 	creature.health_current -= amount;
 	
@@ -439,7 +439,7 @@ Game.prototype.processes[NetProtocol.client.game.HEAL_PLAYER] = function(reader)
 	
 	const creature = this.state.player.creatures[index_creature];
 	
-	console.log("Your " + Data.creatures.by_id[creature.id].name + " restored " + amount + " health");
+	Log.message("Your " + Data.creatures.by_id[creature.id].name + " restored " + amount + " health");
 	
 	creature.health_current += amount;
 	
@@ -453,7 +453,7 @@ Game.prototype.processes[NetProtocol.client.game.HEAL_OPPONENT] = function(reade
 	
 	const creature = this.state.opponent.creatures[index_creature];
 	
-	console.log("Your opponent's " + Data.creatures.by_id[creature.id].name + " restored " + amount + " health");
+	Log.message("Your opponent's " + Data.creatures.by_id[creature.id].name + " restored " + amount + " health");
 	
 	creature.health_current += amount;
 	
@@ -465,7 +465,7 @@ Game.prototype.processes[NetProtocol.client.game.DEATH_PLAYER] = function(reader
 	const index_creature = reader.read_int8();
 	const creature = this.state.player.creatures[index_creature];
 	
-	console.log("Your " + Data.creatures.by_id[creature.id].name + " died");
+	Log.message("Your " + Data.creatures.by_id[creature.id].name + " died");
 	
 	creature.health_current = 0;
 	
@@ -477,27 +477,45 @@ Game.prototype.processes[NetProtocol.client.game.DEATH_OPPONENT] = function(read
 	const index_creature = reader.read_int8();
 	const creature = this.state.opponent.creatures[index_creature];
 	
-	console.log("Your opponent's " + Data.creatures.by_id[creature.id].name + " died");
+	Log.message("Your opponent's " + Data.creatures.by_id[creature.id].name + " died");
 	
 	creature.health_current = 0;
 	
 	this.state_set(this.state);
 };
 
+Game.prototype.processes[NetProtocol.client.game.WIN] = function()
+{
+	Log.message("You won!");
+
+	// TODO(shawn): clean up renderer, any other resources
+
+	State.game = null;
+};
+
+Game.prototype.processes[NetProtocol.client.game.DEFEAT] = function()
+{
+	Log.message("You lost!");
+
+	// TODO(shawn): clean up renderer, any other resources
+
+	State.game = null;
+};
+
 Game.prototype.processes[NetProtocol.client.game.ERROR] = function(reader)
 {
-	const code = reader.read_int8();
+	const code = reader.read_uint8();
 	for(const key in NetProtocol.client.game.error)
 		if(NetProtocol.client.game.error[key] === code)
 		{
-			console.error("Game error: " + key);
+			Log.error("Game error: " + key);
 			break;
 		}
 };
 
 Game.prototype.process = function(reader)
 {
-	const code = reader.read_int8();
+	const code = reader.read_uint8();
 	
 	const process = this.processes[code];
 	if(process !== undefined)
@@ -506,7 +524,7 @@ Game.prototype.process = function(reader)
 		for(const key in NetProtocol.client.game)
 			if(NetProtocol.client.game[key] === code)
 			{
-				console.error("Unhandled game message: " + key);
+				Log.error("Unhandled game message: " + key);
 				break;
 			}
 };
