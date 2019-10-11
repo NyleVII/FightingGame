@@ -1,6 +1,6 @@
 const MAX_EFFECTHANDSIZE = 8;
-const ANCHOR_EFFECTHAND_PLAYER = {x: 400, y: 600};
-const ANCHOR_EFFECTHAND_OPPONENT = {x: 0, y: 0};
+const ANCHOR_EFFECTHAND_PLAYER = {x: 445, y: 600};
+const ANCHOR_EFFECTHAND_OPPONENT = {x: 45, y: 0};
 const INCREMENT_EFFECTHAND_PLAYER = {x: 45, y: 0};
 const INCREMENT_EFFECTHAND_OPPONENT = {x: 45, y: 0}; //OPPONENT HAND GROWS TO THE LEFT
 const CREATURE_SPACING = 110;
@@ -204,9 +204,9 @@ function Game(renderer, opponent)
 	this.sprite_opponent_hand = [];
 	for (let i = 0; i < MAX_EFFECTHANDSIZE; ++i)
 	{
-		this.sprite_player_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_PLAYER.x + i*INCREMENT_EFFECTHAND_PLAYER.x, ANCHOR_EFFECTHAND_PLAYER.y - SIZE_CARD.y + i*INCREMENT_EFFECTHAND_PLAYER.y, 0, 0, SIZE_CARD.x, SIZE_CARD.y, 1, true, onClick_card, onHover_card, onMouseout_card));
+		this.sprite_player_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_PLAYER.x + i*INCREMENT_EFFECTHAND_PLAYER.x, ANCHOR_EFFECTHAND_PLAYER.y - SIZE_CARD.y + i*INCREMENT_EFFECTHAND_PLAYER.y, 0.5, 0, SIZE_CARD.x, SIZE_CARD.y, 1, true, onClick_card, onHover_card, onMouseout_card));
 		this.sprite_player_hand[i].card_index = i;
-		this.sprite_opponent_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_OPPONENT.x + i*INCREMENT_EFFECTHAND_OPPONENT.x, ANCHOR_EFFECTHAND_OPPONENT.y + i*INCREMENT_EFFECTHAND_OPPONENT.y, 0, 0, SIZE_CARD.x, SIZE_CARD.y, 1));
+		this.sprite_opponent_hand.push(init_sprite(this.stage, ANCHOR_EFFECTHAND_OPPONENT.x + i*INCREMENT_EFFECTHAND_OPPONENT.x, ANCHOR_EFFECTHAND_OPPONENT.y + i*INCREMENT_EFFECTHAND_OPPONENT.y, 0.5, 0, SIZE_CARD.x, SIZE_CARD.y, 1));
 	}
 	
 	//Card Hover Sprite
