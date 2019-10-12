@@ -19,6 +19,8 @@
 		<link rel="stylesheet" type="text/css" href="styles/nav.css">
 		<link rel="stylesheet" type="text/css" href="styles/friends.css">
 		<link rel="stylesheet" type="text/css" href="styles/tooltip.css">
+		<link rel="stylesheet" type="text/css" href="styles/forms.css">
+		<link rel="stylesheet" type="text/css" href="styles/login.css">
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans">
 	</head>
 
@@ -40,6 +42,21 @@
 				<div id="tooltip-content"></div>
 			</div>
 			-->
+			<div id="center-screen-container">
+				<form class="login" action="">
+					<div class="login-input">
+						<label>Username:</label>
+						<input type="text" id="username" required>
+					  </div>
+					  <div class="login-input">
+						<label for="password">Password:</label>
+						<input type="password" id="password" required>
+					  </div>
+					  <div class="">
+						  <input id="login-submit" type="submit" value="Log In">
+					  </div>
+				</form>
+			</div>
 			<div id="friends-tab">Friends</div>
 			<div id="friends-container" class="hidden">
 				<div id="friends-listpanel">
