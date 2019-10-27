@@ -12,6 +12,7 @@
 		<script src="lib/domrenderer.js"></script>
 		<script src="lib/game.js"></script>
 		<script src="lib/state.js"></script>
+		<script src="lib/templater.js"></script>
 		<script src="main.js"></script>
 		<link rel="stylesheet" type="text/css" href="styles/gamescreen.css">
 		<link rel="stylesheet" type="text/css" href="styles/layout.css">
@@ -43,19 +44,19 @@
 			</div>
 			-->
 			<div id="center-screen-container">
-				<form class="login" action="">
-					<div class="login-input">
-						<div><label>Username:</label></div>
-						<input type="text" id="username" required>
-
-						<div><label>Password:</label></div>
-						<input type="password" id="password" required>
-					</div>
-					  <div>
-						  <input id="login-submit" type="submit" value="Log In">
-					  </div>
-					</div>
-				</form>
+					<form class="login" action="">
+							<div class="login-input">
+								<div><label>Username:</label></div>
+								<input type="text" id="username" required>
+		
+								<div><label>Password:</label></div>
+								<input type="password" id="password" required>
+							</div>
+							  <div>
+								  <input id="login-submit" type="submit" value="Log In">
+							  </div>
+							</div>
+						</form>
 			</div>
 			<div id="friends-tab">Friends</div>
 			<div id="friends-container" class="hidden">
