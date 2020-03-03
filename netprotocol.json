@@ -2,11 +2,14 @@
 	"server": {
 		"LOGIN": 0,
 		"LOGOUT": 1,
-		"CHAT": 2,
-		"QUEUE_JOIN": 3,
-		"QUEUE_LEAVE": 4,
-		"LOADOUT_ACTIVE": 5,
-		"GAME": 6,
+		"REQUEST_SEND": 2,
+		"REQUEST_ACCEPT": 3,
+		"REQUEST_DENY": 4,
+		"CHAT": 5,
+		"QUEUE_JOIN": 6,
+		"QUEUE_LEAVE": 7,
+		"LOADOUT_ACTIVE": 8,
+		"GAME": 9,
 		
 		"game": {
 			"CONCEDE": 0,
@@ -74,11 +77,12 @@
 			"INVALID_MESSAGE": 0,
 			"NOT_LOGGED_IN": 1,
 			"ALREADY_LOGGED_IN": 2,
-			"PLAYER_NOT_FOUND": 3,
-			"ALREADY_IN_QUEUE": 4,
-			"NOT_IN_QUEUE": 5,
-			"NOT_IN_GAME": 6,
-			"INVALID_LOADOUT": 7
+			"INVALID_PASSWORD": 3,
+			"PLAYER_NOT_FOUND": 4,
+			"ALREADY_IN_QUEUE": 5,
+			"NOT_IN_QUEUE": 6,
+			"NOT_IN_GAME": 7,
+			"INVALID_LOADOUT": 8
 		}
 	}
 }

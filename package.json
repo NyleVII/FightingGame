@@ -5,7 +5,8 @@
 		"start": "node server/main.js"
 	},
 	"dependencies": {
-		"mongodb": "latest",
+		"bcrypt": "latest",
+		"mongodb": "^3.3.4",
 		"websocket": "latest"
 	},
 	"devDependencies": {

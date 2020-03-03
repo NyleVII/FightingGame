@@ -2,30 +2,35 @@ CLIENT -> SERVER
 
 BYTE CODE	| MEANING				| PARAMETERS
 ----------------------------------------------
-0x00		| Login					| string: name, string: password
+0x00		| Login					| name: string, password: string
 0x01		| Logout				|
-0x02		| Chat message			| string: id_player, string: message
-0x03		| Join queue			|
-0x04		| Leave queue			|
-0x05		| Change active loadout	| string: id
-0x06		| Game					|
-0x05		| Play card				| int: index
-0x06		| End turn				|
-0x07		| Use ability			| int: index_creature, int: index_ability
+0x02		| Send Friend Request	| id_player: string
+0x03		| Accept Friend Request	| id_player: string
+0x04		| Deny Friend Request	| id_player: string
+0x05		| Chat message			| id_player: string, message: string
+0x06		| Join queue			|
+0x07		| Leave queue			|
+0x08		| Change active loadout	| id_loadout: string
+0x09		| Game					| game: object
+-> 0x00		| -> Concede			|
+-> 0x01		| -> End turn			|
+-> 0x02		| -> Play card			| index_card: int
+-> 0x03		| -> Use ability		| index_creature: int, index_ability: int
 
 
 SERVER -> CLIENT
 
 BYTE CODE	| MEANING				| PROTOCOL
 ----------------------------------------------
-0x00		| Chat message			| string: id_player, string: message
-0x01		| Ability data dump		| [<ability.id>0<ability.name>0]
-0x02		| Card data dump		| [<card.id>0<card.name>0<card.cost>]
-0x03		| Creature data dump	| [<creature.id>0<creature.name>0]
+0x00		| Login successful		|
+0x01		| Logout successful		|
+0x02		| Chat message			| id_player: string, message: string
+0x03		| Ability data dump		| [<ability.id>0<ability.name>0]
+0x04		| Creature data dump	| [<creature.id>0<creature.name>0]
+0x05		| Card data dump		| [<card.id>0<card.name>0<card.cost>]
 0x04		| Player list			| [<player.id>0<player.name>0]
 0x05		| Player joined			| <player.id>0<player.name>0
 0x06		| Player left			| <player.id>0
-0x07		| Login successful		| <player.id>0
 0x08		| Invalid loadout		|
 0x09		| Game started			| <player.id>0
 0x0A		| Game state			| ...
@@ -39,3 +44,13 @@ BYTE CODE	| MEANING				| PROTOCOL
 0x12		| Play card				| <card.id>0<?>
 0x13		| Use ability			| <index_creature><index_ability><?>
 0x14		| Not your turn			|
+0xFF		| Error					| error: object
+-> 0x00		| -> Invalid message	|
+-> 0x01		| -> Not logged in		|
+-> 0x02		| -> Already logged in	|
+-> 0x03		| -> Invalid password	|
+-> 0x04		| -> Player not found	|
+-> 0x05		| -> Already in queue	|
+-> 0x06		| -> Not in queue		|
+-> 0x07		| -> Not in game		|
+-> 0x08		| -> Invalid loadout	|

@@ -1,6 +1,6 @@
+const bcrypt = require("bcrypt");
 const websocket = require("websocket");
 const server_http = require("./http.js");
-const BufferWriter = require("./bufferwriter.js");
 const Config = require("../appconfig.json");
 const Data = require("./data.js");
 const Game = require("./game/game.js");
@@ -32,12 +32,6 @@ const server_websocket = new websocket.server({httpServer: server_http});
 
 Data.initialize();
 
-function broadcast(message)
-{
-	for(const id_player in State.players.by_id)
-		State.players.by_id[id_player].connection.sendUTF(message);
-}
-
 function errormessage(errorcode)
 {
 	return JSON.stringify({
@@ -48,124 +42,171 @@ function errormessage(errorcode)
 	});
 }
 
+function logout(player)
+{
+	delete State.players.by_id[player._id];
+	delete State.players.by_name[player.name];
+
+	if(State.queue[player._id] !== undefined)
+	{
+		delete State.queue[player._id];
+		State.len_queue--;
+	}
+
+	if(player.game !== null)
+	{
+		const index_player = player.game.players.indexOf(player);
+		player.game.players[index_player] = null;
+	}
+
+	player.connection.player = null;
+}
+
 
 const processes = {};
 
 processes[NetProtocol.server.LOGIN] = function(connection, payload)
 {
 	if(State.players.by_name[payload.name] !== undefined)
-		connection.sendUTF(JSON.stringify({
-			code: NetProtocol.client.ERROR,
-			error: {
-				code: NetProtocol.client.error.ALREADY_LOGGED_IN
-			}
-		}));
+		connection.sendUTF(errormessage(NetProtocol.client.error.ALREADY_LOGGED_IN));
 	else
-		Data.collections.players.findOne({name: payload.name}, function(error, player)
+		Data.collections.players.findOne({name: payload.name}, function(error, player) // FIXME(shawn): database connection may not be initialized yet
 		{
 			if(error !== null)
 				Log.error(error, "logging in");
 			else if(player === null)
-				connection.sendUTF(JSON.stringify({
-					code: NetProtocol.client.ERROR,
-					error: {
-						code: NetProtocol.client.error.PLAYER_NOT_FOUND
-					}
-				}));
+				connection.sendUTF(errormessage(NetProtocol.client.error.PLAYER_NOT_FOUND));
 			else
 			{
-				// update player state
-				State.players.by_id[player._id] = State.players.by_name[player.name] = connection.player = player;
-				player.connection = connection;
-
-				// TODO(shawn): send friend's list
-
-				// send login success message
-				connection.sendUTF(JSON.stringify({
-					code: NetProtocol.client.LOGIN,
-					id: player._id
-				}));
-
-				// TODO(shawn): send player join message to friends
-
-				Log.message(`${player.name} connected.`);
-
-				// send data dumps
-				Network.send(connection, Data.buffers.abilities);
-				Network.send(connection, Data.buffers.cards);
-				Network.send(connection, Data.buffers.creatures);
-
-				// check if player should reconnect to an existing game
-				let index_game;
-				for(index_game = 0; index_game < State.games.length; ++index_game)
+				// TODO(shawn): throttle number of login attempts?
+				bcrypt.compare(payload.password, player.password).then(function(equal)
 				{
-					const game = State.games[index_game];
-
-					const index_player = game.id_players.indexOf(player._id);
-					if(index_player !== -1)
+					if(equal)
 					{
+						// update player state
+						State.players.by_id[player._id] = State.players.by_name[player.name] = connection.player = player;
+						player.connection = connection;
+
+						// TODO(shawn): send friend list
+						
+						// TODO(shawn): send friend requests
+
+						// send login success message
 						connection.sendUTF(JSON.stringify({
-							code: NetProtocol.client.GAMESTART,
-							id_player_opponent: game.id_players[index_player ^ 1]
+							code: NetProtocol.client.LOGIN,
+							id: player._id
 						}));
 
-						connection.sendUTF(JSON.stringify({
-							code: NetProtocol.client.GAME,
-							game: {
-								code: NetProtocol.client.game.STATE,
-								state: game.encodestate(index_player)
+						// TODO(shawn): broadcast player login message to friends
+
+						Log.message(`${player.name} connected.`);
+
+						// send data dumps TODO(shawn): review after JSON network refactor
+						Network.send(connection, Data.buffers.abilities);
+						Network.send(connection, Data.buffers.cards);
+						Network.send(connection, Data.buffers.creatures);
+
+						// check if player should reconnect to an existing game
+						let index_game;
+						for(index_game = 0; index_game < State.games.length; ++index_game)
+						{
+							const game = State.games[index_game];
+
+							const index_player = game.id_players.indexOf(player._id);
+							if(index_player !== -1)
+							{
+								connection.sendUTF(JSON.stringify({
+									code: NetProtocol.client.GAMESTART,
+									id_player_opponent: game.id_players[index_player ^ 1]
+								}));
+
+								connection.sendUTF(JSON.stringify({
+									code: NetProtocol.client.GAME,
+									game: {
+										code: NetProtocol.client.game.STATE,
+										state: game.encodestate(index_player)
+									}
+								}));
+
+								if(game.state.index_currentplayer === index_player)
+									connection.sendUTF(JSON.stringify({
+										code: NetProtocol.client.GAME,
+										game: {
+											code: NetProtocol.client.game.TURN_START_PLAYER
+										}
+									}));
+
+								player.game = game;
+								game.players[index_player] = player;
 							}
-						}));
+						}
 
-						if(game.state.index_currentplayer === index_player)
-							connection.sendUTF(JSON.stringify({
-								code: NetProtocol.client.GAME,
-								game: {
-									code: NetProtocol.client.game.TURN_START_PLAYER
-								}
-							}));
-
-						player.game = game;
-						game.players[index_player] = player;
+						if(index_game === State.games.length)
+							player.game = null;
 					}
-				}
-
-				if(index_game === State.games.length)
-					player.game = null;
+					else
+						connection.sendUTF(errormessage(NetProtocol.client.error.INVALID_PASSWORD));
+				});
 			}
 		});
 };
 
-function logout(connection)
-{
-	delete State.players.by_id[connection.player._id];
-	delete State.players.by_name[connection.player.name];
-
-	if(State.queue[connection.player._id] !== undefined)
-	{
-		delete State.queue[connection.player._id];
-		State.len_queue--;
-	}
-
-	if(connection.player.game !== null)
-	{
-		const game = connection.player.game;
-		const index_player = game.players.indexOf(connection.player);
-		game.players[index_player] = null;
-	}
-
-	connection.player = null;
-}
-
 processes[NetProtocol.server.LOGOUT] = function(connection)
 {
-	logout(connection);
+	logout(connection.player);
 	connection.sendUTF(JSON.stringify({code: NetProtocol.client.LOGOUT}));
+};
+
+processes[NetProtocol.server.REQUEST_SEND] = function(connection, payload)
+{
+	Data.collections.players.findOne({_id: payload.id_player}, function(error, player) // FIXME(shawn): database connection may not be initialized yet
+	{
+		if(error !== null)
+			Log.error(error, "sending friend request");
+		else if(player === null)
+			connection.sendUTF(errormessage(NetProtocol.client.error.PLAYER_NOT_FOUND));
+		else if(player.requests.includes(connection.player._id))
+			connection.sendUTF(errormessage(NetProtocol.client.error.ALREADY_REQUESTED));
+		else
+		{
+			// update request list in both database and cached server state
+			Data.collections.players.updateOne({_id: payload.id_player}, {$push: {requests: connection.player._id}});
+			State.players.by_id[payload.id_player].requests.push(connection.player._id);
+
+			// TODO(shawn): if recipient is online, notify them of the friend request
+			if(State.players.by_id[payload.id_player] !== undefined)
+			{
+
+			}
+
+			// TODO(shawn): notify sending player that request was sent
+		}
+	});
+};
+
+processes[NetProtocol.server.REQUEST_ACCEPT] = function(connection, payload)
+{
+	if(!connection.player.requests.includes(payload.id_player))
+		connection.sendUTF(errormessage(NetProtocol.client.error.REQUEST_NOT_FOUND));
+	else
+	{
+		// TODO(shawn): do the thing
+	}
+};
+
+processes[NetProtocol.server.REQUEST_DENY] = function(connection, payload)
+{
+	if(!connection.player.requests.includes(payload.id_player))
+		connection.sendUTF(errormessage(NetProtocol.client.error.REQUEST_NOT_FOUND));
+	else
+	{
+		// TODO(shawn): do the thing
+	}
 };
 
 processes[NetProtocol.server.CHAT] = function(connection, payload)
 {
-	// // TODO(shawn):
+	// // TODO(shawn): do this
 
 	// .sendUTF(JSON.stringify({
 	// 	code: NetProtocol.client.CHAT,
@@ -185,10 +226,10 @@ processes[NetProtocol.server.CHAT] = function(connection, payload)
 processes[NetProtocol.server.QUEUE_JOIN] = function(connection)
 {
 	if (State.queue[connection.player._id])
-		Network.send(connection, [NetProtocol.client.ERROR, NetProtocol.client.error.ALREADY_IN_QUEUE]);
+		connection.sendUTF(errormessage(NetProtocol.client.error.ALREADY_IN_QUEUE));
 	else
 	{
-		Network.send(connection, [NetProtocol.client.QUEUE_JOINED]);
+		connection.sendUTF(JSON.stringify({code: NetProtocol.client.QUEUE_JOINED}));
 
 		// NOTE(shawn): temporary; implement matchmaking
 		if(State.len_queue > 0)
@@ -229,13 +270,13 @@ processes[NetProtocol.server.QUEUE_JOIN] = function(connection)
 processes[NetProtocol.server.QUEUE_LEAVE] = function(connection)
 {
 	if(State.queue[connection.player._id] === undefined)
-		Network.send(connection, [NetProtocol.client.ERROR, NetProtocol.client.error.NOT_IN_QUEUE]);
+		connection.sendUTF(errormessage(NetProtocol.client.error.ALREADY_IN_QUEUE));
 	else
 	{
 		delete State.queue[connection.player._id];
 		State.len_queue--;
 
-		Network.send(connection, [NetProtocol.client.QUEUE_LEFT]);
+		connection.sendUTF(JSON.stringify({code: NetProtocol.client.QUEUE_LEFT}));
 	}
 };
 
@@ -249,9 +290,9 @@ processes[NetProtocol.server.LOADOUT_ACTIVE] = function(connection, buffer_proce
 		if(error !== null)
 			Log.error(error, "activating loadout");
 		else if(loadout === null)
-			Network.send(connection, [NetProtocol.client.ERROR, NetProtocol.client.error.INVALID_LOADOUT]);
+			connection.sendUTF(errormessage(NetProtocol.client.error.INVALID_LOADOUT));
 		else
-			Network.send(connection, [NetProtocol.client.LOADOUT_ACTIVE]);
+			connection.sendUTF(JSON.stringify({code: NetProtocol.client.LOADOUT_ACTIVE}));
 	});
 };
 
@@ -260,7 +301,7 @@ processes[NetProtocol.server.GAME] = function(connection, buffer_process)
 	const game = connection.player.game;
 
 	if(game === null)
-		Network.send(connection, [NetProtocol.client.ERROR, NetProtocol.client.error.NOT_IN_GAME]);
+		connection.sendUTF(errormessage(NetProtocol.client.error.NOT_IN_GAME));
 	else
 		game.process(game.players.indexOf(connection.player), buffer_process);
 };
@@ -273,7 +314,7 @@ server_websocket.on("request", function(request)
 	else
 	{
 		const connection = request.accept(null, request.origin);
-		connection.id = Random.identifier(LEN_CONNECTIONID);
+		connection.id = Random.identifier(LEN_CONNECTIONID); // FIXME(shawn): duplicate id might be generated; maybe switch to pseudo-rng with fixed seed?
 		connection.player = null;
 		State.connections[connection.id] = connection;
 
@@ -281,17 +322,13 @@ server_websocket.on("request", function(request)
 		{
 			delete State.connections[connection.id];
 
-			if(connection.player !== null)
+			const player = connection.player;
+			if(player !== null)
 			{
-				const player = connection.player;
+				logout(player);
 
-				logout(connection);
-
-				// broadcast player left message TODO(shawn): make this only online friends
-				broadcast(JSON.stringify({
-					code: NetProtocol.client.PLAYER_LEFT,
-					id: player._id
-				}));
+				// TODO(shawn): broadcast player left message to online friends
+				
 				Log.message(`${player.name} disconnected.`);
 			}
 		});
@@ -304,30 +341,15 @@ server_websocket.on("request", function(request)
 				let process;
 
 				if(connection.player === null && payload.code !== NetProtocol.server.LOGIN)
-					connection.sendUTF(JSON.stringify({
-						code: NetProtocol.client.ERROR,
-						error: {
-							code: NetProtocol.client.error.NOT_LOGGED_IN
-						}
-					}));
+					connection.sendUTF(errormessage(NetProtocol.client.error.NOT_LOGGED_IN));
 				else if((process = processes[payload.code]) === undefined)
-					connection.sendUTF(JSON.stringify({
-						code: NetProtocol.client.ERROR,
-						error: {
-							code: NetProtocol.client.error.INVALID_MESSAGE
-						}
-					}));
+					connection.sendUTF(errormessage(NetProtocol.client.error.INVALID_MESSAGE));
 				else
 					process(connection, payload);
 			}
 			catch(error)
 			{
-				connection.sendUTF(JSON.stringify({
-					code: NetProtocol.client.ERROR,
-					error: {
-						code: NetProtocol.client.error.INVALID_MESSAGE
-					}
-				}));
+				connection.sendUTF(errormessage(NetProtocol.client.error.INVALID_MESSAGE));
 			}
 		});
 	}
